@@ -634,7 +634,13 @@ def _have_bin(name):
 	"""
 	Determines whether a particular binary is available on the host system.
 	"""
-	return popen2.Popen4('which %s' % name).wait() == 0
+	for path_dir in os.environ.get("PATH", "").split(":"):
+		if not path_dir:
+			continue
+		file_path = os.path.join(path_dir, name)
+		if os.path.isfile(file_path) and os.access(file_path, os.X_OK):
+			return file_path
+	return None
 
 
 def handler(signum, frame):
