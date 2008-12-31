@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.6
 
 """
 Mirrorselect 1.x written by Colin Kingsley (tercel@gentoo.org)
@@ -174,7 +174,7 @@ class Extractor:
 		self.hosts = []
 		
 		if options.rsync:
-			output.write('using hardcoded rsync mirrors', 2)
+			output.write('using hardcoded rsync mirrors\n', 2)
 			self.hosts = [
 				('rsync://rsync.gentoo.org/gentoo-portage', 'Default'),
 				('rsync://rsync.namerica.gentoo.org/gentoo-portage', 'North'
@@ -274,7 +274,7 @@ class Shallow:
 
 		host_string = ' '.join(hosts)
 
-		output.write('\nnetselect(): running "netselect -s%d %s"' % (int(number),
+		output.write('\nnetselect(): running "netselect -s%d %s"\n' % (int(number),
 			host_string), 2)
 			
 		raw_out, raw_in, raw_err = popen2.popen3('netselect -s%d %s' % \
@@ -282,7 +282,7 @@ class Shallow:
 		
 		del raw_in
 		
-		output.write('netselect(): raw_err.read: %s' % raw_err.read(), 2)
+		output.write('netselect(): raw_err.read: %s\n' % raw_err.read(), 2)
 			
 		for line in raw_out.readlines():
 			line = line.split()
@@ -310,11 +310,11 @@ class Shallow:
 		"""
 		hosts = [host[0] for host in hosts]
 		
-		output.write('netselect_split() got %s hosts.' % len(hosts)), 2	
+		output.write('netselect_split() got %s hosts.\n' % len(hosts), 2)
 		
 		host_blocks = self.host_blocks(hosts, block_size)
 		
-		output.write(' split into %s blocks' % len(host_blocks), 2)
+		output.write(' split into %s blocks\n' % len(host_blocks), 2)
 		
 		top_hosts = []
 		ret_hosts = {}
@@ -344,7 +344,7 @@ class Shallow:
 		for rank in host_ranking_keys[:number]:
 			top_hosts.append(ret_hosts[rank])
 		
-		output.write('netselect_split(): returns %s' % top_hosts, 2)
+		output.write('netselect_split(): returns %s\n' % top_hosts, 2)
 		
 		self.urls = top_hosts
 
@@ -478,10 +478,10 @@ class Deep(object):
 				finally:
 					signal.alarm(0)
 			except socket_error, e:
-				output.write('deeptime(): dns error for host %s: %s' % \
+				output.write('deeptime(): dns error for host %s: %s\n' % \
 					(url_parts.hostname, e), 2)
 			except TimeoutException:
-				output.write('deeptime(): dns timeout for host %s' % \
+				output.write('deeptime(): dns timeout for host %s\n' % \
 					(url_parts.hostname,), 2)
 
 		if not ips:
