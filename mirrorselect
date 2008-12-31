@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.6
 
 """
 Mirrorselect 1.x written by Colin Kingsley (tercel@gentoo.org)
@@ -14,7 +14,6 @@ import urllib
 import urlparse
 from HTMLParser import HTMLParser
 from optparse import IndentedHelpFormatter, OptionParser
-socket_error = (socket.error, socket.herror, socket.gaierror, socket.timeout)
 
 class Output:
 	"""Handles text output. Only prints messages with level <= verbosity.
@@ -477,7 +476,7 @@ class Deep(object):
 						ips.append(ip)
 				finally:
 					signal.alarm(0)
-			except socket_error, e:
+			except socket.error, e:
 				output.write('deeptime(): dns error for host %s: %s\n' % \
 					(url_parts.hostname, e), 2)
 			except TimeoutException:
