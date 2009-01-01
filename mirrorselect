@@ -4,7 +4,7 @@
 Mirrorselect 1.x written by Colin Kingsley (tercel@gentoo.org)
 Tool for selecting Gentoo source and rsync mirrors.
 """
-__revision__ = '1.3'
+__revision__ = '1.4'
 
 import math
 import os
