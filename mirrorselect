@@ -22,7 +22,7 @@ import urlparse
 from HTMLParser import HTMLParser
 from optparse import IndentedHelpFormatter, OptionParser
 
-class Output:
+class Output(object):
 	"""Handles text output. Only prints messages with level <= verbosity.
 	Therefore, verbosity=2 is everything (debug), and verbosity=0 is urgent
 	messages only (quiet)."""
@@ -170,7 +170,7 @@ class MirrorParser(HTMLParser):
 			self.lines.append(tuple(self.line))
 			self.line = []
 
-class Extractor:
+class Extractor(object):
 	"""The Extractor employs a MirrorParser object to get a list of valid
 	mirrors, and then filters them. Only the mirrors that should be tested, based on
 	user input are saved. They will be in the hosts attribute."""
@@ -248,7 +248,7 @@ class Extractor:
 		return parser.lines
 
 
-class Shallow:
+class Shallow(object):
 	"""handles rapid server selection via netselect"""
 
 	def __init__(self, hosts, options):
@@ -603,7 +603,7 @@ class Deep(object):
 		return retval, host_dict
 
 
-class Interactive:
+class Interactive(object):
 	"""Handles interactive host selection."""
 
 	def __init__(self, hosts, rsync):
