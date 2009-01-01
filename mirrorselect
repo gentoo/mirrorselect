@@ -113,7 +113,7 @@ class ColoredFormatter(IndentedHelpFormatter):
 			option)
 		# options without args
 		option = re.sub(
-			r"-([a-zA-Z?]+)", lambda m: "-" + output.green(m.group(1)),
+			r"-([a-zA-Z\d]+)", lambda m: "-" + output.green(m.group(1)),
 			option)
 		return option
 
