@@ -505,6 +505,7 @@ class Deep(object):
 				try:
 					signal.alarm(self._connect_timeout)
 					f = urllib.urlopen(ip_url)
+					break
 				finally:
 					signal.alarm(0)
 			except EnvironmentError, e:
