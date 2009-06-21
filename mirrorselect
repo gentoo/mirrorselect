@@ -525,10 +525,27 @@ class Deep(object):
 
 		try:
 
+			# Close the initial "wake up" connection.
+			try:
+				signal.alarm(self._connect_timeout)
+				f.close()
+			finally:
+				signal.alarm(0)
+
+		except EnvironmentError, e:
+			output.write(('deeptime(): close connection to host %s ' + \
+				'failed for ip %s: %s\n') % \
+				(url_parts.hostname, ip, e), 2)
+		except TimeoutException:
+			output.write(('deeptime(): close connection to host %s ' + \
+				'timed out for ip %s\n') % \
+				(url_parts.hostname, ip), 2)
+
+		try:
+
 			# The first connection serves to "wake up" the route between
 			# the local and remote machines. A second connection is used
 			# for the timed run.
-			f.close()
 			try:
 				signal.alarm(int(math.ceil(maxtime)))
 				stime = time.time()
