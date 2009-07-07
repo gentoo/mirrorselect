@@ -5,6 +5,7 @@
 #
 # Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
 # Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
+# Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,8 +35,8 @@ import sys
 import time
 import urllib
 import urlparse
-from HTMLParser import HTMLParser
 from optparse import IndentedHelpFormatter, OptionParser
+from mirrorparser import MirrorParser, MIRRORS_XML
 
 class Output(object):
 	"""Handles text output. Only prints messages with level <= verbosity.
@@ -137,54 +138,6 @@ class ColoredFormatter(IndentedHelpFormatter):
 		return description + '\n'
 
 
-class MirrorParser(HTMLParser):
-	"""
-	MirrorParser objects are fed an html input stream via the feed() method.
-	After the instance is closed, the lines atribute contains an array with
-	elements of the form: (url, description)
-	"""
-
-	def __init__(self):
-		HTMLParser.__init__(self)
-
-		self.lines = []
-		self.line = []
-
-		self.get_desc = False
-		self.in_sect = False
-		self.sect_good = False
-		self.check_title = False
-		
-		self.sects = ('North America', 'South America', 'Europe', 'Australia',
-				'Asia', 'Other Mirrors:', 'Partial Mirrors')
-
-	def handle_starttag(self, tag, attrs):
-		if tag == 'section':
-			self.in_sect = True
-		if (tag == 'title') and self.in_sect:
-			self.check_title = True
-		if (tag == 'uri') and self.sect_good:	#This is a good one
-			self.line.append(dict(attrs)['link'])		#url
-			self.get_desc = True		#the next data block is the description
-
-	def handle_data(self, data):
-		if self.check_title and (data in self.sects):
-			self.sect_good = True
-		if self.get_desc:
-			if data.endswith('*'):
-				data = data.replace('*', '')
-				data = '* ' + data
-			self.line.append(data)
-			self.get_desc = False
-
-	def handle_endtag(self, tag):
-		if tag == 'section':
-			self.in_sect = False
-			self.sect_good = False
-		if (tag == 'uri') and (len(self.line) == 2):
-			self.lines.append(tuple(self.line))
-			self.line = []
-
 class Extractor(object):
 	"""The Extractor employs a MirrorParser object to get a list of valid
 	mirrors, and then filters them. Only the mirrors that should be tested, based on
@@ -254,13 +207,14 @@ class Extractor(object):
 			pass
 		parser.close()
 
-		if len(parser.lines) == 0:
+		tuples = parser.tuples()
+		if len(tuples) == 0:
 			output.print_err('Could not get mirror list. Check your internet'
 					' connection.')
 
-		output.write(' Got %d mirrors.\n' % len(parser.lines))
+		output.write(' Got %d mirrors.\n' % len(tuples))
 
-		return parser.lines
+		return tuples
 
 
 class Shallow(object):
@@ -911,7 +865,6 @@ output = Output()	#the only FUCKING global. Damnit.
 def main(argv):
 	"""Lets Rock!"""
 	config_path = '/etc/make.conf'
-	list_url = 'http://www.gentoo.org/main/en/mirrors.xml?passthru=1'
 
 	signal.signal(signal.SIGINT, handler)
 
@@ -919,7 +872,7 @@ def main(argv):
 	output.verbosity = options.verbosity
 
 	fsmirrors = get_filesystem_mirrors(options.output, config_path, options.rsync)
-	hosts = Extractor(list_url, options).hosts
+	hosts = Extractor(MIRRORS_XML, options).hosts
 
 	if options.interactive:
 		selector = Interactive(hosts, options.rsync)
