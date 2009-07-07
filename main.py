@@ -36,7 +36,7 @@ import time
 import urllib
 import urlparse
 from optparse import IndentedHelpFormatter, OptionParser
-from mirrorparser3 import MirrorParser3, MIRRORS_3_XML
+from mirrorselect.mirrorparser3 import MirrorParser3, MIRRORS_3_XML
 import codecs
 
 class Output(object):
