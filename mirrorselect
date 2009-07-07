@@ -36,7 +36,8 @@ import time
 import urllib
 import urlparse
 from optparse import IndentedHelpFormatter, OptionParser
-from mirrorparser import MirrorParser, MIRRORS_XML
+from mirrorparser3 import MirrorParser3, MIRRORS_3_XML
+import codecs
 
 class Output(object):
 	"""Handles text output. Only prints messages with level <= verbosity.
@@ -139,12 +140,12 @@ class ColoredFormatter(IndentedHelpFormatter):
 
 
 class Extractor(object):
-	"""The Extractor employs a MirrorParser object to get a list of valid
+	"""The Extractor employs a MirrorParser3 object to get a list of valid
 	mirrors, and then filters them. Only the mirrors that should be tested, based on
 	user input are saved. They will be in the hosts attribute."""
 
 	def __init__(self, list_url, options):
-		parser = MirrorParser()
+		parser = MirrorParser3()
 		self.hosts = []
 		
 		if options.rsync:
@@ -202,12 +203,15 @@ class Extractor(object):
 		output.print_info('Downloading a list of mirrors...')
 
 		try:
-			parser.feed(urllib.urlopen(url).read())
+			parser.parse(urllib.urlopen(url).read())
 		except EnvironmentError:
 			pass
-		parser.close()
 
-		tuples = parser.tuples()
+		def fix_tuple(tuple):
+			url, name = tuple
+			return (url, codecs.encode(name, 'utf8'))
+
+		tuples = [fix_tuple(t) for t in parser.tuples()]
 		if len(tuples) == 0:
 			output.print_err('Could not get mirror list. Check your internet'
 					' connection.')
@@ -872,7 +876,7 @@ def main(argv):
 	output.verbosity = options.verbosity
 
 	fsmirrors = get_filesystem_mirrors(options.output, config_path, options.rsync)
-	hosts = Extractor(MIRRORS_XML, options).hosts
+	hosts = Extractor(MIRRORS_3_XML, options).hosts
 
 	if options.interactive:
 		selector = Interactive(hosts, options.rsync)
