@@ -40,7 +40,7 @@ class MirrorParser3:
                         name = e.text
                     if e.tag == 'uri':
                         uri = e.text
-                        self._dict[uri] = name
+                        self._dict[uri] = [name, mirrorgroup.get("countryname")]
 
     def tuples(self):
         return [(url, name) for url, name in self._dict.items()]

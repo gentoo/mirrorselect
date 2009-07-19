@@ -208,8 +208,8 @@ class Extractor(object):
 			pass
 
 		def fix_tuple(tuple):
-			url, name = tuple
-			return (url, codecs.encode(name, 'utf8'))
+			url, (name, country) = tuple
+			return (url, codecs.encode(name, 'utf8'), codecs.encode(country, 'utf8'))
 
 		tuples = [fix_tuple(t) for t in parser.tuples()]
 		if len(tuples) == 0:
@@ -619,7 +619,11 @@ class Interactive(object):
 				' "Gentoo Download Mirrors" --checklist "Please'\
 				' select your desired mirrors:\n* = supports ipv6" 20 110 14'
 
-		dialog += ' ' + ' '.join(['"%s" "%s" "OFF"' % host for host in hosts])
+		if rsync:
+			dialog += ' ' + ' '.join(['"%s" "%s" "OFF"' % host for host in hosts])
+		else:
+			dialog += ' ' + ' '.join(['"%s" "%s (%s)" "OFF"' % host for
+				host in sorted(hosts, key = lambda x: x[2])])
 		
 		mirror_fd = os.popen('%s' % dialog)
 		mirrors = mirror_fd.read()
@@ -826,7 +830,7 @@ def parse_args(argv):
 		parser.print_help()
 		sys.exit(1)
 
-	options, args = parser.parse_args(argv[1:])		
+	options, args = parser.parse_args(argv[1:])
 
 	# sanity checks
 
