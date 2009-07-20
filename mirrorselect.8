@@ -1,0 +1,107 @@
+.TH "mirrorselect" "8" "2.0.0"
+
+.SH "NAME"
+.LP
+mirrorselect \- A tool which helps to select rsync and distfiles mirrors for Gentoo
+
+.SH "SYNTAX"
+.LP
+mirrorselect [options]
+
+.SH "OPTIONS"
+.TP
+.B \-h, \-\-help
+Print a usage summary and exit.
+.TP
+.B \-\-version
+Show program's version number and exit.
+.SS "Main modes"
+.TP
+.B \-4, \-\-ipv4
+only use IPv4.
+.TP
+.B \-6, \-\-ipv6
+only use IPv6.
+.TP
+.B \-D, \-\-deep
+Deep mode. This is used to give a more accurate speed test. It will download
+a 100k file from each server. Because of this you should only use this option
+if you have a good connection.
+.TP
+.B \-i, \-\-interactive
+Interactive Mode, this will present a list to make it possible to select mirrors
+you wish to use.
+.SS "Server type selection (choose at most one)"
+.TP
+.B \-F, \-\-ftp
+ftp only mode. Will not consider hosts of other types.
+.TP
+.B \-H, \-\-http
+http only mode. Will not consider hosts of other types.
+.TP
+.B \-r, \-\-rsync
+rsync mode. Allows you to interactively select your rsync mirror. Requires -i to be used.
+.SS "Other options"
+.TP
+.BI \-b " BLOCKSIZE " "\fR,\fP \-blocksize" " BLOCKSIZE "
+This is to be used in automatic mode and will split the hosts into blocks of
+BLOCKSIZE for use with netselect. This is required for certain routers which
+block 40+ requests at any given time. Recommended parameters to pass are: -s 3 -b 10
+.TP
+.B \-d, \-\-debug
+Debug mode.
+.TP
+.B \-o, \-\-output
+Output Only Mode, this is especially useful when being used during installation,
+to redirect output to a file other than /etc/make.conf
+.TP
+.B \-q, \-\-quiet
+Quiet mode.
+.TP
+.BI \-s " SERVERS " "\fR,\fP \-servers" " SERVERS "
+Specify Number of servers for Automatic Mode to select. this is only valid for
+download mirrors. If this is not specified, a default of 1 is used.
+.TP
+.BI \-t " TIMEOUT " "\fR,\fP \-timeout" " TIMEOUT "
+Timeout for deep mode. Defaults to 10 seconds.
+
+.SH "EXAMPLES"
+automatic:
+.LP
+.RS 8
+Autoselect the 5 best mirrors and save results in /etc/make.conf, a backup will be created.
+.LP
+# mirrorselect -s5
+.LP
+Autoselect the 3 best mirrors, use a
+.I BLOCKSIZE
+of 10 and append the output to /etc/make.conf.
+.LP
+# mirrorselect -s3 -b10 -o >> /etc/make.conf
+.LP
+Autoselect the 4 best mirrors, it also loads a 100k file from each mirror.
+The result will be written to /etc/make.conf, a backup will be created.
+.LP
+# mirrorselect -D -s4
+.LP
+.RE
+interactive:
+.LP
+.RS 8
+Start mirrorselect in interactive mode to select rsync mirrors.
+.LP
+# mirrorselect -i -r
+.RE
+
+.SH "AUTHORS"
+.LP
+Colin Kingsley <tercel@gentoo.org>
+.LP
+Zac Medico <zmedico@gentoo.org>
+.LP
+Sebastian Pipping <sebastian@pipping.org>
+.LP
+Christian Ruppert <idl0r@gentoo.org>
+
+.SH "BUGS"
+Please report any bugs to http://bugs.gentoo.org
