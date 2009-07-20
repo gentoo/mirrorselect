@@ -622,8 +622,9 @@ class Interactive(object):
 		if rsync:
 			dialog += ' ' + ' '.join(['"%s" "%s" "OFF"' % host for host in hosts])
 		else:
-			dialog += ' ' + ' '.join(['"%s" "%s (%s)" "OFF"' % host for
-				host in sorted(hosts, key = lambda x: x[2])])
+			dialog += ' ' + ' '.join(['"%s" "%s: %s" "OFF"' % \
+				(url, country, name) for (url, name, country) in \
+				sorted(hosts, key = lambda x: x[2])])
 		
 		mirror_fd = os.popen('%s' % dialog)
 		mirrors = mirror_fd.read()
