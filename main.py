@@ -624,7 +624,7 @@ class Interactive(object):
 		else:
 			dialog += ' ' + ' '.join(['"%s" "%s: %s" "OFF"' % \
 				(url, country, name) for (url, name, country) in \
-				sorted(hosts, key = lambda x: x[2])])
+				sorted(hosts, key = lambda x: x[2].lower())])
 		
 		mirror_fd = os.popen('%s' % dialog)
 		mirrors = mirror_fd.read()
