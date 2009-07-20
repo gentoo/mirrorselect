@@ -47,7 +47,7 @@ class Output(object):
 
 	def __init__(self, verbosity=1, out=sys.stderr):
 		esc_seq = "\x1b["
-		codes={}
+		codes = {}
 		
 		codes["reset"]     = esc_seq + "39;49;00m"
 		codes["bold"]      = esc_seq + "01m"
@@ -208,8 +208,8 @@ class Extractor(object):
 		except EnvironmentError:
 			pass
 
-		def fix_tuple(tuple):
-			url, (name, country) = tuple
+		def fix_tuple(_tuple):
+			url, (name, country) = _tuple
 			return (url, codecs.encode(name, 'utf8'), codecs.encode(country, 'utf8'))
 
 		tuples = [fix_tuple(t) for t in parser.tuples()]
@@ -709,31 +709,31 @@ def get_filesystem_mirrors(out, path, sync=False):
 	
 	try:
 		f = open(path,'r')
-	except IOError,e:
+	except IOError, e:
 		return fsmirrors
 
 	""" Search for 'var' in make.conf and extract value """
 	try:
 		lex = shlex.shlex(f, posix=True)
-		lex.wordchars=string.digits+string.letters+"~!@#$%*_\:;?,./-+{}"
-		lex.quotes="\"'"
+		lex.wordchars = string.digits+string.letters+"~!@#$%*_\:;?,./-+{}"
+		lex.quotes = "\"'"
 		while 1:
 			key = lex.get_token()
 			if key == var:
 				equ = lex.get_token()
 				
 				if (equ == ''):
-					break;
+					break
 				elif (equ != '='):
-					break;
+					break
 
 				val = lex.get_token()
 				if val is None:
-					break;
+					break
 
 				""" Look for mounted filesystem in value """
 				mirrorlist = val.rsplit()
-				p = re.compile('rsync://|http://|ftp://',re.IGNORECASE)
+				p = re.compile('rsync://|http://|ftp://', re.IGNORECASE)
 				for mirror in mirrorlist:
 					if (p.match(mirror) == None):
 						fsmirrors.append(mirror)

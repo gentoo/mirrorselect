@@ -25,35 +25,35 @@ from xml.etree import ElementTree as ET
 MIRRORS_3_XML = 'http://www.gentoo.org/main/en/mirrors3.xml'
 
 class MirrorParser3:
-    def __init__(self):
-        self._reset()
+	def __init__(self):
+		self._reset()
 
-    def _reset(self):
-        self._dict = {}
+	def _reset(self):
+		self._dict = {}
 
-    def parse(self, text):
-        self._reset()
-        for mirrorgroup in ET.XML(text):
-            for mirror in mirrorgroup:
-                name = ''
-                for e in mirror:
-                    if e.tag == 'name':
-                        name = e.text
-                    if e.tag == 'uri':
-                        uri = e.text
-                        self._dict[uri] = [name, mirrorgroup.get("countryname")]
+	def parse(self, text):
+		self._reset()
+		for mirrorgroup in ET.XML(text):
+			for mirror in mirrorgroup:
+				name = ''
+				for e in mirror:
+					if e.tag == 'name':
+						name = e.text
+					if e.tag == 'uri':
+						uri = e.text
+						self._dict[uri] = [name, mirrorgroup.get("countryname")]
 
-    def tuples(self):
-        return [(url, name) for url, name in self._dict.items()]
+	def tuples(self):
+		return [(url, name) for url, name in self._dict.items()]
 
-    def uris(self):
-        return [url for url, name in self._dict.items()]
+	def uris(self):
+		return [url for url, name in self._dict.items()]
 
 if __name__ == '__main__':
-    import urllib
-    parser = MirrorParser3()
-    parser.parse(urllib.urlopen(MIRRORS_3_XML).read())
-    print '===== tuples'
-    print parser.tuples()
-    print '===== uris'
-    print parser.uris()
+	import urllib
+	parser = MirrorParser3()
+	parser.parse(urllib.urlopen(MIRRORS_3_XML).read())
+	print '===== tuples'
+	print parser.tuples()
+	print '===== uris'
+	print parser.uris()
