@@ -629,7 +629,7 @@ class Interactive(object):
 		mirrors = mirror_fd.read()
 		mirror_fd.close()
 		
-		self.urls = mirrors.split('\n')
+		self.urls = mirrors.rstrip().split('\n')
 
 
 def _have_bin(name):
