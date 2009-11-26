@@ -153,10 +153,8 @@ class Extractor(object):
 			output.write('using hardcoded rsync mirrors\n', 2)
 			self.hosts = [
 				('rsync://rsync.gentoo.org/gentoo-portage', 'Default'),
-				('rsync://rsync.namerica.gentoo.org/gentoo-portage', 'North'
-						' America'),
-				('rsync://rsync.samerica.gentoo.org/gentoo-portage', 'South'
-						' America'),
+				('rsync://rsync.namerica.gentoo.org/gentoo-portage', 'North America'),
+				('rsync://rsync.samerica.gentoo.org/gentoo-portage', 'South America'),
 				('rsync://rsync.europe.gentoo.org/gentoo-portage', 'Europe'),
 				('rsync://rsync.asia.gentoo.org/gentoo-portage', 'Asia'),
 				('rsync://rsync.au.gentoo.org/gentoo-portage', 'Australia')]
