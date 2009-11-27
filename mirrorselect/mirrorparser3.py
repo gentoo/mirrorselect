@@ -41,13 +41,19 @@ class MirrorParser3:
 						name = e.text
 					if e.tag == 'uri':
 						uri = e.text
-						self._dict[uri] = [name, mirrorgroup.get("countryname")]
+						self._dict[uri] = {
+							"name": name,
+							"country": mirrorgroup.get("countryname"),
+							"ipv4": e.get("ipv4"),
+							"ipv6": e.get("ipv6"),
+							"proto": e.get("protocol"),
+							}
 
 	def tuples(self):
-		return [(url, name) for url, name in self._dict.items()]
+		return [(url, args) for url, args in self._dict.items()]
 
 	def uris(self):
-		return [url for url, name in self._dict.items()]
+		return [url for url, args in self._dict.items()]
 
 if __name__ == '__main__':
 	import urllib
