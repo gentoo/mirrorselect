@@ -608,6 +608,8 @@ class Interactive(object):
 		if options.rsync:
 			dialog = 'dialog --stdout --title "Gentoo RSYNC Mirrors"'\
 				' --radiolist "Please select your desired mirror:" 20 110 14'
+
+			dialog += ' ' + ' '.join(['"%s" "%s" "OFF"' % host for host in hosts])
 		else:
 			dialog = 'dialog --separate-output --stdout --title'\
 				' "Gentoo Download Mirrors" --checklist "Please'\
@@ -617,9 +619,6 @@ class Interactive(object):
 
 			dialog += '" 20 110 14'
 
-		if options.rsync:
-			dialog += ' ' + ' '.join(['"%s" "%s" "OFF"' % host for host in hosts])
-		else:
 			for (url, args) in sorted(hosts, key = lambda x: x[1]['country'].lower()):
 				marker = ""
 				if (not options.ipv6 and not options.ipv4) and args['ipv6'] == 'y':
