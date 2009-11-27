@@ -206,18 +206,13 @@ class Extractor(object):
 		except EnvironmentError:
 			pass
 
-		def fix_tuple(_tuple):
-			url, (name, country) = _tuple
-			return (url, codecs.encode(name, 'utf8'), codecs.encode(country, 'utf8'))
-
-		tuples = [fix_tuple(t) for t in parser.tuples()]
-		if len(tuples) == 0:
+		if len(parser.tuples()) == 0:
 			output.print_err('Could not get mirror list. Check your internet'
 					' connection.')
 
-		output.write(' Got %d mirrors.\n' % len(tuples))
+		output.write(' Got %d mirrors.\n' % len(parser.tuples()))
 
-		return tuples
+		return parser.tuples()
 
 
 class Shallow(object):
@@ -596,36 +591,47 @@ class Deep(object):
 class Interactive(object):
 	"""Handles interactive host selection."""
 
-	def __init__(self, hosts, rsync):
+	def __init__(self, hosts, options):
 		self.urls = []
 
-		self.interactive(hosts, rsync)
+		self.interactive(hosts, options)
 		output.write('Interactive.interactive(): self.urls = %s\n' % self.urls, 2)
 
 		if len(self.urls[0]) == 0:
 			sys.exit(1)
 	
 	
-	def interactive(self, hosts, rsync):
+	def interactive(self, hosts, options):
 		"""
 		Some sort of interactive menu thingy.
 		"""
-		if rsync:
+		if options.rsync:
 			dialog = 'dialog --stdout --title "Gentoo RSYNC Mirrors"'\
 				' --radiolist "Please select your desired mirror:" 20 110 14'
 		else:
 			dialog = 'dialog --separate-output --stdout --title'\
 				' "Gentoo Download Mirrors" --checklist "Please'\
-				' select your desired mirrors:\n* = supports ipv6" 20 110 14'
+				' select your desired mirrors:'
+			if not options.ipv4 and not options.ipv6:
+				dialog += '\n* = supports ipv6'
 
-		if rsync:
+			dialog += '" 20 110 14'
+
+		if options.rsync:
 			dialog += ' ' + ' '.join(['"%s" "%s" "OFF"' % host for host in hosts])
 		else:
-			dialog += ' ' + ' '.join(['"%s" "%s: %s" "OFF"' % \
-				(url, country, name) for (url, name, country) in \
-				sorted(hosts, key = lambda x: x[2].lower())])
-		
-		mirror_fd = os.popen('%s' % dialog)
+			for (url, args) in sorted(hosts, key = lambda x: x[1]['country'].lower()):
+				marker = ""
+				if (not options.ipv6 and not options.ipv4) and args['ipv6'] == 'y':
+					marker = "* "
+				if options.ipv6 and ( args['ipv6'] == 'n' ): continue
+				if options.ipv4 and ( args['ipv4'] == 'n' ): continue
+				if options.http and ( args['proto'] != 'http'): continue
+				if options.ftp and ( args['proto'] != 'ftp'): continue
+
+				dialog += ' ' + '"%s" "%s%s: %s" "OFF"' % ( url, marker, args['country'], args['name'] )
+	
+		mirror_fd = os.popen('%s' % codecs.encode(dialog, 'utf8'))
 		mirrors = mirror_fd.read()
 		mirror_fd.close()
 		
@@ -841,7 +847,7 @@ def parse_args(argv):
 	if options.ipv4 and options.ipv6:
 		output.print_err('Choose at most one of --ipv4 and --ipv6')
 
-	if options.ipv6 and not socket.has_ipv6:
+	if (options.ipv6 and not socket.has_ipv6) and not options.interactive:
 		options.ipv6 = False
 		output.print_err('The --ipv6 option requires python ipv6 support')
 
@@ -883,7 +889,7 @@ def main(argv):
 	hosts = Extractor(MIRRORS_3_XML, options).hosts
 
 	if options.interactive:
-		selector = Interactive(hosts, options.rsync)
+		selector = Interactive(hosts, options)
 	elif options.deep:
 		selector = Deep(hosts, options)
 	else:
