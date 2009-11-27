@@ -619,7 +619,7 @@ class Interactive(object):
 
 			dialog += '" 20 110 14'
 
-			for (url, args) in sorted(hosts, key = lambda x: x[1]['country'].lower()):
+			for (url, args) in sorted(hosts, key = lambda x: (x[1]['country'].lower(), x[1]['name'].lower()) ):
 				marker = ""
 				if (not options.ipv6 and not options.ipv4) and args['ipv6'] == 'y':
 					marker = "* "
