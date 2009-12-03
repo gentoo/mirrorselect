@@ -37,7 +37,7 @@ import time
 import urllib
 import urlparse
 from optparse import IndentedHelpFormatter, OptionParser
-from mirrorselect.mirrorparser3 import MirrorParser3, MIRRORS_3_XML
+from mirrorselect.mirrorparser3 import MirrorParser3, MIRRORS_3_XML, MIRRORS_RSYNC_DATA
 import codecs
 
 class Output(object):
@@ -149,28 +149,17 @@ class Extractor(object):
 		parser = MirrorParser3()
 		self.hosts = []
 		
-		if options.rsync:
-			output.write('using hardcoded rsync mirrors\n', 2)
-			self.hosts = [
-				('rsync://rsync.gentoo.org/gentoo-portage', 'Default'),
-				('rsync://rsync.namerica.gentoo.org/gentoo-portage', 'North America'),
-				('rsync://rsync.samerica.gentoo.org/gentoo-portage', 'South America'),
-				('rsync://rsync.europe.gentoo.org/gentoo-portage', 'Europe'),
-				('rsync://rsync.asia.gentoo.org/gentoo-portage', 'Asia'),
-				('rsync://rsync.au.gentoo.org/gentoo-portage', 'Australia')]
-		else:
-			hosts = self.getlist(parser, list_url)
-			output.write('Extractor(): fetched mirrors.xml,'
-					' %s hosts before filtering\n' % len(hosts), 2)
+		hosts = self.getlist(parser, list_url)
+		output.write('Extractor(): fetched mirrors.xml,'
+				' %s hosts before filtering\n' % len(hosts), 2)
 
+		if not options.rsync:
 			if options.ftp:
 				hosts = self.restrict_protocall('ftp', hosts)
 			if options.http:
 				hosts = self.restrict_protocall('http', hosts)
 
-			for host in hosts:
-				if not host[0].startswith('rsync'):
-					self.hosts.append(host)
+		self.hosts = hosts
 
 	def restrict_protocall(self, prot, hosts):
 		"""
@@ -608,8 +597,6 @@ class Interactive(object):
 		if options.rsync:
 			dialog = 'dialog --stdout --title "Gentoo RSYNC Mirrors"'\
 				' --radiolist "Please select your desired mirror:" 20 110 14'
-
-			dialog += ' ' + ' '.join(['"%s" "%s" "OFF"' % host for host in hosts])
 		else:
 			dialog = 'dialog --separate-output --stdout --title'\
 				' "Gentoo Download Mirrors" --checklist "Please'\
@@ -619,16 +606,16 @@ class Interactive(object):
 
 			dialog += '" 20 110 14'
 
-			for (url, args) in sorted(hosts, key = lambda x: (x[1]['country'].lower(), x[1]['name'].lower()) ):
-				marker = ""
-				if (not options.ipv6 and not options.ipv4) and args['ipv6'] == 'y':
-					marker = "* "
-				if options.ipv6 and ( args['ipv6'] == 'n' ): continue
-				if options.ipv4 and ( args['ipv4'] == 'n' ): continue
-				if options.http and ( args['proto'] != 'http'): continue
-				if options.ftp and ( args['proto'] != 'ftp'): continue
+		for (url, args) in sorted(hosts, key = lambda x: (x[1]['country'].lower(), x[1]['name'].lower()) ):
+			marker = ""
+			if (not options.ipv6 and not options.ipv4) and args['ipv6'] == 'y':
+				marker = "* "
+			if options.ipv6 and ( args['ipv6'] == 'n' ): continue
+			if options.ipv4 and ( args['ipv4'] == 'n' ): continue
+			if options.http and ( args['proto'] != 'http'): continue
+			if options.ftp and ( args['proto'] != 'ftp'): continue
 
-				dialog += ' ' + '"%s" "%s%s: %s" "OFF"' % ( url, marker, args['country'], args['name'] )
+			dialog += ' ' + '"%s" "%s%s: %s" "OFF"' % ( url, marker, args['country'], args['name'] )
 
 		mirror_fd = os.popen('%s' % codecs.encode(dialog, 'utf8'))
 		mirrors = mirror_fd.read()
@@ -885,7 +872,10 @@ def main(argv):
 	output.verbosity = options.verbosity
 
 	fsmirrors = get_filesystem_mirrors(options.output, config_path, options.rsync)
-	hosts = Extractor(MIRRORS_3_XML, options).hosts
+	if options.rsync:
+		hosts = Extractor(MIRRORS_RSYNC_DATA, options).hosts
+	else:
+		hosts = Extractor(MIRRORS_3_XML, options).hosts
 
 	if options.interactive:
 		selector = Interactive(hosts, options)
