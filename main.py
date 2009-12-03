@@ -629,7 +629,7 @@ class Interactive(object):
 				if options.ftp and ( args['proto'] != 'ftp'): continue
 
 				dialog += ' ' + '"%s" "%s%s: %s" "OFF"' % ( url, marker, args['country'], args['name'] )
-	
+
 		mirror_fd = os.popen('%s' % codecs.encode(dialog, 'utf8'))
 		mirrors = mirror_fd.read()
 		mirror_fd.close()
