@@ -23,6 +23,7 @@
 from xml.etree import ElementTree as ET
 
 MIRRORS_3_XML = 'http://www.gentoo.org/main/en/mirrors3.xml'
+MIRRORS_RSYNC_DATA = 'http://www.gentoo.org/main/en/mirrors-rsync-data.xml'
 
 class MirrorParser3:
 	def __init__(self):
@@ -44,6 +45,7 @@ class MirrorParser3:
 						self._dict[uri] = {
 							"name": name,
 							"country": mirrorgroup.get("countryname"),
+							"region": mirrorgroup.get("region"),
 							"ipv4": e.get("ipv4"),
 							"ipv6": e.get("ipv6"),
 							"proto": e.get("protocol"),
