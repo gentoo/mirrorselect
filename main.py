@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Mirrorselect 1.x
+# Mirrorselect 2.x
 # Tool for selecting Gentoo source and rsync mirrors.
 #
 # Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
-__revision__ = '2.0.0'
+__revision__ = '2.1.0'
 
 import math
 import os
