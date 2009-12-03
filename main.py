@@ -612,8 +612,6 @@ class Interactive(object):
 				marker = "* "
 			if options.ipv6 and ( args['ipv6'] == 'n' ): continue
 			if options.ipv4 and ( args['ipv4'] == 'n' ): continue
-			if options.http and ( args['proto'] != 'http'): continue
-			if options.ftp and ( args['proto'] != 'ftp'): continue
 
 			dialog += ' ' + '"%s" "%s%s: %s" "OFF"' % ( url, marker, args['country'], args['name'] )
 
