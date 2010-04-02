@@ -608,6 +608,8 @@ class Interactive(object):
 
 		for (url, args) in sorted(hosts, key = lambda x: (x[1]['country'].lower(), x[1]['name'].lower()) ):
 			marker = ""
+			if options.rsync and not url.endswith("/gentoo-portage"):
+				url+="/gentoo-portage"
 			if (not options.ipv6 and not options.ipv4) and args['ipv6'] == 'y':
 				marker = "* "
 			if options.ipv6 and ( args['ipv6'] == 'n' ): continue
