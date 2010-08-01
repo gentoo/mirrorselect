@@ -36,6 +36,7 @@ import sys
 import time
 import urllib
 import urlparse
+import hashlib
 from optparse import IndentedHelpFormatter, OptionParser
 from mirrorselect.mirrorparser3 import MirrorParser3, MIRRORS_3_XML, MIRRORS_RSYNC_DATA
 import codecs
@@ -336,8 +337,6 @@ class Shallow(object):
 class Deep(object):
 	"""handles deep mode mirror selection."""
 
-	_bufsize = 4096
-
 	def __init__(self, hosts, options):
 		self.urls = []
 		self._hosts = hosts
@@ -457,10 +456,9 @@ class Deep(object):
 
 		for ip in ips:
 			try:
-				ip_url = url.replace(url_parts.hostname, ip, 1)
 				try:
 					signal.alarm(self._connect_timeout)
-					f = urllib.urlopen(ip_url)
+					f = urllib.urlopen(url)
 					break
 				finally:
 					signal.alarm(0)
@@ -480,14 +478,12 @@ class Deep(object):
 			return (None, True)
 
 		try:
-
 			# Close the initial "wake up" connection.
 			try:
 				signal.alarm(self._connect_timeout)
 				f.close()
 			finally:
 				signal.alarm(0)
-
 		except EnvironmentError, e:
 			output.write(('deeptime(): close connection to host %s ' + \
 				'failed for ip %s: %s\n') % \
@@ -498,16 +494,17 @@ class Deep(object):
 				(url_parts.hostname, ip), 2)
 
 		try:
-
 			# The first connection serves to "wake up" the route between
 			# the local and remote machines. A second connection is used
 			# for the timed run.
 			try:
 				signal.alarm(int(math.ceil(maxtime)))
 				stime = time.time()
-				f = urllib.urlopen(ip_url)
-				while f.read(self._bufsize):
-					pass
+				f = urllib.urlopen(url)
+
+				if hashlib.md5(f.read()).hexdigest() != "bdf077b2e683c506bf9e8f2494eeb044":
+					return (None, True)
+
 				delta = time.time() - stime
 				f.close()
 			finally:
