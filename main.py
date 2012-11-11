@@ -49,20 +49,20 @@ class Output(object):
 	def __init__(self, verbosity=1, out=sys.stderr):
 		esc_seq = "\x1b["
 		codes = {}
-		
+
 		codes["reset"]     = esc_seq + "39;49;00m"
 		codes["bold"]      = esc_seq + "01m"
 		codes["blue"]      = esc_seq + "34;01m"
 		codes["green"]     = esc_seq + "32;01m"
 		codes["yellow"]    = esc_seq + "33;01m"
 		codes["red"]       = esc_seq + "31;01m"
-		
+
 		self.codes = codes
 		del codes
-		
+
 		self.verbosity = verbosity
 		self.file = out
-	
+
 	def red(self, text):
 		return self.codes["red"]+text+self.codes["reset"]
 
@@ -77,26 +77,26 @@ class Output(object):
 
 	def yellow(self, text):
 		return self.codes["yellow"]+text+self.codes["reset"]
-	
+
 	def print_info(self, message, level=1):
 		"""Prints an info message with a green star, like einfo."""
 		if level <= self.verbosity:
 			self.file.write('\r' + self.green('* ') + message)
 			self.file.flush()
-	
+
 	def print_warn(self, message, level=1):
 		"""Prints a warning."""
 		if level <= self.verbosity:
 			self.file.write(self.yellow('Warning: ') + message)
 			self.file.flush()
-	
+
 	def print_err(self, message, level=0):
 		"""prints an error message with a big red ERROR."""
 		if level <= self.verbosity:
 			self.file.write(self.red('\nERROR: ') + message + '\n')
 			self.file.flush()
 			sys.exit(1)
-	
+
 	def write(self, message, level=1):
 		"""A wrapper arounf stderr.write, to enforce verbosity settings."""
 		if level <= self.verbosity:
@@ -149,7 +149,7 @@ class Extractor(object):
 	def __init__(self, list_url, options):
 		parser = MirrorParser3()
 		self.hosts = []
-		
+
 		hosts = self.getlist(parser, list_url)
 		output.write('Extractor(): fetched mirrors.xml,'
 				' %s hosts before filtering\n' % len(hosts), 2)
@@ -170,17 +170,17 @@ class Extractor(object):
 		myhosts = []
 
 		output.print_info('Limiting test to %s hosts. ' % prot )
-		
+
 		for host in hosts:
 			if host[0].startswith(prot):
 				myhosts.append(host)
-		
+
 		output.write('%s of %s removed.\n' % (len(hosts) - len(myhosts),
 			len(hosts)) )
-		
+
 		return myhosts
-	
-	
+
+
 	def getlist(self, parser, url):
 		"""
 		Uses the supplied parser to get a list of urls.
@@ -188,7 +188,7 @@ class Extractor(object):
 		"""
 
 		output.write('getlist(): fetching ' + url + '\n', 2)
-		
+
 		output.print_info('Downloading a list of mirrors...')
 
 		try:
@@ -210,7 +210,7 @@ class Shallow(object):
 
 	def __init__(self, hosts, options):
 		self.urls = []
-		
+
 		if options.blocksize is not None:
 			self.netselect_split(hosts, options.servers,
 					options.blocksize)
@@ -230,7 +230,7 @@ class Shallow(object):
 			hosts = [host[0] for host in hosts]
 		top_host_dict = {}
 		top_hosts = []
-		
+
 		if not quiet:
 			output.print_info('Using netselect to choose the top %d mirrors...' \
 					% number)
@@ -254,13 +254,13 @@ class Shallow(object):
 				continue
 			top_hosts.append(line[1])
 			top_host_dict[line[0]] = line[1]
-		
+
 		if not quiet:
 			output.write('Done.\n')
 
 		output.write('\nnetselect(): returning %s and %s\n' % (top_hosts,
 			top_host_dict), 2)
-		
+
 		if quiet:
 			return top_hosts, top_host_dict
 		else:
@@ -273,31 +273,31 @@ class Shallow(object):
 		This is done in a tournament style.
 		"""
 		hosts = [host[0] for host in hosts]
-		
+
 		output.write('netselect_split() got %s hosts.\n' % len(hosts), 2)
-		
+
 		host_blocks = self.host_blocks(hosts, block_size)
-		
+
 		output.write(' split into %s blocks\n' % len(host_blocks), 2)
-		
+
 		top_hosts = []
 		ret_hosts = {}
-		
+
 		block_index = 0
 		for block in host_blocks:
 			output.print_info('Using netselect to choose the top '
 			'%d hosts, in blocks of %s. %s of %s blocks complete.'
 			% (number, block_size, block_index, len(host_blocks)))
-			
+
 			host_dict = self.netselect(block, len(block), quiet=True)[1]
-			
+
 			output.write('ran netselect(%s, %s), and got %s\n' % (block, len(block),
 				host_dict), 2)
-			
+
 			for key in host_dict.keys():
 				ret_hosts[key] = host_dict[key]
 			block_index += 1
-		
+
 		sys.stderr.write('\rUsing netselect to choose the top'
 		'%d hosts, in blocks of %s. %s of %s blocks complete.\n'
 		% (number, block_size, block_index, len(host_blocks)))
@@ -307,9 +307,9 @@ class Shallow(object):
 
 		for rank in host_ranking_keys[:number]:
 			top_hosts.append(ret_hosts[rank])
-		
+
 		output.write('netselect_split(): returns %s\n' % top_hosts, 2)
-		
+
 		self.urls = top_hosts
 
 
@@ -320,7 +320,7 @@ class Shallow(object):
 		"""
 		host_array = []
 		mylist = []
-		
+
 		while len(hosts) > block_size:
 			while (len(mylist) < block_size):
 				mylist.append(hosts.pop())
@@ -372,11 +372,11 @@ class Deep(object):
 		num_hosts = len(hosts)
 
 		for host in hosts:
-			
+
 			prog += 1
 			output.print_info('Downloading 100k files from each mirror... [%s of %s]'\
 							% (prog, num_hosts) )
-			
+
 			mytime, ignore = self.deeptime(host, maxtime)
 
 			if not ignore and mytime < maxtime:
@@ -384,10 +384,10 @@ class Deep(object):
 						maxtime, top_hosts, self._number)
 			else:
 				continue
-		
+
 		output.write('deeptest(): got %s hosts, and returned %s\n' % (num_hosts, \
 			str(top_hosts.values())), 2)
-			
+
 		output.write('\n')	#this just makes output nicer
 
 		#can't just return the dict.valuse, because we want the fastest mirror first...
@@ -408,7 +408,7 @@ class Deep(object):
 		Like mine.
 		"""
 		output.write('\n_deeptime(): maxtime is %s\n' % maxtime, 2)
-		
+
 		if url.endswith('/'):	#append the path to the testfile to the URL
 			url = url + 'distfiles/mirrorselect-test'
 		else:
@@ -535,14 +535,14 @@ class Deep(object):
 		Returns the new maxtime, be it the specified timeout, or the slowest host.
 		"""
 		if len(host_dict) < maxlen:	#still have room, and host is fast. add it.
-			
+
 			output.write('_list_add(): added host %s. with a time of %s\n' %
 					(time_host[1], time_host[0]), 2)
-			
+
 			host_dict.update(dict([time_host]))
 			times = host_dict.keys()
 			times.sort()
-			
+
 		else: #We need to make room in the dict before we add. Kill the slowest.
 			output.write('_list_add(): Adding host %s with a time of %s\n' %
 					(time_host[1], time_host[0]), 2)
@@ -585,8 +585,8 @@ class Interactive(object):
 
 		if len(self.urls[0]) == 0:
 			sys.exit(1)
-	
-	
+
+
 	def interactive(self, hosts, options):
 		"""
 		Some sort of interactive menu thingy.
@@ -617,7 +617,7 @@ class Interactive(object):
 		mirror_fd = os.popen('%s' % codecs.encode(dialog, 'utf8'))
 		mirrors = mirror_fd.read()
 		mirror_fd.close()
-		
+
 		self.urls = mirrors.rstrip().split('\n')
 
 
@@ -645,7 +645,7 @@ def write_config(hosts, out, path, sync=False):
 		var = 'SYNC'
 	else:
 		var = 'GENTOO_MIRRORS'
-		
+
 	mirror_string = '%s="%s"' % (var, ' '.join(hosts))
 
 	if out:
@@ -665,12 +665,12 @@ def write_config(hosts, out, path, sync=False):
 		shutil.move(path, path + '.backup')
 	except IOError:
 		lines = []
-	
+
 	regex = re.compile('^%s=.*' % var)
 	for line in lines:
 		if regex.match(line):
 			lines.remove(line)
-	
+
 	lines.append(mirror_string)
 
 	output.write('\tWriting new make.conf\n')
@@ -693,7 +693,7 @@ def get_filesystem_mirrors(out, path, sync=False):
 		var = 'SYNC'
 	else:
 		var = 'GENTOO_MIRRORS'
-	
+
 	try:
 		f = open(path,'r')
 	except IOError, e:
@@ -708,7 +708,7 @@ def get_filesystem_mirrors(out, path, sync=False):
 			key = lex.get_token()
 			if key == var:
 				equ = lex.get_token()
-				
+
 				if (equ == ''):
 					break
 				elif (equ != '='):
@@ -847,10 +847,10 @@ def parse_args(argv):
 		output.print_err(
 			'You do not appear to have netselect on your system. '
 			'You must use the -D flag')
-	
+
 	if (os.getuid() != 0) and not options.output:
 		output.print_err('Must be root to write to /etc/make.conf!\n')
-	
+
 	if args:
 		output.print_err('Unexpected arguments passed.')
 
