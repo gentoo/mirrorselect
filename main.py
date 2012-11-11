@@ -655,7 +655,7 @@ def write_config(hosts, out, path, sync=False):
 
 
 	output.write('\n')
-	output.print_info('Modifying make.conf with new mirrors...\n')
+	output.print_info('Modifying %s with new mirrors...\n' % path)
 	try:
 		config = open(path, 'r')
 		output.write('\tReading make.conf\n')
@@ -673,7 +673,7 @@ def write_config(hosts, out, path, sync=False):
 
 	lines.append(mirror_string)
 
-	output.write('\tWriting new make.conf\n')
+	output.write('\tWriting new %s\n' % path)
 	config = open(path, 'w')
 	for line in lines:
 		config.write(line)
@@ -732,7 +732,7 @@ def get_filesystem_mirrors(out, path, sync=False):
 
 	return fsmirrors
 
-def parse_args(argv):
+def parse_args(argv, config_path):
 	"""
 	Does argument parsing and some sanity checks.
 	Returns an optparse Options object.
@@ -745,7 +745,7 @@ def parse_args(argv):
 			"",
 			output.white("	 automatic:"),
 			"		 # mirrorselect -s5",
-			"		 # mirrorselect -s3 -b10 -o >> /mnt/gentoo/etc/make.conf",
+			"		 # mirrorselect -s3 -b10 -o >> /mnt/gentoo/etc/portage/make.conf",
 			"		 # mirrorselect -D -s4",
 			"",
 			output.white("	 interactive:"),
@@ -792,7 +792,7 @@ def parse_args(argv):
 		"-o", "--output", action="store_true", default=False,
 		help="Output Only Mode, this is especially useful "
 		"when being used during installation, to redirect "
-		"output to a file other than /etc/make.conf")
+		"output to a file other than %s" % config_path)
 	group.add_option(
 		"-b", "--blocksize", action="store", type="int",
 		help="This is to be used in automatic mode "
@@ -849,7 +849,7 @@ def parse_args(argv):
 			'You must use the -D flag')
 
 	if (os.getuid() != 0) and not options.output:
-		output.print_err('Must be root to write to /etc/make.conf!\n')
+		output.print_err('Must be root to write to %s!\n' % config_path)
 
 	if args:
 		output.print_err('Unexpected arguments passed.')
@@ -858,14 +858,20 @@ def parse_args(argv):
 	return options
 
 
-output = Output()	#the only FUCKING global. Damnit.
+output = Output()  #the only FUCKING global. Damnit.
 def main(argv):
 	"""Lets Rock!"""
-	config_path = '/etc/make.conf'
+	# start with the new location
+	config_path = '/etc/portage/make.conf'
+	if not os.access(config_path, os.F_OK):
+		# check if the old location is what is used
+		if os.access('/etc/make.conf', os.F_OK):
+			config_path = '/etc/make.conf'
 
+	#output.print_info("config_path set to :", config_path)
 	signal.signal(signal.SIGINT, handler)
 
-	options = parse_args(argv)
+	options = parse_args(argv, config_path)
 	output.verbosity = options.verbosity
 
 	fsmirrors = get_filesystem_mirrors(options.output, config_path, options.rsync)
