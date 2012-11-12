@@ -1,25 +1,35 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+#-*- coding:utf-8 -*-
 
-# Mirrorselect 2.x
-# Tool for selecting Gentoo source and rsync mirrors.
-#
-# Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
-# Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
-# Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
-# Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, version 2 of the License.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+
+"""Mirrorselect 2.x
+ Tool for selecting Gentoo source and rsync mirrors.
+
+Copyright 2005-2012 Gentoo Foundation
+
+	Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
+	Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
+	Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
+	Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
+
+Distributed under the terms of the GNU General Public License v2
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, version 2 of the License.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+
+"""
+
+
+from __future__ import print_function
 
 
 import os
@@ -40,13 +50,22 @@ class MirrorSelect(object):
 	'''Main operational class'''
 
 	def __init__(self, output=None):
-		'''Main class init'''
+		'''MirrorSelect class init
+
+		@param output: mirrorselect.output.Ouptut() class instance
+			or None for the default instance
+		'''
 		self.output = output or Output()
+
 
 	@staticmethod
 	def _have_bin(name):
-		"""
-		Determines whether a particular binary is available on the host system.
+		"""Determines whether a particular binary is available
+		on the host system.  It searches in the PATH environment
+		variable paths.
+
+		@param name: string, binary name to search for
+		@rtype: string or None
 		"""
 		for path_dir in os.environ.get("PATH", "").split(":"):
 			if not path_dir:
@@ -57,9 +76,14 @@ class MirrorSelect(object):
 		return None
 
 
-	def write_config(self, hosts, out, path, sync=False):
-		"""
-		Writes the make.conf style string to the given file, or to stdout.
+	def write_config(self, hosts, out, config_path, sync=False):
+		"""Writes the make.conf style string to the given file, or to stdout.
+
+		@param hosts: list of host urls to write
+		@param out: boolean, used to redirect output to stdout
+		@param config_path; string
+		@param sync: boolean, used to switch between SYNC and GENTOO_MIRRORS
+			make.conf variable target
 		"""
 		if sync:
 			var = 'SYNC'
@@ -69,20 +93,19 @@ class MirrorSelect(object):
 		mirror_string = '%s="%s"' % (var, ' '.join(hosts))
 
 		if out:
-			print
-			print mirror_string
+			print()
+			print(mirror_string)
 			sys.exit(0)
 
-
 		self.output.write('\n')
-		self.output.print_info('Modifying %s with new mirrors...\n' % path)
+		self.output.print_info('Modifying %s with new mirrors...\n' % config_path)
 		try:
-			config = open(path, 'r')
+			config = open(config_path, 'r')
 			self.output.write('\tReading make.conf\n')
 			lines = config.readlines()
 			config.close()
-			self.output.write('\tMoving to %s.backup\n' % path)
-			shutil.move(path, path + '.backup')
+			self.output.write('\tMoving to %s.backup\n' % config_path)
+			shutil.move(config_path, config_path + '.backup')
 		except IOError:
 			lines = []
 
@@ -93,8 +116,8 @@ class MirrorSelect(object):
 
 		lines.append(mirror_string)
 
-		self.output.write('\tWriting new %s\n' % path)
-		config = open(path, 'w')
+		self.output.write('\tWriting new %s\n' % config_path)
+		config = open(config_path, 'w')
 		for line in lines:
 			config.write(line)
 		config.write('\n')
@@ -103,9 +126,15 @@ class MirrorSelect(object):
 		self.output.print_info('Done.\n')
 		sys.exit(0)
 
-	def get_filesystem_mirrors(self, out, path, sync=False):
-		"""
-		Read the current mirrors and retain mounted filesystems mirrors
+
+	@staticmethod
+	def get_filesystem_mirrors(config_path, sync=False):
+		"""Read the current mirrors and retain mounted filesystems mirrors
+
+		@param config_path: string
+		@param sync: boolean, used to switch between SYNC and GENTOO_MIRRORS
+			make.conf variable target
+		@rtype list
 		"""
 		fsmirrors = []
 
@@ -115,7 +144,7 @@ class MirrorSelect(object):
 			var = 'GENTOO_MIRRORS'
 
 		try:
-			f = open(path,'r')
+			f = open(config_path,'r')
 		except IOError:
 			return fsmirrors
 
@@ -151,6 +180,7 @@ class MirrorSelect(object):
 			fsmirrors = []
 
 		return fsmirrors
+
 
 	def _parse_args(self, argv, config_path):
 		"""
@@ -279,7 +309,12 @@ class MirrorSelect(object):
 
 
 	def get_available_hosts(self, options):
-		''''''
+		'''Returns a list of hosts suitable for consideration by a user
+		based on user input
+
+		@param options: parser.parse_args() options instance
+		@rtype: list
+		'''
 		if options.rsync:
 			hosts = Extractor(MIRRORS_RSYNC_DATA, options, self.output).hosts
 		else:
@@ -288,7 +323,16 @@ class MirrorSelect(object):
 
 
 	def select_urls(self, hosts, options):
-		''''''
+		'''Returns the list of selected host urls using
+		the options passed in to run one of the three selector types.
+		1) Interactive ncurses dialog
+		2) Deep mode mirror selection.
+		3) (Shallow) Rapid server selection via netselect
+
+		@param hosts: list of hosts to choose from
+		@param options: parser.parse_args() options instance
+		@rtype: list
+		'''
 		if options.interactive:
 			selector = Interactive(hosts, options, self.output)
 		elif options.deep:
@@ -298,20 +342,34 @@ class MirrorSelect(object):
 		return selector.urls
 
 
-	def main(self, argv):
-		"""Lets Rock!"""
+	@staticmethod
+	def get_make_conf_path():
+		'''Checks for the existance of make.conf in /etc/portage/
+		Failing that it checks for it in /etc/
+		Failing in /etc/ it defaults to /etc/portage/make.conf
+
+		@rtype: string
+		'''
 		# start with the new location
 		config_path = '/etc/portage/make.conf'
 		if not os.access(config_path, os.F_OK):
 			# check if the old location is what is used
 			if os.access('/etc/make.conf', os.F_OK):
 				config_path = '/etc/make.conf'
+		return config_path
+
+
+	def main(self, argv):
+		"""Lets Rock!
+
+		@param argv: list of command line arguments to parse
+		"""
+		config_path = self.get_make_conf_path()
 
 		options = self._parse_args(argv, config_path)
 		self.output.verbosity = options.verbosity
 
-		fsmirrors = self.get_filesystem_mirrors(options.output,
-			config_path, options.rsync)
+		fsmirrors = self.get_filesystem_mirrors(config_path, options.rsync)
 
 		hosts = self.get_available_hosts(options)
 
