@@ -38,7 +38,6 @@ import urllib
 import urlparse
 import hashlib
 from mirrorselect.mirrorparser3 import MirrorParser3
-from mirrorselect.output import output
 
 import codecs
 
@@ -48,12 +47,13 @@ class Extractor(object):
 	mirrors, and then filters them. Only the mirrors that should be tested, based on
 	user input are saved. They will be in the hosts attribute."""
 
-	def __init__(self, list_url, options):
+	def __init__(self, list_url, options, output):
+		self.output = output
 		parser = MirrorParser3()
 		self.hosts = []
 
 		hosts = self.getlist(parser, list_url)
-		output.write('Extractor(): fetched mirrors.xml,'
+		self.output.write('Extractor(): fetched mirrors.xml,'
 				' %s hosts before filtering\n' % len(hosts), 2)
 
 		if not options.rsync:
@@ -71,13 +71,13 @@ class Extractor(object):
 		"""
 		myhosts = []
 
-		output.print_info('Limiting test to %s hosts. ' % prot )
+		self.output.print_info('Limiting test to %s hosts. ' % prot )
 
 		for host in hosts:
 			if host[0].startswith(prot):
 				myhosts.append(host)
 
-		output.write('%s of %s removed.\n' % (len(hosts) - len(myhosts),
+		self.output.write('%s of %s removed.\n' % (len(hosts) - len(myhosts),
 			len(hosts)) )
 
 		return myhosts
@@ -89,9 +89,9 @@ class Extractor(object):
 		Takes a parser object, url, and filering options.
 		"""
 
-		output.write('getlist(): fetching ' + url + '\n', 2)
+		self.output.write('getlist(): fetching ' + url + '\n', 2)
 
-		output.print_info('Downloading a list of mirrors...')
+		self.output.print_info('Downloading a list of mirrors...')
 
 		try:
 			parser.parse(urllib.urlopen(url).read())
@@ -99,10 +99,10 @@ class Extractor(object):
 			pass
 
 		if len(parser.tuples()) == 0:
-			output.print_err('Could not get mirror list. Check your internet'
+			self.output.print_err('Could not get mirror list. Check your internet'
 					' connection.')
 
-		output.write(' Got %d mirrors.\n' % len(parser.tuples()))
+		self.output.write(' Got %d mirrors.\n' % len(parser.tuples()))
 
 		return parser.tuples()
 
@@ -110,7 +110,8 @@ class Extractor(object):
 class Shallow(object):
 	"""handles rapid server selection via netselect"""
 
-	def __init__(self, hosts, options):
+	def __init__(self, hosts, options, output):
+		self.output = output
 		self.urls = []
 
 		if options.blocksize is not None:
@@ -120,7 +121,7 @@ class Shallow(object):
 			self.netselect(hosts, options.servers)
 
 		if len(self.urls) == 0:
-			output.print_err('Netselect failed to return any mirrors.'
+			self.output.print_err('Netselect failed to return any mirrors.'
 					' Try again using block mode.')
 
 
@@ -134,12 +135,12 @@ class Shallow(object):
 		top_hosts = []
 
 		if not quiet:
-			output.print_info('Using netselect to choose the top %d mirrors...' \
+			self.output.print_info('Using netselect to choose the top %d mirrors...' \
 					% number)
 
 		host_string = ' '.join(hosts)
 
-		output.write('\nnetselect(): running "netselect -s%d %s"\n' % (int(number),
+		self.output.write('\nnetselect(): running "netselect -s%d %s"\n' % (int(number),
 			host_string), 2)
 
 		proc = subprocess.Popen( ['netselect', '-s%d' % (number,)] + hosts,
@@ -148,7 +149,7 @@ class Shallow(object):
 		out, err = proc.communicate()
 
 		if err:
-			output.write('netselect(): netselect stderr: %s\n' % err, 2)
+			self.output.write('netselect(): netselect stderr: %s\n' % err, 2)
 
 		for line in out.splitlines():
 			line = line.split()
@@ -158,9 +159,9 @@ class Shallow(object):
 			top_host_dict[line[0]] = line[1]
 
 		if not quiet:
-			output.write('Done.\n')
+			self.output.write('Done.\n')
 
-		output.write('\nnetselect(): returning %s and %s\n' % (top_hosts,
+		self.output.write('\nnetselect(): returning %s and %s\n' % (top_hosts,
 			top_host_dict), 2)
 
 		if quiet:
@@ -176,24 +177,24 @@ class Shallow(object):
 		"""
 		hosts = [host[0] for host in hosts]
 
-		output.write('netselect_split() got %s hosts.\n' % len(hosts), 2)
+		self.output.write('netselect_split() got %s hosts.\n' % len(hosts), 2)
 
 		host_blocks = self.host_blocks(hosts, block_size)
 
-		output.write(' split into %s blocks\n' % len(host_blocks), 2)
+		self.output.write(' split into %s blocks\n' % len(host_blocks), 2)
 
 		top_hosts = []
 		ret_hosts = {}
 
 		block_index = 0
 		for block in host_blocks:
-			output.print_info('Using netselect to choose the top '
+			self.output.print_info('Using netselect to choose the top '
 			'%d hosts, in blocks of %s. %s of %s blocks complete.'
 			% (number, block_size, block_index, len(host_blocks)))
 
 			host_dict = self.netselect(block, len(block), quiet=True)[1]
 
-			output.write('ran netselect(%s, %s), and got %s\n' % (block, len(block),
+			self.output.write('ran netselect(%s, %s), and got %s\n' % (block, len(block),
 				host_dict), 2)
 
 			for key in host_dict.keys():
@@ -210,7 +211,7 @@ class Shallow(object):
 		for rank in host_ranking_keys[:number]:
 			top_hosts.append(ret_hosts[rank])
 
-		output.write('netselect_split(): returns %s\n' % top_hosts, 2)
+		self.output.write('netselect_split(): returns %s\n' % top_hosts, 2)
 
 		self.urls = top_hosts
 
@@ -230,7 +231,7 @@ class Shallow(object):
 			mylist = []
 		host_array.append(hosts)
 
-		output.write('\n_host_blocks(): returns %s blocks, each about %s in size\n'
+		self.output.write('\n_host_blocks(): returns %s blocks, each about %s in size\n'
 				% (len(host_array), len(host_array[0])), 2)
 
 		return host_array
@@ -239,7 +240,8 @@ class Shallow(object):
 class Deep(object):
 	"""handles deep mode mirror selection."""
 
-	def __init__(self, hosts, options):
+	def __init__(self, hosts, options, output):
+		self.output = output
 		self.urls = []
 		self._hosts = hosts
 		self._number = options.servers
@@ -276,7 +278,7 @@ class Deep(object):
 		for host in hosts:
 
 			prog += 1
-			output.print_info('Downloading 100k files from each mirror... [%s of %s]'\
+			self.output.print_info('Downloading 100k files from each mirror... [%s of %s]'\
 							% (prog, num_hosts) )
 
 			mytime, ignore = self.deeptime(host, maxtime)
@@ -287,10 +289,10 @@ class Deep(object):
 			else:
 				continue
 
-		output.write('deeptest(): got %s hosts, and returned %s\n' % (num_hosts, \
+		self.output.write('deeptest(): got %s hosts, and returned %s\n' % (num_hosts, \
 			str(top_hosts.values())), 2)
 
-		output.write('\n')	#this just makes output nicer
+		self.output.write('\n')	#this just makes output nicer
 
 		#can't just return the dict.valuse, because we want the fastest mirror first...
 		keys = top_hosts.keys()
@@ -309,7 +311,7 @@ class Deep(object):
 		Can be given an optional timeout, for use with a clever algorithm.
 		Like mine.
 		"""
-		output.write('\n_deeptime(): maxtime is %s\n' % maxtime, 2)
+		self.output.write('\n_deeptime(): maxtime is %s\n' % maxtime, 2)
 
 		if url.endswith('/'):	#append the path to the testfile to the URL
 			url = url + 'distfiles/mirrorselect-test'
@@ -342,14 +344,14 @@ class Deep(object):
 				finally:
 					signal.alarm(0)
 			except socket.error, e:
-				output.write('deeptime(): dns error for host %s: %s\n' % \
+				self.output.write('deeptime(): dns error for host %s: %s\n' % \
 					(url_parts.hostname, e), 2)
 			except TimeoutException:
-				output.write('deeptime(): dns timeout for host %s\n' % \
+				self.output.write('deeptime(): dns timeout for host %s\n' % \
 					(url_parts.hostname,), 2)
 
 		if not ips:
-			output.write('deeptime(): unable to resolve ip for host %s\n' % \
+			self.output.write('deeptime(): unable to resolve ip for host %s\n' % \
 				(url_parts.hostname,), 2)
 			return (None, True)
 
@@ -365,16 +367,16 @@ class Deep(object):
 				finally:
 					signal.alarm(0)
 			except EnvironmentError, e:
-				output.write(('deeptime(): connection to host %s ' + \
+				self.output.write(('deeptime(): connection to host %s ' + \
 					'failed for ip %s: %s\n') % \
 					(url_parts.hostname, ip, e), 2)
 			except TimeoutException:
-				output.write(('deeptime(): connection to host %s ' + \
+				self.output.write(('deeptime(): connection to host %s ' + \
 					'timed out for ip %s\n') % \
 					(url_parts.hostname, ip), 2)
 
 		if f is None:
-			output.write('deeptime(): unable to ' + \
+			self.output.write('deeptime(): unable to ' + \
 				'connect to host %s\n' % \
 				(url_parts.hostname,), 2)
 			return (None, True)
@@ -387,11 +389,11 @@ class Deep(object):
 			finally:
 				signal.alarm(0)
 		except EnvironmentError, e:
-			output.write(('deeptime(): close connection to host %s ' + \
+			self.output.write(('deeptime(): close connection to host %s ' + \
 				'failed for ip %s: %s\n') % \
 				(url_parts.hostname, ip, e), 2)
 		except TimeoutException:
-			output.write(('deeptime(): close connection to host %s ' + \
+			self.output.write(('deeptime(): close connection to host %s ' + \
 				'timed out for ip %s\n') % \
 				(url_parts.hostname, ip), 2)
 
@@ -413,20 +415,20 @@ class Deep(object):
 				signal.alarm(0)
 
 		except EnvironmentError, e:
-			output.write(('deeptime(): download from host %s ' + \
+			self.output.write(('deeptime(): download from host %s ' + \
 				'failed for ip %s: %s\n') % \
 				(url_parts.hostname, ip, e), 2)
 			return (None, True)
 		except TimeoutException:
-			output.write(('deeptime(): download from host %s ' + \
+			self.output.write(('deeptime(): download from host %s ' + \
 				'timed out for ip %s\n') % \
 				(url_parts.hostname, ip), 2)
 			return (None, True)
 
 		signal.signal(signal.SIGALRM, signal.SIG_DFL)
 
-		output.write('deeptime(): download completed.\n', 2)
-		output.write('deeptime(): %s seconds for host %s\n' % (delta, url), 2)
+		self.output.write('deeptime(): download completed.\n', 2)
+		self.output.write('deeptime(): %s seconds for host %s\n' % (delta, url), 2)
 		return (delta, False)
 
 	def _list_add(self, time_host, maxtime, host_dict, maxlen):
@@ -438,7 +440,7 @@ class Deep(object):
 		"""
 		if len(host_dict) < maxlen:	#still have room, and host is fast. add it.
 
-			output.write('_list_add(): added host %s. with a time of %s\n' %
+			self.output.write('_list_add(): added host %s. with a time of %s\n' %
 					(time_host[1], time_host[0]), 2)
 
 			host_dict.update(dict([time_host]))
@@ -446,11 +448,11 @@ class Deep(object):
 			times.sort()
 
 		else: #We need to make room in the dict before we add. Kill the slowest.
-			output.write('_list_add(): Adding host %s with a time of %s\n' %
+			self.output.write('_list_add(): Adding host %s with a time of %s\n' %
 					(time_host[1], time_host[0]), 2)
 			times = host_dict.keys()
 			times.sort()
-			output.write('_list_add(): removing %s\n' % host_dict[times[-1]],
+			self.output.write('_list_add(): removing %s\n' % host_dict[times[-1]],
 					2)
 			del host_dict[times[-1]]
 			host_dict.update(dict([time_host]))
@@ -459,18 +461,18 @@ class Deep(object):
 			times.sort()
 
 		if len(host_dict) < maxlen:	#check again to choose new timeout
-			output.write('_list_add(): host_dict is not full yet.'
+			self.output.write('_list_add(): host_dict is not full yet.'
 					' reusing timeout of %s sec.\n' % maxtime, 2)
 			retval = maxtime
 		else:
-			output.write('_list_add(): host_dict is full. Selecting the best'
+			self.output.write('_list_add(): host_dict is full. Selecting the best'
 			' timeout\n', 2)
 			if times[-1] < maxtime:
 				retval = times[-1]
 			else:
 				retval = maxtime
 
-		output.write('_list_add(): new max time is %s seconds,'
+		self.output.write('_list_add(): new max time is %s seconds,'
 				' and now len(host_dict)= %s\n' % (retval, len(host_dict)), 2)
 
 		return retval, host_dict
@@ -479,11 +481,12 @@ class Deep(object):
 class Interactive(object):
 	"""Handles interactive host selection."""
 
-	def __init__(self, hosts, options):
+	def __init__(self, hosts, options, output):
+		self.output = output
 		self.urls = []
 
 		self.interactive(hosts, options)
-		output.write('Interactive.interactive(): self.urls = %s\n' % self.urls, 2)
+		self.output.write('Interactive.interactive(): self.urls = %s\n' % self.urls, 2)
 
 		if len(self.urls[0]) == 0:
 			sys.exit(1)

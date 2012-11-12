@@ -27,7 +27,6 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
-from __future__ import print_function
 
 import sys
 import re
@@ -106,9 +105,12 @@ class ColoredFormatter(IndentedHelpFormatter):
 	Overrides format_heading.
 	"""
 
+	def __init__(self, output):
+		self.output = output
+
 	def format_heading(self, heading):
 		"""Return a colorful heading."""
-		return "%*s%s:\n" % (self.current_indent, "", output.white(heading))
+		return "%*s%s:\n" % (self.current_indent, "", self.output.white(heading))
 
 	def format_option(self, option):
 		"""Return colorful formatted help for an option."""
@@ -116,17 +118,18 @@ class ColoredFormatter(IndentedHelpFormatter):
 		# long options with args
 		option = re.sub(
 			r"--([a-zA-Z]*)=([a-zA-Z]*)",
-			lambda m: "-%s %s" % (output.green(m.group(1)),
-				output.blue(m.group(2))),
+			lambda m: "-%s %s" % (self.output.green(m.group(1)),
+				self.output.blue(m.group(2))),
 			option)
 		# short options with args
 		option = re.sub(
 			r"-([a-zA-Z]) ?([0-9A-Z]+)",
-			lambda m: " -" + output.green(m.group(1)) + ' ' + output.blue(m.group(2)),
+			lambda m: " -" + self.output.green(m.group(1)) + ' ' + \
+				self.output.blue(m.group(2)),
 			option)
 		# options without args
 		option = re.sub(
-			r"-([a-zA-Z\d]+)", lambda m: "-" + output.green(m.group(1)),
+			r"-([a-zA-Z\d]+)", lambda m: "-" + self.output.green(m.group(1)),
 			option)
 		return option
 
@@ -134,5 +137,3 @@ class ColoredFormatter(IndentedHelpFormatter):
 		"""Do not wrap."""
 		return description + '\n'
 
-
-output = Output()  #the only FUCKING global. Damnit.

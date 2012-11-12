@@ -54,10 +54,10 @@ except KeyboardInterrupt:
 	sys.exit(1)
 
 
-from mirrorselect.main import main
+from mirrorselect.main import MirrorSelect
 
 try:
-	main(sys.argv)
+	MirrorSelect().main(sys.argv)
 except KeyboardInterrupt:
 	print("Aborted.")
 	sys.exit(130)
