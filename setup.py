@@ -7,7 +7,6 @@ from __future__ import print_function
 import re
 import sys
 from distutils import core, log
-from glob import glob
 
 import os
 import io
@@ -107,10 +106,10 @@ core.setup(
 		% __version__,
 	package_dir={'': 'mirrorselect'},
 	packages=packages,
-	package_data = test_data,
-	scripts=(glob('bin/*')),
+	#package_data = test_data,
+	scripts=(['bin/mirrorselect']),
 	data_files=(
-		(os.path.join(os.sep, EPREFIX.lstrip(os.sep), 'usr/share/man/man8'), 'mirrorselect.8'),
+		(os.path.join(os.sep, EPREFIX.lstrip(os.sep), 'usr/share/man/man8'), ['mirrorselect.8']),
 	),
 	cmdclass={
 		'test': load_test(),
