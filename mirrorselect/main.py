@@ -21,7 +21,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
-__revision__ = '2.1.0'
 
 import os
 import re
@@ -34,6 +33,7 @@ from optparse import OptionParser
 from mirrorselect.mirrorparser3 import MIRRORS_3_XML, MIRRORS_RSYNC_DATA
 from mirrorselect.output import Output, ColoredFormatter
 from mirrorselect.selectors import Deep, Shallow, Extractor, Interactive
+from mirrorselect.version import version
 
 
 class MirrorSelect(object):
@@ -152,7 +152,7 @@ class MirrorSelect(object):
 
 		return fsmirrors
 
-	def parse_args(self, argv, config_path):
+	def _parse_args(self, argv, config_path):
 		"""
 		Does argument parsing and some sanity checks.
 		Returns an optparse Options object.
@@ -173,7 +173,7 @@ class MirrorSelect(object):
 				))
 		parser = OptionParser(
 			formatter=ColoredFormatter(self.output), description=desc,
-			version='Mirrorselect version: %s' % __revision__)
+			version='Mirrorselect version: %s' % version)
 
 		group = parser.add_option_group("Main modes")
 		group.add_option(
@@ -278,6 +278,26 @@ class MirrorSelect(object):
 		return options
 
 
+	def get_available_hosts(self, options):
+		''''''
+		if options.rsync:
+			hosts = Extractor(MIRRORS_RSYNC_DATA, options, self.output).hosts
+		else:
+			hosts = Extractor(MIRRORS_3_XML, options, self.output).hosts
+		return hosts
+
+
+	def select_urls(self, hosts, options):
+		''''''
+		if options.interactive:
+			selector = Interactive(hosts, options, self.output)
+		elif options.deep:
+			selector = Deep(hosts, options, self.output)
+		else:
+			selector = Shallow(hosts, options, self.output)
+		return selector.urls
+
+
 	def main(self, argv):
 		"""Lets Rock!"""
 		# start with the new location
@@ -287,23 +307,16 @@ class MirrorSelect(object):
 			if os.access('/etc/make.conf', os.F_OK):
 				config_path = '/etc/make.conf'
 
-		#self.output.print_info("config_path set to :", config_path)
-
-		options = self.parse_args(argv, config_path)
+		options = self._parse_args(argv, config_path)
 		self.output.verbosity = options.verbosity
 
-		fsmirrors = self.get_filesystem_mirrors(options.output, config_path, options.rsync)
-		if options.rsync:
-			hosts = Extractor(MIRRORS_RSYNC_DATA, options, self.output).hosts
-		else:
-			hosts = Extractor(MIRRORS_3_XML, options, self.output).hosts
+		fsmirrors = self.get_filesystem_mirrors(options.output,
+			config_path, options.rsync)
 
-		if options.interactive:
-			selector = Interactive(hosts, options, self.output)
-		elif options.deep:
-			selector = Deep(hosts, options, self.output)
-		else:
-			selector = Shallow(hosts, options, self.output)
+		hosts = self.get_available_hosts(options)
 
-		self.write_config(fsmirrors + selector.urls, options.output, config_path, options.rsync)
+		urls = self.select_urls(hosts, options)
+
+		self.write_config(fsmirrors + urls, options.output,
+			config_path, options.rsync)
 
