@@ -47,6 +47,15 @@ from mirrorselect.selectors import Deep, Shallow, Extractor, Interactive
 from mirrorselect.version import version
 
 
+# establish the eprefix, initially set so eprefixify can
+# set it on install
+EPREFIX = "@GENTOO_PORTAGE_EPREFIX@"
+
+# check and set it if it wasn't
+if "GENTOO_PORTAGE_EPREFIX" in EPREFIX:
+    EPREFIX = ''
+
+
 class MirrorSelect(object):
 	'''Main operational class'''
 
@@ -352,11 +361,11 @@ class MirrorSelect(object):
 		@rtype: string
 		'''
 		# start with the new location
-		config_path = '/etc/portage/make.conf'
+		config_path = EPREFIX + '/etc/portage/make.conf'
 		if not os.access(config_path, os.F_OK):
 			# check if the old location is what is used
-			if os.access('/etc/make.conf', os.F_OK):
-				config_path = '/etc/make.conf'
+			if os.access(EPREFIX + '/etc/make.conf', os.F_OK):
+				config_path = EPREFIX + '/etc/make.conf'
 		return config_path
 
 
