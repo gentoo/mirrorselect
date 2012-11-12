@@ -40,19 +40,16 @@ if int(sys.version[0]) == 3:
 	import urllib.request, urllib.parse, urllib.error
 	url_parse = urllib.parse
 	url_open = urllib.request.urlopen
+	_unicode = str
 else:
 	import urllib
 	import urlparse
 	url_parse = urlparse.urlparse
 	url_open = urllib.urlopen
+	_unicode = unicode
 
 
 from mirrorselect.mirrorparser3 import MirrorParser3
-
-if sys.hexversion >= 0x3000000:
-    _unicode = str
-else:
-    _unicode = unicode
 
 
 class Extractor(object):
