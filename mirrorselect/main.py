@@ -56,6 +56,12 @@ if "GENTOO_PORTAGE_EPREFIX" in EPREFIX:
     EPREFIX = ''
 
 
+if sys.hexversion >= 0x3000000:
+    _unicode = str
+else:
+    _unicode = unicode
+
+
 class MirrorSelect(object):
 	'''Main operational class'''
 
@@ -100,6 +106,9 @@ class MirrorSelect(object):
 		else:
 			var = 'GENTOO_MIRRORS'
 
+		if hasattr(hosts[0], 'decode'):
+			hosts = [x.decode('utf-8') for x in hosts]
+
 		mirror_string = '%s="%s"' % (var, ' '.join(hosts))
 
 		if out:
@@ -127,7 +136,9 @@ class MirrorSelect(object):
 		lines.append(mirror_string)
 
 		self.output.write('\tWriting new %s\n' % config_path)
+
 		config = open(config_path, 'w')
+
 		for line in lines:
 			config.write(line)
 		config.write('\n')

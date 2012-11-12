@@ -29,18 +29,30 @@ Distributed under the terms of the GNU General Public License v2
 """
 
 import math
-import os
 import signal
 import socket
 import subprocess
 import sys
 import time
-import urllib
-import urlparse
 import hashlib
+
+if int(sys.version[0]) == 3:
+	import urllib.request, urllib.parse, urllib.error
+	url_parse = urllib.parse
+	url_open = urllib.request.urlopen
+else:
+	import urllib
+	import urlparse
+	url_parse = urlparse.urlparse
+	url_open = urllib.urlopen
+
+
 from mirrorselect.mirrorparser3 import MirrorParser3
 
-import codecs
+if sys.hexversion >= 0x3000000:
+    _unicode = str
+else:
+    _unicode = unicode
 
 
 class Extractor(object):
@@ -95,7 +107,7 @@ class Extractor(object):
 		self.output.print_info('Downloading a list of mirrors...')
 
 		try:
-			parser.parse(urllib.urlopen(url).read())
+			parser.parse(url_open(url).read())
 		except EnvironmentError:
 			pass
 
@@ -198,7 +210,7 @@ class Shallow(object):
 			self.output.write('ran netselect(%s, %s), and got %s\n' % (block, len(block),
 				host_dict), 2)
 
-			for key in host_dict.keys():
+			for key in list(host_dict.keys()):
 				ret_hosts[key] = host_dict[key]
 			block_index += 1
 
@@ -206,7 +218,7 @@ class Shallow(object):
 		'%d hosts, in blocks of %s. %s of %s blocks complete.\n'
 		% (number, block_size, block_index, len(host_blocks)))
 
-		host_ranking_keys = ret_hosts.keys()
+		host_ranking_keys = list(ret_hosts.keys())
 		host_ranking_keys.sort()
 
 		for rank in host_ranking_keys[:number]:
@@ -291,12 +303,12 @@ class Deep(object):
 				continue
 
 		self.output.write('deeptest(): got %s hosts, and returned %s\n' % (num_hosts, \
-			str(top_hosts.values())), 2)
+			str(list(top_hosts.values()))), 2)
 
 		self.output.write('\n')	#this just makes output nicer
 
 		#can't just return the dict.valuse, because we want the fastest mirror first...
-		keys = top_hosts.keys()
+		keys = list(top_hosts.keys())
 		keys.sort()
 
 		rethosts = []
@@ -319,7 +331,7 @@ class Deep(object):
 		else:
 			url = url + '/distfiles/mirrorselect-test'
 
-		url_parts = urlparse.urlparse(url)
+		url_parts = url_parse(url)
 
 		class TimeoutException(Exception):
 			pass
@@ -344,7 +356,7 @@ class Deep(object):
 						ips.append(ip)
 				finally:
 					signal.alarm(0)
-			except socket.error, e:
+			except socket.error as e:
 				self.output.write('deeptime(): dns error for host %s: %s\n' % \
 					(url_parts.hostname, e), 2)
 			except TimeoutException:
@@ -363,11 +375,11 @@ class Deep(object):
 			try:
 				try:
 					signal.alarm(self._connect_timeout)
-					f = urllib.urlopen(url)
+					f = url_open(url)
 					break
 				finally:
 					signal.alarm(0)
-			except EnvironmentError, e:
+			except EnvironmentError as e:
 				self.output.write(('deeptime(): connection to host %s ' + \
 					'failed for ip %s: %s\n') % \
 					(url_parts.hostname, ip, e), 2)
@@ -389,7 +401,7 @@ class Deep(object):
 				f.close()
 			finally:
 				signal.alarm(0)
-		except EnvironmentError, e:
+		except EnvironmentError as e:
 			self.output.write(('deeptime(): close connection to host %s ' + \
 				'failed for ip %s: %s\n') % \
 				(url_parts.hostname, ip, e), 2)
@@ -405,7 +417,7 @@ class Deep(object):
 			try:
 				signal.alarm(int(math.ceil(maxtime)))
 				stime = time.time()
-				f = urllib.urlopen(url)
+				f = url_open(url)
 
 				if hashlib.md5(f.read()).hexdigest() != "bdf077b2e683c506bf9e8f2494eeb044":
 					return (None, True)
@@ -415,7 +427,7 @@ class Deep(object):
 			finally:
 				signal.alarm(0)
 
-		except EnvironmentError, e:
+		except EnvironmentError as e:
 			self.output.write(('deeptime(): download from host %s ' + \
 				'failed for ip %s: %s\n') % \
 				(url_parts.hostname, ip, e), 2)
@@ -445,20 +457,20 @@ class Deep(object):
 					(time_host[1], time_host[0]), 2)
 
 			host_dict.update(dict([time_host]))
-			times = host_dict.keys()
+			times = list(host_dict.keys())
 			times.sort()
 
 		else: #We need to make room in the dict before we add. Kill the slowest.
 			self.output.write('_list_add(): Adding host %s with a time of %s\n' %
 					(time_host[1], time_host[0]), 2)
-			times = host_dict.keys()
+			times = list(host_dict.keys())
 			times.sort()
 			self.output.write('_list_add(): removing %s\n' % host_dict[times[-1]],
 					2)
 			del host_dict[times[-1]]
 			host_dict.update(dict([time_host]))
 			#done adding. now return the appropriate time
-			times = host_dict.keys()
+			times = list(host_dict.keys())
 			times.sort()
 
 		if len(host_dict) < maxlen:	#check again to choose new timeout
@@ -498,16 +510,17 @@ class Interactive(object):
 		Some sort of interactive menu thingy.
 		"""
 		if options.rsync:
-			dialog = 'dialog --stdout --title "Gentoo RSYNC Mirrors"'\
-				' --radiolist "Please select your desired mirror:" 20 110 14'
+			dialog = ['dialog', '--stdout', '--title', '"Gentoo RSYNC Mirrors"',
+				'--radiolist', '"Please select your desired mirror:"',
+				'20', '110', '14']
 		else:
-			dialog = 'dialog --separate-output --stdout --title'\
-				' "Gentoo Download Mirrors" --checklist "Please'\
-				' select your desired mirrors:'
+			dialog = ['dialog', '--separate-output', '--stdout', '--title',
+				'"Gentoo Download Mirrors"', '--checklist',
+				'"Please select your desired mirrors:']
 			if not options.ipv4 and not options.ipv6:
-				dialog += '\n* = supports ipv6'
+				dialog[-1] += '\n* = supports ipv6'
 
-			dialog += '" 20 110 14'
+			dialog.extend(['20', '110', '14'])
 
 		for (url, args) in sorted(hosts, key = lambda x: (x[1]['country'].lower(), x[1]['name'].lower()) ):
 			marker = ""
@@ -518,10 +531,20 @@ class Interactive(object):
 			if options.ipv6 and ( args['ipv6'] == 'n' ): continue
 			if options.ipv4 and ( args['ipv4'] == 'n' ): continue
 
-			dialog += ' ' + '"%s" "%s%s: %s" "OFF"' % ( url, marker, args['country'], args['name'] )
+			#dialog.append('"%s" "%s%s: %s" "OFF"' % ( url, marker, args['country'], args['name']))
+			dialog.extend(["%s" %url,
+				"%s%s: %s" %(marker, args['country'], args['name']),
+				 "OFF"])
+		dialog = [_unicode(x) for x in dialog]
+		proc = subprocess.Popen( dialog,
+			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-		mirror_fd = os.popen('%s' % codecs.encode(dialog, 'utf8'))
-		mirrors = mirror_fd.read()
-		mirror_fd.close()
+		out, err = proc.communicate()
 
-		self.urls = mirrors.rstrip().split('\n')
+		self.urls = out.splitlines()
+
+		if hasattr(self.urls[0], 'decode'):
+			self.urls = [x.decode('utf-8').rstrip() for x in self.urls]
+		else:
+			self.urls = [x.rstrip() for x in self.urls]
+
