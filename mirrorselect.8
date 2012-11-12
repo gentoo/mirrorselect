@@ -75,12 +75,12 @@ Autoselect the 5 best mirrors and save results in /etc/make.conf, a backup will 
 .LP
 Autoselect the 3 best mirrors, use a
 .I BLOCKSIZE
-of 10 and append the output to /etc/make.conf.
+of 10 and append the output to /etc/portage/make.conf.
 .LP
-# mirrorselect -s3 -b10 -o >> /etc/make.conf
+# mirrorselect -s3 -b10 -o >> /etc/portage/make.conf
 .LP
 Autoselect the 4 best mirrors, it also loads a 100k file from each mirror.
-The result will be written to /etc/make.conf, a backup will be created.
+The result will be written to /etc/portage/make.conf, a backup will be created.
 .LP
 # mirrorselect -D -s4
 .LP
