@@ -27,7 +27,7 @@ if "GENTOO_PORTAGE_EPREFIX" in EPREFIX:
 
 # Python files that need `version = ""` subbed, relative to this dir:
 python_scripts = [os.path.join(cwd, path) for path in (
-	'mirrorselect/version.py'
+	'mirrorselect/version.py',
 )]
 
 
