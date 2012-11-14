@@ -84,7 +84,7 @@ def	load_test():
 
 packages = [
 	str('.'.join(root.split(os.sep)[1:]))
-	for root, dirs, files in os.walk('mirrorselect')
+	for root, dirs, files in os.walk('.')
 	if '__init__.py' in files
 ]
 
@@ -104,7 +104,6 @@ core.setup(
 	url='http://www.gentoo.org/proj/en/portage/tools/index.xml',
 	download_url='http://distfiles.gentoo.org/distfiles/mirrorselect-%s.tar.gz'\
 		% __version__,
-	package_dir={'': 'mirrorselect'},
 	packages=packages,
 	#package_data = test_data,
 	scripts=(['bin/mirrorselect']),
@@ -116,3 +115,4 @@ core.setup(
 		'set_version': set_version,
 	},
 )
+
