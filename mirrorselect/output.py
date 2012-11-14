@@ -107,6 +107,7 @@ class ColoredFormatter(IndentedHelpFormatter):
 	"""
 
 	def __init__(self, output):
+		IndentedHelpFormatter.__init__(self)
 		self.output = output
 
 	def format_heading(self, heading):
