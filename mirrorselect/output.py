@@ -32,6 +32,7 @@ Distributed under the terms of the GNU General Public License v2
 import sys
 import re
 import codecs
+import locale
 
 from optparse import IndentedHelpFormatter
 
