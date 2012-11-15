@@ -31,8 +31,48 @@ Distributed under the terms of the GNU General Public License v2
 
 import sys
 import re
+import codecs
 
 from optparse import IndentedHelpFormatter
+
+
+if sys.hexversion >= 0x3000000:
+    _unicode = str
+else:
+    _unicode = unicode
+
+
+def encoder(text, _encoding_):
+    return codecs.encode(text, _encoding_, 'replace')
+
+
+def decode_selection(selection):
+    '''utility function to decode a list of strings
+    accoring to the filesystem encoding
+    '''
+    # fix None passed in, return an empty list
+    selection = selection or []
+    enc = sys.getfilesystemencoding()
+    if enc is not None:
+        return [encoder(i, enc) for i in selection]
+    return selection
+
+
+def get_encoding(output):
+    if hasattr(output, 'encoding') \
+            and output.encoding != None:
+        return output.encoding
+    else:
+        encoding = locale.getpreferredencoding()
+        # Make sure that python knows the encoding. Bug 350156
+        try:
+            # We don't care about what is returned, we just want to
+            # verify that we can find a codec.
+            codecs.lookup(encoding)
+        except LookupError:
+            # Python does not know the encoding, so use utf-8.
+            encoding = 'utf_8'
+        return encoding
 
 
 class Output(object):

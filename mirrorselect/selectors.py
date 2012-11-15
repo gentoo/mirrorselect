@@ -40,16 +40,15 @@ if int(sys.version[0]) == 3:
 	import urllib.request, urllib.parse, urllib.error
 	url_parse = urllib.parse
 	url_open = urllib.request.urlopen
-	_unicode = str
 else:
 	import urllib
 	import urlparse
 	url_parse = urlparse.urlparse
 	url_open = urllib.urlopen
-	_unicode = unicode
 
 
 from mirrorselect.mirrorparser3 import MirrorParser3
+from mirrorselect.output import encoder, get_encoding, decode_selection
 
 
 class Extractor(object):
@@ -498,7 +497,7 @@ class Interactive(object):
 		self.interactive(hosts, options)
 		self.output.write('Interactive.interactive(): self.urls = %s\n' % self.urls, 2)
 
-		if len(self.urls[0]) == 0:
+		if not self.urls or len(self.urls[0]) == 0:
 			sys.exit(1)
 
 
@@ -532,7 +531,7 @@ class Interactive(object):
 			dialog.extend(["%s" %url,
 				"%s%s: %s" %(marker, args['country'], args['name']),
 				 "OFF"])
-		dialog = [_unicode(x) for x in dialog]
+		dialog = [encoder(x, get_encoding(sys.stdout)) for x in dialog]
 		proc = subprocess.Popen( dialog,
 			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -540,8 +539,9 @@ class Interactive(object):
 
 		self.urls = out.splitlines()
 
-		if hasattr(self.urls[0], 'decode'):
-			self.urls = [x.decode('utf-8').rstrip() for x in self.urls]
-		else:
-			self.urls = [x.rstrip() for x in self.urls]
+		if self.urls:
+			if hasattr(self.urls[0], 'decode'):
+				self.urls = decode_selection([x.decode('utf-8').rstrip() for x in self.urls])
+			else:
+				self.urls = decode_selection([x.rstrip() for x in self.urls])
 
