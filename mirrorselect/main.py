@@ -46,6 +46,12 @@ from mirrorselect.output import Output, ColoredFormatter
 from mirrorselect.selectors import Deep, Shallow, Extractor, Interactive
 from mirrorselect.version import version
 
+# eprefix compatibility
+try:
+	from portage.const import rootuid
+except ImportError:
+	rootuid = 0
+
 
 # establish the eprefix, initially set so eprefixify can
 # set it on install
@@ -319,7 +325,7 @@ class MirrorSelect(object):
 				'You do not appear to have netselect on your system. '
 				'You must use the -D flag')
 
-		if (os.getuid() != 0) and not options.output:
+		if (os.getuid() != rootuid) and not options.output:
 			self.output.print_err('Must be root to write to %s!\n' % config_path)
 
 		if args:
