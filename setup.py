@@ -30,6 +30,10 @@ python_scripts = [os.path.join(cwd, path) for path in (
 	'mirrorselect/version.py',
 )]
 
+manpage = [os.path.join(cwd, path) for path in (
+	'mirrorselect.8',
+)]
+
 
 class set_version(core.Command):
 	"""Set python version to our __version__."""
@@ -59,6 +63,8 @@ class set_version(core.Command):
 		quote = r'[\'"]{1}'
 		python_re = r'(?<=^version = )' + quote + '[^\'"]*' + quote
 		sub(python_scripts, python_re)
+		man_re = r'(?<=^.TH "mirrorselect" "8" )' + quote + '[^\'"]*' + quote
+		sub(manpage, man_re)
 
 
 def	load_test():
