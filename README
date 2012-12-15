@@ -1,0 +1,13 @@
+Package: app-portage/mirrorselect
+Authors:
+	Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
+	Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
+	Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
+	Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
+	Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
+
+Mirrorselect is a small utility script to help select the mirror(s)
+to use for fetching the distfiles to install packages in a
+gentoo or gentoo-based linux system.
+
+See the mirrorselect manpage for usage instructions.
