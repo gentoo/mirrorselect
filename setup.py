@@ -12,7 +12,7 @@ import os
 import io
 
 
-__version__ = os.getenv('VERSION', default='9999')
+__version__ = os.getenv('PVR', default='9999')
 
 cwd = os.getcwd()
 
