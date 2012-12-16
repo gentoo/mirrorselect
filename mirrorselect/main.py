@@ -154,8 +154,7 @@ class MirrorSelect(object):
 		sys.exit(0)
 
 
-	@staticmethod
-	def get_filesystem_mirrors(config_path, sync=False):
+	def get_filesystem_mirrors(self, config_path, sync=False):
 		"""Read the current mirrors and retain mounted filesystems mirrors
 
 		@param config_path: string
@@ -170,6 +169,7 @@ class MirrorSelect(object):
 		else:
 			var = 'GENTOO_MIRRORS'
 
+		self.output.write('get_filesystem_mirrors(): config_path = %s\n' % config_path)
 		try:
 			f = open(config_path,'r')
 		except IOError:
@@ -182,6 +182,8 @@ class MirrorSelect(object):
 			lex.quotes = "\"'"
 			while 1:
 				key = lex.get_token()
+				#self.output.write('get_filesystem_mirrors(): processing key = %s\n' % key, 2)
+
 				if key == var:
 					equ = lex.get_token()
 
@@ -196,16 +198,22 @@ class MirrorSelect(object):
 
 					""" Look for mounted filesystem in value """
 					mirrorlist = val.rsplit()
+					self.output.write('get_filesystem_mirrors(): mirrorlist = %s\n' % mirrorlist, 2)
 					p = re.compile('rsync://|http://|ftp://', re.IGNORECASE)
 					for mirror in mirrorlist:
 						if (p.match(mirror) == None):
-							fsmirrors.append(mirror)
+							if os.access(mirror, os.F_OK):
+								self.output.write('get_filesystem_mirrors(): found file system mirror = %s\n' % mirror, 2)
+								fsmirrors.append(mirror)
+							else:
+								self.output.write('get_filesystem_mirrors(): ignoring non-accessible mirror = %s\n' % mirror, 2)
 					break
 				elif key is None:
 					break
 		except Exception:
 			fsmirrors = []
 
+		self.output.write('get_filesystem_mirrors(): fsmirrors = %s\n' % fsmirrors, 2)
 		return fsmirrors
 
 

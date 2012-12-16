@@ -303,14 +303,16 @@ class Deep(object):
 
 		self.output.write('\n')	#this just makes output nicer
 
-		#can't just return the dict.valuse, because we want the fastest mirror first...
+		#can't just return the dict.values, because we want the fastest mirror first...
 		keys = list(top_hosts.keys())
 		keys.sort()
 
 		rethosts = []
 		for key in keys:
+			#self.output.write('deeptest(): adding rethost %s, %s' % (key, top_hosts[key]), 2)
 			rethosts.append(top_hosts[key])
 
+		self.output.write('deeptest(): final rethost %s' % (rethosts), 2)
 		self.urls = rethosts
 
 
