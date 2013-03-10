@@ -53,7 +53,7 @@ Debug mode.
 .TP
 .B \-o, \-\-output
 Output Only Mode, this is especially useful when being used during installation,
-to redirect output to a file other than /etc/make.conf
+to redirect output to a file other than /etc/portage/make.conf
 .TP
 .B \-q, \-\-quiet
 Quiet mode.
@@ -69,7 +69,8 @@ Timeout for deep mode. Defaults to 10 seconds.
 automatic:
 .LP
 .RS 8
-Autoselect the 5 best mirrors and save results in /etc/make.conf, a backup will be created.
+Autoselect the 5 best mirrors and save results in /etc/portage/make.conf,
+a backup will be created.
 .LP
 # mirrorselect -s5
 .LP
