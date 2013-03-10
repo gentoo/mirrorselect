@@ -169,7 +169,7 @@ class MirrorSelect(object):
 		else:
 			var = 'GENTOO_MIRRORS'
 
-		self.output.write('get_filesystem_mirrors(): config_path = %s\n' % config_path)
+		self.output.write('get_filesystem_mirrors(): config_path = %s\n' % config_path, 2)
 		try:
 			f = open(config_path,'r')
 		except IOError:
