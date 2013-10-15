@@ -36,14 +36,6 @@ MIRRORS_RSYNC_DATA = 'http://www.gentoo.org/main/en/mirrors-rsync-data.xml'
 
 class MirrorParser3:
 	def __init__(self, options=None):
-		self.filters = {}
-		for opt in ["country", "region"]:
-			value = getattr(options, opt)
-			if value is not None:
-				self.filters[opt] = value
-		for opt in ["ftp", "http"]:
-			if getattr(options, opt):
-				self.filters["proto"] = opt
 		self._reset()
 
 	def _reset(self):
@@ -59,7 +51,7 @@ class MirrorParser3:
 						name = e.text
 					if e.tag == 'uri':
 						uri = e.text
-						data = {
+						self._dict[uri] = {
 							"name": name,
 							"country": mirrorgroup.get("countryname"),
 							"region": mirrorgroup.get("region"),
@@ -67,15 +59,6 @@ class MirrorParser3:
 							"ipv6": e.get("ipv6"),
 							"proto": e.get("protocol"),
 							}
-						if len(self.filters):
-							good = True
-							for f in self.filters:
-								if data[f] != self.filters[f]:
-									good = False
-							if good:
-								self._dict[uri] = data
-						else:
-							self._dict[uri] = data
 
 	def tuples(self):
 		return [(url, args) for url, args in list(self._dict.items())]

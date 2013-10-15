@@ -58,32 +58,44 @@ class Extractor(object):
 
 	def __init__(self, list_url, options, output):
 		self.output = output
-		parser = MirrorParser3(options)
+		filters = {}
+		for opt in ["country", "region"]:
+			value = getattr(options, opt)
+			if value is not None:
+				filters[opt] = value
+				self.output.print_info('Limiting test to %s = %s hosts. \n'
+					%(opt, value))
+		for opt in ["ftp", "http"]:
+			if getattr(options, opt):
+				filters["proto"] = opt
+				self.output.print_info('Limiting test to %s hosts. \n' % opt )
+		parser = MirrorParser3()
 		self.hosts = []
 
-		hosts = self.getlist(parser, list_url)
+		self.unfiltered_hosts = self.getlist(parser, list_url)
+
+		self.hosts = self.filter_hosts(filters, self.unfiltered_hosts)
+
 		self.output.write('Extractor(): fetched mirrors.xml,'
-				' %s hosts before filtering\n' % len(hosts), 2)
+				' %s hosts after filtering\n' % len(self.hosts), 2)
 
-		self.hosts = hosts
 
-	def restrict_protocall(self, prot, hosts):
+	@staticmethod
+	def filter_hosts(filters, hosts):
+		"""Filter the hosts to the criteria passed in
+		Return the filtered list
 		"""
-		Removes hosts that are not of the specified type.
-		"prot" must always be exactly 'http' or 'ftp'.
-		"""
-		myhosts = []
-
-		self.output.print_info('Limiting test to %s hosts. ' % prot )
-
-		for host in hosts:
-			if host[0].startswith(prot):
-				myhosts.append(host)
-
-		self.output.write('%s of %s removed.\n' % (len(hosts) - len(myhosts),
-			len(hosts)) )
-
-		return myhosts
+		if not len(filters):
+			return hosts
+		filtered = []
+		for uri, data in hosts:
+			good = True
+			for f in filters:
+				if data[f] != filters[f]:
+					good = False
+			if good:
+				filtered.append((uri, data))
+		return filtered
 
 
 	def getlist(self, parser, url):
@@ -102,8 +114,8 @@ class Extractor(object):
 			pass
 
 		if len(parser.tuples()) == 0:
-			self.output.print_err('Could not get mirror list. Check your internet'
-					' connection.')
+			self.output.print_err('Could not get mirror list. '
+				'Check your internet connection.')
 
 		self.output.write(' Got %d mirrors.\n' % len(parser.tuples()))
 
