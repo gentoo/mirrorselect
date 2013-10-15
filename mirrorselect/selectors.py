@@ -58,18 +58,12 @@ class Extractor(object):
 
 	def __init__(self, list_url, options, output):
 		self.output = output
-		parser = MirrorParser3()
+		parser = MirrorParser3(options)
 		self.hosts = []
 
 		hosts = self.getlist(parser, list_url)
 		self.output.write('Extractor(): fetched mirrors.xml,'
 				' %s hosts before filtering\n' % len(hosts), 2)
-
-		if not options.rsync:
-			if options.ftp:
-				hosts = self.restrict_protocall('ftp', hosts)
-			if options.http:
-				hosts = self.restrict_protocall('http', hosts)
 
 		self.hosts = hosts
 

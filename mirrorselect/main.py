@@ -271,6 +271,16 @@ class MirrorSelect(object):
 		group.add_option(
 			"-6", "--ipv6", action="store_true", default=False,
 			help="only use IPv6")
+		group.add_option(
+			"-c", "--country", action="store", default=None,
+			help="only use mirrors from the specified country "
+			"NOTE: Names with a space must be quoted "
+			"eg.:  -c 'South Korea'")
+		group.add_option(
+			"-R", "--region", action="store", default=None,
+			help="only use mirrors from the specified region"
+			"NOTE: Names with a space must be quoted"
+			"eg.:  -r 'North America'")
 
 		group = parser.add_option_group("Other options")
 		group.add_option(
