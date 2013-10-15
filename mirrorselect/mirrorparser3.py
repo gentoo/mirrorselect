@@ -84,6 +84,7 @@ class MirrorParser3:
 		return [url for url, args in list(self._dict.items())]
 
 if __name__ == '__main__':
+	import sys
 	if int(sys.version[0]) == 3:
 		import urllib.request, urllib.parse, urllib.error
 		parser = MirrorParser3()
