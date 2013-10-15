@@ -93,6 +93,7 @@ class Extractor(object):
 			for f in filters:
 				if data[f] != filters[f]:
 					good = False
+					continue
 			if good:
 				filtered.append((uri, data))
 		return filtered
