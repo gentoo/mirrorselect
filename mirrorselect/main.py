@@ -268,7 +268,7 @@ class MirrorSelect(object):
 		group.add_option(
 			"-r", "--rsync", action="store_true", default=False,
 			help="rsync mode. Allows you to interactively select your"
-			" rsync mirror. Requires -i to be used.")
+			" rsync mirror. Requires -i or -a to be used.")
 		group.add_option(
 			"-4", "--ipv4", action="store_true", default=False,
 			help="only use IPv4")
@@ -333,8 +333,8 @@ class MirrorSelect(object):
 			options.ipv6 = False
 			self.output.print_err('The --ipv6 option requires python ipv6 support')
 
-		if options.rsync and not options.interactive:
-			self.output.print_err('rsync servers can only be selected with -i')
+		if options.rsync and not (options.interactive or options.all_mirrors):
+			self.output.print_err('rsync servers can only be selected with -i or -a')
 
 		if options.interactive and (
 			options.deep or
