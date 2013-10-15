@@ -242,6 +242,10 @@ class MirrorSelect(object):
 
 		group = parser.add_option_group("Main modes")
 		group.add_option(
+			"-a", "--all_mirrors", action="store_true", default=False,
+			help="This will present a list of all results"
+			"to make it possible to select mirrors you wish to use.")
+		group.add_option(
 			"-i", "--interactive", action="store_true", default=False,
 			help="Interactive Mode, this will present a list "
 			"to make it possible to select mirrors you wish to use.")
@@ -418,7 +422,10 @@ class MirrorSelect(object):
 
 		hosts = self.get_available_hosts(options)
 
-		urls = self.select_urls(hosts, options)
+		if options.all_mirrors:
+			urls = [url for url, args in list(hosts)]
+		else:
+			urls = self.select_urls(hosts, options)
 
 		self.write_config(fsmirrors + urls, options.output,
 			config_path, options.rsync)
