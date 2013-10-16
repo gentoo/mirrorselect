@@ -243,7 +243,7 @@ class MirrorSelect(object):
 		group = parser.add_option_group("Main modes")
 		group.add_option(
 			"-a", "--all_mirrors", action="store_true", default=False,
-			help="This will present a list of all results"
+			help="This will present a list of all filtered search results "
 			"to make it possible to select mirrors you wish to use.")
 		group.add_option(
 			"-i", "--interactive", action="store_true", default=False,
@@ -335,6 +335,12 @@ class MirrorSelect(object):
 
 		if options.rsync and not (options.interactive or options.all_mirrors):
 			self.output.print_err('rsync servers can only be selected with -i or -a')
+		elif options.rsync and options.all_mirrors and not options.output:
+			# force output to screen.
+			# multiple uri's break normal sync operation
+			options.output = True
+			self.output.print_info("Forcing output to screen, as "
+				"multiple rsync uris are not supported\n")
 
 		if options.interactive and (
 			options.deep or
