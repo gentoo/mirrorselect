@@ -427,6 +427,9 @@ class MirrorSelect(object):
 		else:
 			urls = self.select_urls(hosts, options)
 
-		self.write_config(fsmirrors + urls, options.output,
-			config_path, options.rsync)
-
+		if len(urls):
+			self.write_config(fsmirrors + urls, options.output,
+				config_path, options.rsync)
+		else:
+			self.output.write("No search results found. "
+				"Check your filter settings and re-run mirrorselect\n")
