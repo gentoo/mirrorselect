@@ -126,14 +126,14 @@ class Output(object):
 			self.file.flush()
 
 	def print_err(self, message, level=0):
-		"""prints an error message with a big red ERROR."""
+		"""Prints an error message with a big red ERROR."""
 		if level <= self.verbosity:
 			self.file.write(self.red('\nERROR: ') + message + '\n')
 			self.file.flush()
 			sys.exit(1)
 
 	def write(self, message, level=1):
-		"""A wrapper arounf stderr.write, to enforce verbosity settings."""
+		"""A wrapper around stderr.write, to enforce verbosity settings."""
 		if level <= self.verbosity:
 			self.file.write(message)
 			self.file.flush()
