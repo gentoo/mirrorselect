@@ -244,7 +244,9 @@ class MirrorSelect(object):
 		group.add_option(
 			"-a", "--all_mirrors", action="store_true", default=False,
 			help="This will present a list of all filtered search results "
-			"to make it possible to select mirrors you wish to use.")
+			"to make it possible to select mirrors you wish to use. "
+			" For the -r, --rsync option, it will select the rotation server "
+			"only. As multiple rsync URL's are not supported.")
 		group.add_option(
 			"-i", "--interactive", action="store_true", default=False,
 			help="Interactive Mode, this will present a list "
@@ -335,12 +337,6 @@ class MirrorSelect(object):
 
 		if options.rsync and not (options.interactive or options.all_mirrors):
 			self.output.print_err('rsync servers can only be selected with -i or -a')
-		elif options.rsync and options.all_mirrors and not options.output:
-			# force output to screen.
-			# multiple uri's break normal sync operation
-			options.output = True
-			self.output.print_info("Forcing output to screen, as "
-				"multiple rsync uris are not supported\n")
 
 		if options.interactive and (
 			options.deep or
@@ -429,7 +425,9 @@ class MirrorSelect(object):
 		hosts = self.get_available_hosts(options)
 
 		if options.all_mirrors:
-			urls = [url for url, args in list(hosts)]
+			urls = sorted([url for url, args in list(hosts)])
+			if options.rsync:
+				urls = [urls[0]]
 		else:
 			urls = self.select_urls(hosts, options)
 
