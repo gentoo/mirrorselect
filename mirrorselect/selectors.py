@@ -38,7 +38,7 @@ import hashlib
 
 if int(sys.version[0]) == 3:
 	import urllib.request, urllib.parse, urllib.error
-	url_parse = urllib.parse
+	url_parse = urllib.parse.urlparse
 	url_open = urllib.request.urlopen
 else:
 	import urllib
