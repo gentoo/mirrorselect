@@ -62,12 +62,6 @@ if "GENTOO_PORTAGE_EPREFIX" in EPREFIX:
     EPREFIX = ''
 
 
-if sys.hexversion >= 0x3000000:
-    _unicode = str
-else:
-    _unicode = unicode
-
-
 class MirrorSelect(object):
 	'''Main operational class'''
 

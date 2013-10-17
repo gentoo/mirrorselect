@@ -37,12 +37,6 @@ import locale
 from optparse import IndentedHelpFormatter
 
 
-if sys.hexversion >= 0x3000000:
-    _unicode = str
-else:
-    _unicode = unicode
-
-
 def encoder(text, _encoding_):
     return codecs.encode(text, _encoding_, 'replace')
 
