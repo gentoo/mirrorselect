@@ -43,7 +43,8 @@ import sys
 from optparse import OptionParser
 from mirrorselect.mirrorparser3 import MIRRORS_3_XML, MIRRORS_RSYNC_DATA
 from mirrorselect.output import Output, ColoredFormatter
-from mirrorselect.selectors import Deep, Shallow, Extractor, Interactive
+from mirrorselect.selectors import Deep, Shallow, Interactive
+from mirrorselect.extractor import Extractor
 from mirrorselect.version import version
 
 # eprefix compatibility
