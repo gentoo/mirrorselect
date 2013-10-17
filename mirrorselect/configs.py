@@ -105,7 +105,7 @@ def write_repos_conf(output, config_path, var, value):
 	config.read(config_path)
 	if config.has_option('gentoo', var):
 		config.set('gentoo', var, value)
-		with open(config_path, 'wb') as configfile:
+		with open(config_path, 'w') as configfile:
 			config.write(configfile)
 	else:
 		output.print_err("write_repos_conf(): Failed to find section 'gentoo',"
