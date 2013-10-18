@@ -29,7 +29,7 @@ Distributed under the terms of the GNU General Public License v2
 
 import sys
 
-if int(sys.version[0]) == 3:
+if sys.version_info[0] >= 3:
 	import urllib.request, urllib.parse, urllib.error
 	url_parse = urllib.parse
 	url_open = urllib.request.urlopen

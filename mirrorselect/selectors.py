@@ -36,7 +36,7 @@ import sys
 import time
 import hashlib
 
-if int(sys.version[0]) == 3:
+if sys.version_info[0] >= 3:
 	import urllib.request, urllib.parse, urllib.error
 	url_parse = urllib.parse.urlparse
 	url_open = urllib.request.urlopen
