@@ -39,11 +39,13 @@ import hashlib
 if sys.version_info[0] >= 3:
 	import urllib.request, urllib.parse, urllib.error
 	url_parse = urllib.parse.urlparse
+	url_unparse = urllib.parse.urlunparse
 	url_open = urllib.request.urlopen
 else:
 	import urllib
 	import urlparse
 	url_parse = urlparse.urlparse
+	url_unparse = urlparse.urlunparse
 	url_open = urllib.urlopen
 
 
@@ -200,9 +202,7 @@ class Deep(object):
 		elif options.ipv6:
 			addr_families.append(socket.AF_INET6)
 		else:
-			addr_families.append(socket.AF_INET)
-			if socket.has_ipv6:
-				addr_families.append(socket.AF_INET6)
+			addr_families.append(socket.AF_UNSPEC)
 
 		self._addr_families = addr_families
 
@@ -219,6 +219,7 @@ class Deep(object):
 		maxtime = self._download_timeout
 		hosts = [host[0] for host in self._hosts]
 		num_hosts = len(hosts)
+		self.dl_failures = 0
 
 		for host in hosts:
 
@@ -252,7 +253,9 @@ class Deep(object):
 			#self.output.write('deeptest(): adding rethost %s, %s' % (key, top_hosts[key]), 2)
 			rethosts.append(top_hosts[key])
 
-		self.output.write('deeptest(): final rethost %s' % (rethosts), 2)
+		self.output.write('deeptest(): final rethost %s\n' % (rethosts), 2)
+		self.output.write('deeptest(): final md5 failures %s of %s\n'
+			% (self.dl_failures, num_hosts), 2)
 		self.urls = rethosts
 
 
@@ -280,40 +283,38 @@ class Deep(object):
 		signal.signal(signal.SIGALRM, timeout_handler)
 
 		ips = []
-		for family in self._addr_families:
-			ipv6 = family == socket.AF_INET6
+		for addr_family in self._addr_families:
 			try:
-				try:
-					signal.alarm(self._dns_timeout)
-					for family, socktype, proto, canonname, sockaddr in \
-						socket.getaddrinfo(url_parts.hostname, None,
-							family, socket.SOCK_STREAM):
-						ip = sockaddr[0]
-						if ipv6:
-							ip = "[%s]" % ip
-						ips.append(ip)
-				finally:
-					signal.alarm(0)
+				signal.alarm(self._dns_timeout)
+				for result in socket.getaddrinfo(url_parts.hostname, None,
+					addr_family, socket.SOCK_STREAM, 0, socket.AI_ADDRCONFIG):
+					family, _, __, ___, sockaddr = result
+					ip = sockaddr[0]
+					if family == socket.AF_INET6:
+						ip = "[%s]" % ip
+					ips.append(ip)
 			except socket.error as e:
-				self.output.write('deeptime(): dns error for host %s: %s\n' % \
-					(url_parts.hostname, e), 2)
+				self.output.write('deeptime(): dns error for host %s: %s\n' % (url_parts.hostname, e), 2)
 			except TimeoutException:
-				self.output.write('deeptime(): dns timeout for host %s\n' % \
-					(url_parts.hostname,), 2)
+				self.output.write('deeptime(): dns timeout for host %s\n' % url_parts.hostname, 2)
+			finally:
+				signal.alarm(0)
 
 		if not ips:
-			self.output.write('deeptime(): unable to resolve ip for host %s\n' % \
-				(url_parts.hostname,), 2)
+			self.output.write('deeptime(): unable to resolve ip for host %s\n' % url_parts.hostname, 2)
 			return (None, True)
 
 		delta = 0
 		f = None
 
 		for ip in ips:
+			test_parts = url_parts._replace(netloc=ip)
+			test_url = url_unparse(test_parts)
+			self.output.write('deeptime(): testing url: %s\n' % test_url, 2)
 			try:
 				try:
 					signal.alarm(self._connect_timeout)
-					f = url_open(url)
+					f = url_open(test_url)
 					break
 				finally:
 					signal.alarm(0)
@@ -324,7 +325,7 @@ class Deep(object):
 			except TimeoutException:
 				self.output.write(('deeptime(): connection to host %s ' + \
 					'timed out for ip %s\n') % \
-					(url_parts.hostname, ip), 2)
+					(test_parts.hostname, ip), 2)
 
 		if f is None:
 			self.output.write('deeptime(): unable to ' + \
@@ -355,13 +356,21 @@ class Deep(object):
 			try:
 				signal.alarm(int(math.ceil(maxtime)))
 				stime = time.time()
-				f = url_open(url)
+				f = url_open(test_url)
 
-				if hashlib.md5(f.read()).hexdigest() != "bdf077b2e683c506bf9e8f2494eeb044":
-					return (None, True)
+				md5 = hashlib.md5(f.read()).hexdigest()
 
 				delta = time.time() - stime
 				f.close()
+				if md5 != self.test_md5:
+					self.output.write(
+						"deeptime(): md5sum error for file: %s\n" % self.test_file +
+						"         expected: %s\n" % self.test_md5 +
+						"         got.....: %s\n" % md5 +
+						"         host....: %s, %s\n" % (url_parts.hostname, ip))
+					self.dl_failures += 1
+					return (None, True)
+
 			finally:
 				signal.alarm(0)
 
