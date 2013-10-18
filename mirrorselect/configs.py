@@ -40,6 +40,12 @@ import string
 import sys
 
 
+try: # py2
+	letters = string.letters
+except AttributeError: # py3
+	letters = string.ascii_letters
+
+
 def get_make_conf_path(EPREFIX):
 		# try the newer make.conf location
 		config_path = EPREFIX + '/etc/portage/make.conf'
@@ -120,6 +126,16 @@ def get_filesystem_mirrors(output, config_path, sync=False):
 		make.conf variable target
 	@rtype list
 	"""
+
+	def get_token(lex):
+		'''internal function for getting shlex tokens
+		'''
+		try:
+			val = lex.get_token()
+		except ValueError:
+			val = None
+		return val
+
 	fsmirrors = []
 
 	if sync:
@@ -134,42 +150,36 @@ def get_filesystem_mirrors(output, config_path, sync=False):
 		return fsmirrors
 
 	""" Search for 'var' in make.conf and extract value """
-	try:
-		lex = shlex.shlex(f, posix=True)
-		lex.wordchars = string.digits+string.letters+"~!@#$%*_\:;?,./-+{}"
-		lex.quotes = "\"'"
-		while 1:
-			key = lex.get_token()
-			#output.write('get_filesystem_mirrors(): processing key = %s\n' % key, 2)
+	lex = shlex.shlex(f, posix=True)
+	lex.wordchars = string.digits+letters+"~!@#$%*_\:;?,./-+{}"
+	lex.quotes = "\"'"
+	p = re.compile('rsync://|http://|ftp://', re.IGNORECASE)
+	while 1:
+		key = get_token(lex)
+		#output.write('get_filesystem_mirrors(): processing key = %s\n' % key, 2)
 
-			if key == var:
-				equ = lex.get_token()
-
-				if (equ == ''):
-					break
-				elif (equ != '='):
-					break
-
-				val = lex.get_token()
-				if val is None:
-					break
-
-				""" Look for mounted filesystem in value """
-				mirrorlist = val.rsplit()
-				output.write('get_filesystem_mirrors(): mirrorlist = %s\n' % mirrorlist, 2)
-				p = re.compile('rsync://|http://|ftp://', re.IGNORECASE)
-				for mirror in mirrorlist:
-					if (p.match(mirror) == None):
-						if os.access(mirror, os.F_OK):
-							output.write('get_filesystem_mirrors(): found file system mirror = %s\n' % mirror, 2)
-							fsmirrors.append(mirror)
-						else:
-							output.write('get_filesystem_mirrors(): ignoring non-accessible mirror = %s\n' % mirror, 2)
+		if key == var:
+			equ = get_token(lex)
+			if (equ != '='):
 				break
-			elif key is None:
+
+			val = get_token(lex)
+			if val is None:
 				break
-	except Exception:
-		fsmirrors = []
+
+			""" Look for mounted filesystem in value """
+			mirrorlist = val.rsplit()
+			output.write('get_filesystem_mirrors(): mirrorlist = %s\n' % mirrorlist, 2)
+			for mirror in mirrorlist:
+				if (p.match(mirror) == None):
+					if os.access(mirror, os.F_OK):
+						output.write('get_filesystem_mirrors(): found file system mirror = %s\n' % mirror, 2)
+						fsmirrors.append(mirror)
+					else:
+						output.write('get_filesystem_mirrors(): ignoring non-accessible mirror = %s\n' % mirror, 2)
+			break
+		elif key is None:
+			break
 
 	output.write('get_filesystem_mirrors(): fsmirrors = %s\n' % fsmirrors, 2)
 	return fsmirrors
