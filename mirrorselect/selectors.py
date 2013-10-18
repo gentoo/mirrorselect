@@ -191,6 +191,8 @@ class Deep(object):
 		self._dns_timeout = options.timeout
 		self._connect_timeout = options.timeout
 		self._download_timeout = options.timeout
+		self.test_file = options.file
+		self.test_md5 = options.md5
 
 		addr_families = []
 		if options.ipv4:
@@ -221,8 +223,12 @@ class Deep(object):
 		for host in hosts:
 
 			prog += 1
-			self.output.print_info('Downloading 100k files from each mirror... [%s of %s]'\
-							% (prog, num_hosts) )
+			if self.test_file is not 'mirrorselect-test':
+				self.output.print_info('Downloading %s files from each mirror... [%s of %s]'\
+								% (self.test_file, prog, num_hosts) )
+			else:
+				self.output.print_info('Downloading 100k files from each mirror... [%s of %s]'\
+								% (prog, num_hosts) )
 
 			mytime, ignore = self.deeptime(host, maxtime)
 
@@ -259,9 +265,9 @@ class Deep(object):
 		self.output.write('\n_deeptime(): maxtime is %s\n' % maxtime, 2)
 
 		if url.endswith('/'):	#append the path to the testfile to the URL
-			url = url + 'distfiles/mirrorselect-test'
+			url = url + 'distfiles/' + self.test_file
 		else:
-			url = url + '/distfiles/mirrorselect-test'
+			url = url + '/distfiles/' + self.test_file
 
 		url_parts = url_parse(url)
 

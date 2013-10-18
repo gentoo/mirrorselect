@@ -229,6 +229,17 @@ class MirrorSelect(object):
 		group.add_option(
 			"-q", "--quiet", action="store_const", const=0, dest="verbosity",
 			help="Quiet mode")
+		group.add_option(
+			"-f", "--file", action="store", default='mirrorselect-test',
+			help="An alternate file to download for deep testing. "
+				"Please choose the file carefully as to not abuse the system "
+				"by selecting an overly large size file.  You must also "
+				" use the -m, --md5 option.")
+		group.add_option(
+			"-m", "--md5", action="store", default='bdf077b2e683c506bf9e8f2494eeb044',
+			help="An alternate file md5sum value used to compare the downloaded "
+				"file against for deep testing.")
+
 
 		if len(argv) == 1:
 			parser.print_help()
