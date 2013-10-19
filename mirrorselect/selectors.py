@@ -41,12 +41,14 @@ if sys.version_info[0] >= 3:
 	url_parse = urllib.parse.urlparse
 	url_unparse = urllib.parse.urlunparse
 	url_open = urllib.request.urlopen
+	HTTPError = urllib.HTTPError
 else:
-	import urllib
+	import urllib2
 	import urlparse
 	url_parse = urlparse.urlparse
 	url_unparse = urlparse.urlunparse
-	url_open = urllib.urlopen
+	url_open = urllib2.urlopen
+	HTTPError = urllib2.HTTPError
 
 
 from mirrorselect.output import encoder, get_encoding, decode_selection
@@ -314,21 +316,11 @@ class Deep(object):
 			test_parts = url_parts._replace(netloc=ip)
 			test_url = url_unparse(test_parts)
 			self.output.write('deeptime(): testing url: %s\n' % test_url, 2)
-			try:
-				try:
-					signal.alarm(self._connect_timeout)
-					f = url_open(test_url)
-					break
-				finally:
-					signal.alarm(0)
-			except EnvironmentError as e:
-				self.output.write(('deeptime(): connection to host %s ' + \
-					'failed for ip %s: %s\n') % \
-					(url_parts.hostname, ip, e), 2)
-			except TimeoutException:
-				self.output.write(('deeptime(): connection to host %s ' + \
-					'timed out for ip %s\n') % \
-					(test_parts.hostname, ip), 2)
+
+			f, test_url, early_out = self._test_connection(test_url, url_parts,
+				ip, ips[ips.index(ip):])
+			if early_out:
+				break
 
 		if f is None:
 			self.output.write('deeptime(): unable to ' + \
@@ -394,6 +386,40 @@ class Deep(object):
 		self.output.write('deeptime(): download completed.\n', 2)
 		self.output.write('deeptime(): %s seconds for host %s\n' % (delta, url), 2)
 		return (delta, False)
+
+
+	def _test_connection(self, test_url, url_parts, ip, ips):
+		"""Tests the url for a connection, will recurse using
+		the original url instead of the ip if an HTTPError occurs
+		Returns f, test_url, early_out
+		"""
+		early_out = False
+		f = None
+		try:
+			try:
+				signal.alarm(self._connect_timeout)
+				f = url_open(test_url)
+				early_out = True
+			finally:
+				signal.alarm(0)
+		except HTTPError, e:
+			self.output.write(('deeptime(): connection to host %s\n' + \
+				'            returned HTTPError: %s for ip %s\n'  \
+				'            Switching back to original url\n') % \
+				(url_parts.hostname, e, ip), 2)
+			if len(ips) == 1:
+				test_url = url_unparse(url_parts)
+				return self._test_connection(test_url, url_parts, ip, [])
+		except EnvironmentError as e:
+			self.output.write(('deeptime(): connection to host %s ' + \
+				'failed for ip %s:\n            %s\n') % \
+				(url_parts.hostname, ip, e), 2)
+		except TimeoutException:
+			self.output.write(('deeptime(): connection to host %s ' + \
+				'timed out for ip %s\n') % \
+				(url_parts.hostname, ip), 2)
+		return f, test_url, early_out
+
 
 	def _list_add(self, time_host, maxtime, host_dict, maxlen):
 		"""
