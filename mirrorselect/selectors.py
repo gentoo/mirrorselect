@@ -182,6 +182,14 @@ class Shallow(object):
 		return host_array
 
 
+class TimeoutException(Exception):
+	pass
+
+
+def timeout_handler(signum, frame):
+	raise TimeoutException()
+
+
 class Deep(object):
 	"""handles deep mode mirror selection."""
 
@@ -273,12 +281,6 @@ class Deep(object):
 			url = url + '/distfiles/' + self.test_file
 
 		url_parts = url_parse(url)
-
-		class TimeoutException(Exception):
-			pass
-
-		def timeout_handler(signum, frame):
-			raise TimeoutException()
 
 		signal.signal(signal.SIGALRM, timeout_handler)
 
