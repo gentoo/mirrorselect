@@ -68,7 +68,7 @@ class Extractor(object):
 
 		self.hosts = self.filter_hosts(filters, self.unfiltered_hosts)
 
-		self.output.write('Extractor(): fetched mirrors.xml,'
+		self.output.write('Extractor(): fetched mirrors,'
 				' %s hosts after filtering\n' % len(self.hosts), 2)
 
 

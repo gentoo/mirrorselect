@@ -306,6 +306,7 @@ class Deep(object):
 			self.output.write('deeptime(): unable to resolve ip for host %s\n' % url_parts.hostname, 2)
 			return (None, True)
 
+		self.output.write("deeptime(): ip's for host %s: %s\n" % (url_parts.hostname, str(ips)), 2)
 		delta = 0
 		f = None
 
@@ -343,14 +344,15 @@ class Deep(object):
 			finally:
 				signal.alarm(0)
 		except EnvironmentError as e:
-			self.output.write(('deeptime(): close connection to host %s ' + \
+			self.output.write(('deeptime(): closing connection to host %s ' + \
 				'failed for ip %s: %s\n') % \
 				(url_parts.hostname, ip, e), 2)
 		except TimeoutException:
-			self.output.write(('deeptime(): close connection to host %s ' + \
+			self.output.write(('deeptime(): closing connection to host %s ' + \
 				'timed out for ip %s\n') % \
 				(url_parts.hostname, ip), 2)
 
+		self.output.write('deeptime(): timing url: %s\n' % test_url, 2)
 		try:
 			# The first connection serves to "wake up" the route between
 			# the local and remote machines. A second connection is used

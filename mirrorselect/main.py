@@ -292,10 +292,10 @@ class MirrorSelect(object):
 		@rtype: list
 		'''
 		if options.rsync:
-			self.output.write("using url: %s" % MIRRORS_RSYNC_DATA, 2)
+			self.output.write("using url: %s\n" % MIRRORS_RSYNC_DATA, 2)
 			hosts = Extractor(MIRRORS_RSYNC_DATA, options, self.output).hosts
 		else:
-			self.output.write("using url: %s" % MIRRORS_3_XML, 2)
+			self.output.write("using url: %s\n" % MIRRORS_3_XML, 2)
 			hosts = Extractor(MIRRORS_3_XML, options, self.output).hosts
 		return hosts
 
@@ -353,7 +353,7 @@ class MirrorSelect(object):
 			config_path = self.get_conf_path(options.rsync)
 			self.output.write("main(); reset config_path = %s\n" % config_path, 2)
 		else:
-			self.output.write("main(); rsync = %s" % str(options.rsync),2)
+			self.output.write("main(); rsync = %s\n" % str(options.rsync),2)
 
 		fsmirrors = get_filesystem_mirrors(self.output,
 			config_path, options.rsync)
