@@ -240,6 +240,12 @@ class MirrorSelect(object):
 			default='bdf077b2e683c506bf9e8f2494eeb044',
 			help="An alternate file md5sum value used to compare the downloaded "
 				"file against for deep testing.")
+		group.add_option(
+			"-P", "--proxy", action="store",
+			default=None,
+			help="Proxy server to use if not the default proxy "
+				"in the environment")
+
 
 
 		if len(argv) == 1:
