@@ -27,20 +27,10 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
-import sys
-
-if sys.version_info[0] >= 3:
-	import urllib.request, urllib.parse, urllib.error
-	url_parse = urllib.parse
-	url_open = urllib.request.urlopen
-else:
-	import urllib
-	import urlparse
-	url_parse = urlparse.urlparse
-	url_open = urllib.urlopen
-
+import os
 
 from mirrorselect.mirrorparser3 import MirrorParser3
+from mirrorselect.connections import Connector
 
 
 class Extractor(object):
@@ -50,6 +40,7 @@ class Extractor(object):
 
 	def __init__(self, list_url, options, output):
 		self.output = output
+		self.output.print_info('Using url: %s\n' % list_url)
 		filters = {}
 		for opt in ["country", "region"]:
 			value = getattr(options, opt)
@@ -61,6 +52,15 @@ class Extractor(object):
 			if getattr(options, opt):
 				filters["proto"] = opt
 				self.output.print_info('Limiting test to %s hosts. \n' % opt )
+
+		self.proxies = {}
+
+		for proxy in ['http_proxy', 'https_proxy']:
+			if options.proxy:
+				self.proxies[proxy.split('_')[0]] = options.proxy
+			elif os.getenv(proxy):
+				self.proxies[proxy.split('_')[0]] = os.getenv(proxy)
+
 		parser = MirrorParser3()
 		self.hosts = []
 
@@ -99,18 +99,18 @@ class Extractor(object):
 
 		self.output.write('getlist(): fetching ' + url + '\n', 2)
 
-		self.output.print_info('Downloading a list of mirrors...')
+		self.output.print_info('Downloading a list of mirrors...\n')
 
-		try:
-			parser.parse(url_open(url).read())
-		except EnvironmentError:
-			pass
+		fetcher = Connector(self.output, self.proxies)
+		success, mirrorlist, timestamp = fetcher.fetch_content(url)
+		parser.parse(mirrorlist)
 
-		if len(parser.tuples()) == 0:
+		if (not mirrorlist) or len(parser.tuples()) == 0:
 			self.output.print_err('Could not get mirror list. '
 				'Check your internet connection.')
 
 		self.output.write(' Got %d mirrors.\n' % len(parser.tuples()))
 
 		return parser.tuples()
+
 
