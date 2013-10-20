@@ -236,7 +236,8 @@ class MirrorSelect(object):
 				"by selecting an overly large size file.  You must also "
 				" use the -m, --md5 option.")
 		group.add_option(
-			"-m", "--md5", action="store", default='bdf077b2e683c506bf9e8f2494eeb044',
+			"-m", "--md5", action="store",
+			default='bdf077b2e683c506bf9e8f2494eeb044',
 			help="An alternate file md5sum value used to compare the downloaded "
 				"file against for deep testing.")
 
