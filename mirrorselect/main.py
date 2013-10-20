@@ -224,8 +224,8 @@ class MirrorSelect(object):
 			"to select. this is only valid for download mirrors. "
 			"If this is not specified, a default of 1 is used.")
 		group.add_option(
-			"-d", "--debug", action="store_const", const=2, dest="verbosity",
-			default=1, help="debug mode")
+			"-d", "--debug", action="store", type="int", dest="verbosity",
+			default=1, help="debug mode, pass in the debug level [1-9]")
 		group.add_option(
 			"-q", "--quiet", action="store_const", const=0, dest="verbosity",
 			help="Quiet mode")
