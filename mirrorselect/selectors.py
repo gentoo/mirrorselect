@@ -41,7 +41,7 @@ if sys.version_info[0] >= 3:
 	url_parse = urllib.parse.urlparse
 	url_unparse = urllib.parse.urlunparse
 	url_open = urllib.request.urlopen
-	HTTPError = urllib.HTTPError
+	HTTPError = urllib.error.HTTPError
 else:
 	import urllib2
 	import urlparse
@@ -402,7 +402,7 @@ class Deep(object):
 				early_out = True
 			finally:
 				signal.alarm(0)
-		except HTTPError, e:
+		except HTTPError as e:
 			self.output.write(('deeptime(): connection to host %s\n' + \
 				'            returned HTTPError: %s for ip %s\n'  \
 				'            Switching back to original url\n') % \
