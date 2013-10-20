@@ -31,8 +31,13 @@ from __future__ import print_function
 
 from xml.etree import ElementTree as ET
 
-MIRRORS_3_XML = 'http://www.gentoo.org/main/en/mirrors3.xml'
-MIRRORS_RSYNC_DATA = 'http://www.gentoo.org/main/en/mirrors-rsync-data.xml'
+# old url's
+#MIRRORS_3_XML = 'http://www.gentoo.org/main/en/mirrors3.xml'
+#MIRRORS_RSYNC_DATA = 'http://www.gentoo.org/main/en/mirrors-rsync-data.xml'
+
+# new urls
+MIRRORS_3_XML = 'https://api.gentoo.org/mirrors/distfiles.xml'
+MIRRORS_RSYNC_DATA = 'https://api.gentoo.org/mirrors/rsync.xml'
 
 class MirrorParser3:
 	def __init__(self, options=None):
