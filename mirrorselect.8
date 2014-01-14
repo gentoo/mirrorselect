@@ -40,13 +40,15 @@ ftp only mode. Will not consider hosts of other types.
 http only mode. Will not consider hosts of other types.
 .TP
 .B \-r, \-\-rsync
-rsync mode. Allows you to interactively select your rsync mirror. Requires -i to be used.
+rsync mode. Allows you to interactively select your rsync mirror.
+ Requires -i to be used.
 .SS "Other options"
 .TP
 .BI \-b " BLOCKSIZE " "\fR,\fP \-blocksize" " BLOCKSIZE "
 This is to be used in automatic mode and will split the hosts into blocks of
 BLOCKSIZE for use with netselect. This is required for certain routers which
-block 40+ requests at any given time. Recommended parameters to pass are: -s 3 -b 10
+block 40+ requests at any given time.
+Recommended parameters to pass are: -s 3 -b 10
 .TP
 .B \-d, \-\-debug
 Debug mode.
@@ -103,6 +105,10 @@ Zac Medico <zmedico@gentoo.org>
 Sebastian Pipping <sebastian@pipping.org>
 .LP
 Christian Ruppert <idl0r@gentoo.org>
+.LP
+Brian Dolbec <dolsen@gentoo.org>
+.LP
+Douglas Freed <dwfreed@mtu.edu>
 
 .SH "BUGS"
 Please report any bugs to http://bugs.gentoo.org
