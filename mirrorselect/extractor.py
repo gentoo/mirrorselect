@@ -30,8 +30,10 @@ Distributed under the terms of the GNU General Public License v2
 import os
 
 from mirrorselect.mirrorparser3 import MirrorParser3
-from mirrorselect.connections import Connector
+from sslfetch.connections import Connector
+from mirrorselect.version import version
 
+USERAGENT = "Mirrorselect-" + version
 
 class Extractor(object):
 	"""The Extractor employs a MirrorParser3 object to get a list of valid
@@ -101,7 +103,7 @@ class Extractor(object):
 
 		self.output.print_info('Downloading a list of mirrors...\n')
 
-		fetcher = Connector(self.output, self.proxies)
+		fetcher = Connector(self.output, self.proxies, USERAGENT)
 		success, mirrorlist, timestamp = fetcher.fetch_content(url)
 		parser.parse(mirrorlist)
 
