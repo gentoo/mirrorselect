@@ -140,16 +140,16 @@ class MirrorSelect(object):
 		need some finishing touches.
 		"""
 		desc = "\n".join((
-				self.output.white("examples:"),
-				"",
-				self.output.white("	 automatic:"),
-				"		 # mirrorselect -s5",
-				"		 # mirrorselect -s3 -b10 -o >> /mnt/gentoo/etc/portage/make.conf",
-				"		 # mirrorselect -D -s4",
-				"",
-				self.output.white("	 interactive:"),
-				"		 # mirrorselect -i -r",
-				))
+			self.output.white("examples:"),
+			"",
+			self.output.white("	 automatic:"),
+			"		 # mirrorselect -s5",
+			"		 # mirrorselect -s3 -b10 -o >> /mnt/gentoo/etc/portage/make.conf",
+			"		 # mirrorselect -D -s4",
+			"",
+			self.output.white("	 interactive:"),
+			"		 # mirrorselect -i -r",
+			))
 		parser = OptionParser(
 			formatter=ColoredFormatter(self.output), description=desc,
 			version='Mirrorselect version: %s' % version)
