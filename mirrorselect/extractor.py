@@ -37,8 +37,8 @@ USERAGENT = "Mirrorselect-" + version
 
 class Extractor(object):
 	"""The Extractor employs a MirrorParser3 object to get a list of valid
-	mirrors, and then filters them. Only the mirrors that should be tested, based on
-	user input are saved. They will be in the hosts attribute."""
+	mirrors, and then filters them. Only the mirrors that should be tested,
+	based on user input are saved. They will be in the hosts attribute."""
 
 	def __init__(self, list_url, options, output):
 		self.output = output

@@ -108,7 +108,8 @@ core.setup(
 	#package_data = test_data,
 	scripts=(['bin/mirrorselect']),
 	data_files=(
-		(os.path.join(os.sep, EPREFIX.lstrip(os.sep), 'usr/share/man/man8'), ['mirrorselect.8']),
+		(os.path.join(os.sep, EPREFIX.lstrip(os.sep), 'usr/share/man/man8'),
+		['mirrorselect.8']),
 	),
 	cmdclass={
 		'test': load_test(),
