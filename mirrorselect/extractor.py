@@ -58,10 +58,11 @@ class Extractor(object):
 		self.proxies = {}
 
 		for proxy in ['http_proxy', 'https_proxy']:
-			if options.proxy:
-				self.proxies[proxy.split('_')[0]] = options.proxy
+			prox = proxy.split('_')[0]
+			if options.proxy and prox + ":" in options.proxy:
+				self.proxies[prox] = options.proxy
 			elif os.getenv(proxy):
-				self.proxies[proxy.split('_')[0]] = os.getenv(proxy)
+				self.proxies[prox] = os.getenv(proxy)
 
 		parser = MirrorParser3()
 		self.hosts = []
