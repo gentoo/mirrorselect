@@ -200,7 +200,7 @@ class MirrorSelect(object):
 			"-R", "--region", action="store", default=None,
 			help="only use mirrors from the specified region "
 			"NOTE: Names with a space must be quoted "
-			"eg.:  -r 'North America'")
+			"eg.:  -R 'North America'")
 
 		group = parser.add_option_group("Other options")
 		group.add_option(
