@@ -42,6 +42,8 @@ if sys.version_info[0] >= 3:
 	url_unparse = urllib.parse.urlunparse
 	url_open = urllib.request.urlopen
 	HTTPError = urllib.error.HTTPError
+	import http.client
+	IncompleteRead = http.client.IncompleteRead
 else:
 	import urllib2
 	import urlparse
@@ -49,6 +51,8 @@ else:
 	url_unparse = urlparse.urlunparse
 	url_open = urllib2.urlopen
 	HTTPError = urllib2.HTTPError
+	import httplib
+	IncompleteRead = httplib.IncompleteRead
 
 
 from mirrorselect.output import encoder, get_encoding, decode_selection
@@ -369,7 +373,7 @@ class Deep(object):
 				f.close()
 				if md5 != self.test_md5:
 					self.output.write(
-						"deeptime(): md5sum error for file: %s\n"
+						"\ndeeptime(): md5sum error for file: %s\n"
 						% self.test_file +
 						"         expected: %s\n" % self.test_md5 +
 						"         got.....: %s\n" % md5 +
@@ -382,12 +386,16 @@ class Deep(object):
 				signal.alarm(0)
 
 		except EnvironmentError as e:
-			self.output.write(('deeptime(): download from host %s '
+			self.output.write(('\ndeeptime(): download from host %s '
 				'failed for ip %s: %s\n') % (url_parts.hostname, ip, e), 2)
 			return (None, True)
 		except TimeoutException:
-			self.output.write(('deeptime(): download from host %s '
+			self.output.write(('\ndeeptime(): download from host %s '
 				'timed out for ip %s\n') % (url_parts.hostname, ip), 2)
+			return (None, True)
+		except IncompleteRead as e:
+			self.output.write(('\ndeeptime(): download from host %s '
+				'failed for ip %s: %s\n') % (url_parts.hostname, ip, e), 2)
 			return (None, True)
 
 		signal.signal(signal.SIGALRM, signal.SIG_DFL)
