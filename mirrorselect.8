@@ -17,11 +17,11 @@ Print a usage summary and exit.
 Show program's version number and exit.
 .SS "Main modes"
 .TP
-.B \-4, \-\-ipv4
-only use IPv4.
-.TP
-.B \-6, \-\-ipv6
-only use IPv6.
+.B \-a, \-\-all
+This will present a list of all filtered search results
+to make it possible to select mirrors you wish to use.
+For the -r, --rsync option, it will select the rotation server
+only. As multiple rsync URL's are not supported.
 .TP
 .B \-D, \-\-deep
 Deep mode. This is used to give a more accurate speed test. It will download
@@ -33,6 +33,11 @@ Interactive Mode, this will present a list to make it possible to select mirrors
 you wish to use.
 .SS "Server type selection (choose at most one)"
 .TP
+.BI \-c " COUNTRY " "\fR,\fP \-\-country " COUNTRY "
+Only use mirrors from the specified country.
+NOTE: Names with a space must be quoted
+    eg.:  -c 'South Korea'
+.TP
 .B \-F, \-\-ftp
 ftp only mode. Will not consider hosts of other types.
 .TP
@@ -42,20 +47,45 @@ http only mode. Will not consider hosts of other types.
 .B \-r, \-\-rsync
 rsync mode. Allows you to interactively select your rsync mirror.
  Requires -i to be used.
+.TP
+.BI \-R " REGION " "\fR,\fP \-\-region " REGION "
+Only use mirrors from the specified region.
+NOTE: Names with a space must be quoted.
+    eg.:  -R 'North America'
+.TP
+.B \-4, \-\-ipv4
+only use IPv4.
+.TP
+.B \-6, \-\-ipv6
+only use IPv6.
 .SS "Other options"
 .TP
-.BI \-b " BLOCKSIZE " "\fR,\fP \-blocksize" " BLOCKSIZE "
+.BI \-b " BLOCKSIZE " "\fR,\fP \-\-blocksize" " BLOCKSIZE "
 This is to be used in automatic mode and will split the hosts into blocks of
 BLOCKSIZE for use with netselect. This is required for certain routers which
 block 40+ requests at any given time.
 Recommended parameters to pass are: -s 3 -b 10
 .TP
-.B \-d, \-\-debug
+.BI \-d " VERBOSITY " "\fR,\fP \-\-debug " VERBOSITY "
 Debug mode.
+.TP
+.BI \-f " FILE " "\fR,\fP \-\-file "FILE "
+An alternate file to download for deep testing. Please
+choose the file carefully as to not abuse the system
+by selecting an overly large size file.  You must also
+use the -m, --md5 option.
+.TP
+.BI \-m " MD5 " "\fR,\fP \-\-md5 " MD5 "
+An alternate file md5sum value used to compare the
+downloaded file against for deep testing.
 .TP
 .B \-o, \-\-output
 Output Only Mode, this is especially useful when being used during installation,
-to redirect output to a file other than /etc/portage/make.conf
+to redirect output to a file other than /etc/portage/make.conf.
+.TP
+.BI \-P " PROXY " "\fR,\fP \-\-proxy " PROXY "
+Proxy server to use if not the default proxy in the
+environment.
 .TP
 .B \-q, \-\-quiet
 Quiet mode.
