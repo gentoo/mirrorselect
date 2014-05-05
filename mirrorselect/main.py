@@ -162,18 +162,23 @@ class MirrorSelect(object):
 			" For the -r, --rsync option, it will select the rotation server "
 			"only. As multiple rsync URL's are not supported.")
 		group.add_option(
-			"-i", "--interactive", action="store_true", default=False,
-			help="Interactive Mode, this will present a list "
-			"to make it possible to select mirrors you wish to use.")
-		group.add_option(
 			"-D", "--deep", action="store_true", default=False,
 			help="Deep mode. This is used to give a more accurate "
 			"speed test. It will download a 100k file from "
 			"each server. Because of this you should only use "
 			"this option if you have a good connection.")
+		group.add_option(
+			"-i", "--interactive", action="store_true", default=False,
+			help="Interactive Mode, this will present a list "
+			"to make it possible to select mirrors you wish to use.")
 
 		group = parser.add_option_group(
 			"Server type selection (choose at most one)")
+		group.add_option(
+			"-c", "--country", action="store", default=None,
+			help="only use mirrors from the specified country "
+			"NOTE: Names with a space must be quoted "
+			"eg.:  -c 'South Korea'")
 		group.add_option(
 			"-F", "--ftp", action="store_true", default=False,
 			help="ftp only mode. Will not consider hosts of other "
@@ -186,28 +191,18 @@ class MirrorSelect(object):
 			help="rsync mode. Allows you to interactively select your"
 			" rsync mirror. Requires -i or -a to be used.")
 		group.add_option(
+			"-R", "--region", action="store", default=None,
+			help="only use mirrors from the specified region "
+			"NOTE: Names with a space must be quoted "
+			"eg.:  -R 'North America'")
+		group.add_option(
 			"-4", "--ipv4", action="store_true", default=False,
 			help="only use IPv4")
 		group.add_option(
 			"-6", "--ipv6", action="store_true", default=False,
 			help="only use IPv6")
-		group.add_option(
-			"-c", "--country", action="store", default=None,
-			help="only use mirrors from the specified country "
-			"NOTE: Names with a space must be quoted "
-			"eg.:  -c 'South Korea'")
-		group.add_option(
-			"-R", "--region", action="store", default=None,
-			help="only use mirrors from the specified region "
-			"NOTE: Names with a space must be quoted "
-			"eg.:  -R 'North America'")
 
 		group = parser.add_option_group("Other options")
-		group.add_option(
-			"-o", "--output", action="store_true", default=False,
-			help="Output Only Mode, this is especially useful "
-			"when being used during installation, to redirect "
-			"output to a file other than %s" % config_path)
 		group.add_option(
 			"-b", "--blocksize", action="store", type="int",
 			help="This is to be used in automatic mode "
@@ -216,19 +211,8 @@ class MirrorSelect(object):
 			"routers which block 40+ requests at any given time. "
 			"Recommended parameters to pass are: -s3 -b10")
 		group.add_option(
-			"-t", "--timeout", action="store", type="int",
-			default="10", help="Timeout for deep mode. Defaults to 10 seconds.")
-		group.add_option(
-			"-s", "--servers", action="store", type="int", default=1,
-			help="Specify Number of servers for Automatic Mode "
-			"to select. this is only valid for download mirrors. "
-			"If this is not specified, a default of 1 is used.")
-		group.add_option(
 			"-d", "--debug", action="store", type="int", dest="verbosity",
 			default=1, help="debug mode, pass in the debug level [1-9]")
-		group.add_option(
-			"-q", "--quiet", action="store_const", const=0, dest="verbosity",
-			help="Quiet mode")
 		group.add_option(
 			"-f", "--file", action="store", default='mirrorselect-test',
 			help="An alternate file to download for deep testing. "
@@ -241,10 +225,26 @@ class MirrorSelect(object):
 			help="An alternate file md5sum value used to compare the downloaded "
 				"file against for deep testing.")
 		group.add_option(
+			"-o", "--output", action="store_true", default=False,
+			help="Output Only Mode, this is especially useful "
+			"when being used during installation, to redirect "
+			"output to a file other than %s" % config_path)
+		group.add_option(
 			"-P", "--proxy", action="store",
 			default=None,
 			help="Proxy server to use if not the default proxy "
 				"in the environment")
+		group.add_option(
+			"-q", "--quiet", action="store_const", const=0, dest="verbosity",
+			help="Quiet mode")
+		group.add_option(
+			"-s", "--servers", action="store", type="int", default=1,
+			help="Specify Number of servers for Automatic Mode "
+			"to select. this is only valid for download mirrors. "
+			"If this is not specified, a default of 1 is used.")
+		group.add_option(
+			"-t", "--timeout", action="store", type="int",
+			default="10", help="Timeout for deep mode. Defaults to 10 seconds.")
 
 
 
