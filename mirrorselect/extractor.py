@@ -104,7 +104,15 @@ class Extractor(object):
 
 		self.output.print_info('Downloading a list of mirrors...\n')
 
-		fetcher = Connector(self.output, self.proxies, USERAGENT)
+		# setup the ssl-fetch ouptut map
+		connector_output = {
+			'info':self.output.write,
+			'error': self.output.print_err,
+			'args-info': {'level': 2},
+			'args-error': {'level':0},
+			}
+
+		fetcher = Connector(connector_output, self.proxies, USERAGENT)
 		success, mirrorlist, timestamp = fetcher.fetch_content(url)
 		parser.parse(mirrorlist)
 
