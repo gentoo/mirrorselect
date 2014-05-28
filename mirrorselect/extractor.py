@@ -108,8 +108,8 @@ class Extractor(object):
 		connector_output = {
 			'info':self.output.write,
 			'error': self.output.print_err,
-			'args-info': {'level': 2},
-			'args-error': {'level':0},
+			'kwargs-info': {'level': 2},
+			'kwargs-error': {'level':0},
 			}
 
 		fetcher = Connector(connector_output, self.proxies, USERAGENT)
