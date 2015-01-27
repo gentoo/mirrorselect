@@ -107,6 +107,7 @@ class Extractor(object):
 		# setup the ssl-fetch ouptut map
 		connector_output = {
 			'info':self.output.write,
+			'debug': self.output.write,
 			'error': self.output.print_err,
 			'kwargs-info': {'level': 2},
 			'kwargs-debug': {'level':2},
