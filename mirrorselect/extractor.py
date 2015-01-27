@@ -109,6 +109,7 @@ class Extractor(object):
 			'info':self.output.write,
 			'error': self.output.print_err,
 			'kwargs-info': {'level': 2},
+			'kwargs-debug': {'level':2},
 			'kwargs-error': {'level':0},
 			}
 
