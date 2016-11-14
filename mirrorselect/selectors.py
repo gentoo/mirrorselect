@@ -300,22 +300,24 @@ class Deep(object):
 		ips = []
 		for addr_family in self._addr_families:
 			try:
-				signal.alarm(self._dns_timeout)
-				for result in socket.getaddrinfo(url_parts.hostname, None,
-					addr_family, socket.SOCK_STREAM, 0, socket.AI_ADDRCONFIG):
-					family, _, __, ___, sockaddr = result
-					ip = sockaddr[0]
-					if family == socket.AF_INET6:
-						ip = "[%s]" % ip
-					ips.append(ip)
+				try:
+					signal.alarm(self._dns_timeout)
+					for result in socket.getaddrinfo(
+						url_parts.hostname, None, addr_family,
+						socket.SOCK_STREAM, 0, socket.AI_ADDRCONFIG):
+						family, _, __, ___, sockaddr = result
+						ip = sockaddr[0]
+						if family == socket.AF_INET6:
+							ip = "[%s]" % ip
+						ips.append(ip)
+				finally:
+					signal.alarm(0)
 			except socket.error as e:
 				self.output.write('deeptime(): dns error for host %s: %s\n'
 					% (url_parts.hostname, e), 2)
 			except TimeoutException:
 				self.output.write('deeptime(): dns timeout for host %s\n'
 					% url_parts.hostname, 2)
-			finally:
-				signal.alarm(0)
 
 		if not ips:
 			self.output.write('deeptime(): unable to resolve ip for host %s\n'
