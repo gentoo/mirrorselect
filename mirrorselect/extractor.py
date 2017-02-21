@@ -115,7 +115,7 @@ class Extractor(object):
 			}
 
 		fetcher = Connector(connector_output, self.proxies, USERAGENT)
-		success, mirrorlist, timestamp = fetcher.fetch_content(url)
+		success, mirrorlist, timestamp = fetcher.fetch_content(url, climit=60)
 		parser.parse(mirrorlist)
 
 		if (not mirrorlist) or len(parser.tuples()) == 0:
