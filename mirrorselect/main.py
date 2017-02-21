@@ -109,7 +109,7 @@ class MirrorSelect(object):
 			var = 'GENTOO_MIRRORS'
 
 		for i in range(0, len(hosts)):
-			if isinstance(hosts[i], 'bytes'):
+			if isinstance(hosts[i], bytes):
 				hosts[i] = hosts[i].decode('utf-8')
 
 		if var == "sync-uri" and out:
