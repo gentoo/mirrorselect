@@ -101,10 +101,7 @@ class MirrorSelect(object):
 			SYNC and GENTOO_MIRRORS make.conf variable target
 		"""
 		if sync:
-			if 'repos.conf' in config_path:
-				var = "sync-uri"
-			else:
-				var = 'SYNC'
+			var = "sync-uri"
 		else:
 			var = 'GENTOO_MIRRORS'
 
