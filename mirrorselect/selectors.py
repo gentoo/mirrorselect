@@ -31,6 +31,7 @@ Distributed under the terms of the GNU General Public License v2
 import math
 import signal
 import socket
+import ssl
 import subprocess
 import sys
 import time
@@ -430,7 +431,7 @@ class Deep(object):
 			if len(ips) == 1:
 				test_url = url_unparse(url_parts)
 				return self._test_connection(test_url, url_parts, ip, [])
-		except EnvironmentError as e:
+		except (EnvironmentError, ssl.CertificateError) as e:
 			self.output.write('deeptime(): connection to host %s '
 				'failed for ip %s:\n            %s\n'
 				% (url_parts.hostname, ip, e), 2)
