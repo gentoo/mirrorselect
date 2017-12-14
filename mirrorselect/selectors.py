@@ -388,7 +388,7 @@ class Deep(object):
 			finally:
 				signal.alarm(0)
 
-		except EnvironmentError as e:
+		except (EnvironmentError, ssl.CertificateError) as e:
 			self.output.write(('\ndeeptime(): download from host %s '
 				'failed for ip %s: %s\n') % (url_parts.hostname, ip, e), 2)
 			return (None, True)
