@@ -243,6 +243,9 @@ class MirrorSelect(object):
 		group.add_option(
 			"-t", "--timeout", action="store", type="int",
 			default="10", help="Timeout for deep mode. Defaults to 10 seconds.")
+		group.add_option(
+			"-e", "--exclude", action="append", dest="exclude",
+			default=None, help="Exclude host from mirrors list.")
 
 
 
@@ -302,6 +305,10 @@ class MirrorSelect(object):
 		else:
 			self.output.write("using url: %s\n" % MIRRORS_3_XML, 2)
 			hosts = Extractor(MIRRORS_3_XML, options, self.output).hosts
+
+		if options.exclude:
+			hosts = [x for x in hosts if x[0] not in options.exclude]
+
 		return hosts
 
 
