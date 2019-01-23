@@ -5,7 +5,7 @@
 """Mirrorselect 2.x
  Tool for selecting Gentoo source and rsync mirrors.
 
-Copyright 2012 Gentoo Foundation
+Copyright 2012-2019 Gentoo Authors
 
 	Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
 
@@ -25,5 +25,5 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
-version = "2.2.2-git"
+version = "2.2.3-git"
 
