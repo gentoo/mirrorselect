@@ -7,6 +7,7 @@ from __future__ import print_function
 import re
 import sys
 from distutils import core, log
+from distutils.command.sdist import sdist
 
 import os
 import io
@@ -67,6 +68,18 @@ class set_version(core.Command):
 		sub(manpage, man_re)
 
 
+class x_sdist(sdist):
+	"""sdist defaulting to archive files owned by root."""
+
+	def finalize_options(self):
+		if self.owner is None:
+			self.owner = 'root'
+		if self.group is None:
+			self.group = 'root'
+
+		sdist.finalize_options(self)
+
+
 def	load_test():
 	"""Only return the real test class if it's actually being run so that we
 	don't depend on snakeoil just to install."""
@@ -113,6 +126,7 @@ core.setup(
 	),
 	cmdclass={
 		'test': load_test(),
+		'sdist': x_sdist,
 		'set_version': set_version,
 	},
 )
