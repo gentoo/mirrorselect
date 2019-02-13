@@ -25,5 +25,5 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
-version = "2.2.3-git"
+version = "2.2.4-git"
 
