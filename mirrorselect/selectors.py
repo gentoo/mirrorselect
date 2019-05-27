@@ -65,6 +65,7 @@ class Shallow(object):
 	"""handles rapid server selection via netselect"""
 
 	def __init__(self, hosts, options, output):
+		self._options = options
 		self.output = output
 		self.urls = []
 
@@ -94,10 +95,18 @@ class Shallow(object):
 
 		host_string = ' '.join(hosts)
 
-		self.output.write('\nnetselect(): running "netselect -s%d %s"\n'
-			% (int(number), host_string), 2)
+		cmd = ['netselect', '-s%d' % (number,)]
+		if self._options.ipv4:
+			cmd.append('-4')
+		elif self._options.ipv6:
+			cmd.append('-6')
 
-		proc = subprocess.Popen( ['netselect', '-s%d' % (number,)] + hosts,
+		cmd.extend(hosts)
+
+		self.output.write('\nnetselect(): running "%s"\n'
+			% ' '.join(cmd), 2)
+
+		proc = subprocess.Popen(cmd,
 			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 		out, err = proc.communicate()
