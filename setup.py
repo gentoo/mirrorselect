@@ -8,9 +8,11 @@ import re
 import sys
 from distutils import core, log
 from distutils.command.sdist import sdist
+from distutils.core import Command
 
 import os
 import io
+import unittest
 
 
 __version__ = os.getenv('VERSION', default=os.getenv('PVR', default='9999'))
@@ -80,26 +82,23 @@ class x_sdist(sdist):
 		sdist.finalize_options(self)
 
 
-def	load_test():
-	"""Only return the real test class if it's actually being run so that we
-	don't depend on snakeoil just to install."""
+class TestCommand(Command):
+	user_options = []
 
-	desc = "run the test suite"
-	if 'test' in sys.argv[1:]:
-		try:
-			from snakeoil import distutils_extensions
-		except ImportError:
-			sys.stderr.write("Error: We depend on dev-python/snakeoil ")
-			sys.stderr.write("to run tests.\n")
-			sys.exit(1)
-		class test(distutils_extensions.test):
-			description = desc
-			default_test_namespace = 'mirrorselect.test'
-	else:
-		class test(core.Command):
-			description = desc
+	def initialize_options(self):
+		pass
 
-	return test
+	def finalize_options(self):
+		pass
+
+	def run(self):
+		suite = unittest.TestSuite()
+		tests = unittest.defaultTestLoader.discover('tests')
+		suite.addTests(tests)
+		result = unittest.TextTestRunner(verbosity=2).run(suite)
+		if result.errors or result.failures:
+			raise SystemExit(1)
+
 
 test_data = {
 	'mirrorselect': [
@@ -125,7 +124,7 @@ core.setup(
 		['mirrorselect.8']),
 	),
 	cmdclass={
-		'test': load_test(),
+		'test': TestCommand,
 		'sdist': x_sdist,
 		'set_version': set_version,
 	},

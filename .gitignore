@@ -1,6 +1,5 @@
 *.py[co]
 testing*
-test*
 *.geany
 build*
 .gitignore

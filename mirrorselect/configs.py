@@ -4,7 +4,7 @@
 """Mirrorselect 2.x
  Tool for selecting Gentoo source and rsync mirrors.
 
-Copyright 2005-2012 Gentoo Foundation
+Copyright 2005-2019 Gentoo Authors
 
 	Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
 	Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
@@ -75,10 +75,32 @@ def write_make_conf(output, config_path, var, mirror_string):
 	except IOError:
 		lines = []
 
-	regex = re.compile('^%s=.*' % var)
-	for line in lines:
-		if regex.match(line):
-			lines.remove(line)
+	with open(config_path + '.backup', 'r') as f:
+		lex = shlex.shlex(f, posix=True)
+		lex.wordchars = string.digits + letters + r"~!@#$%*_\:;?,./-+{}"
+		lex.quotes = "\"'"
+		while True:
+			key = lex.get_token()
+
+			if key == var:
+				begin_line = lex.lineno
+				equ = lex.get_token()
+				if equ is None:
+					break
+				if equ != '=':
+					continue
+
+				val = lex.get_token()
+				if val is None:
+					break
+				end_line = lex.lineno
+
+				new_lines = []
+				for index, line in enumerate(lines):
+					if index < begin_line - 1 or index >= end_line - 1:
+						new_lines.append(line)
+				lines = new_lines
+				break
 
 	lines.append(mirror_string)
 
@@ -92,7 +114,6 @@ def write_make_conf(output, config_path, var, mirror_string):
 	config.close()
 
 	output.print_info('Done.\n')
-	sys.exit(0)
 
 
 def write_repos_conf(output, config_path, var, value):
