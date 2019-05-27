@@ -172,7 +172,7 @@ def get_filesystem_mirrors(output, config_path, sync=False):
 
 	""" Search for 'var' in make.conf and extract value """
 	lex = shlex.shlex(f, posix=True)
-	lex.wordchars = string.digits+letters+"~!@#$%*_\:;?,./-+{}"
+	lex.wordchars = string.digits + letters + r"~!@#$%*_\:;?,./-+{}"
 	lex.quotes = "\"'"
 	p = re.compile('rsync://|http://|ftp://', re.IGNORECASE)
 	while 1:
