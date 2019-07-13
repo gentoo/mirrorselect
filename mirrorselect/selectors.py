@@ -61,6 +61,11 @@ else:
 from mirrorselect.output import encoder, get_encoding, decode_selection
 
 
+# The netselect --ipv4 and --ipv6 options are supported only
+# with >=net-analyzer/netselect-0.4[ipv6(+)].
+NETSELECT_SUPPORTS_IPV4_IPV6 = False
+
+
 class Shallow(object):
 	"""handles rapid server selection via netselect"""
 
@@ -96,10 +101,12 @@ class Shallow(object):
 		host_string = ' '.join(hosts)
 
 		cmd = ['netselect', '-s%d' % (number,)]
-		if self._options.ipv4:
-			cmd.append('-4')
-		elif self._options.ipv6:
-			cmd.append('-6')
+
+		if NETSELECT_SUPPORTS_IPV4_IPV6:
+			if self._options.ipv4:
+				cmd.append('-4')
+			elif self._options.ipv6:
+				cmd.append('-6')
 
 		cmd.extend(hosts)
 
