@@ -23,6 +23,7 @@ class WriteMakeConfTestCase(unittest.TestCase):
 			('\n{}="foo \\\nbar"\n'.format(var), '\n{}\n'.format(mirror_string)),
 			('\n\n{}="foo \\\nbar"\n'.format(var), '\n\n{}\n'.format(mirror_string)),
 			('\n\n{}="foo \\\nbar"\na="b"\n'.format(var), '\n\na="b"\n{}\n'.format(mirror_string)),
+			('', '{}\n'.format(mirror_string)),
 		)
 
 		for make_conf, expected_result in cases:

@@ -81,6 +81,8 @@ def write_make_conf(output, config_path, var, mirror_string):
 		lex.quotes = "\"'"
 		while True:
 			key = lex.get_token()
+			if key is None:
+				break
 
 			if key == var:
 				begin_line = lex.lineno
