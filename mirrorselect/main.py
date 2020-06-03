@@ -271,6 +271,9 @@ class MirrorSelect(object):
 		if options.rsync and not (options.interactive or options.all_mirrors):
 			self.output.print_err('rsync servers can only be selected with -i or -a')
 
+		if options.servers and options.all_mirrors:
+			self.output.print_err('Choose at most one of -s or -a')
+
 		if options.interactive and (
 			options.deep or
 			options.blocksize or
