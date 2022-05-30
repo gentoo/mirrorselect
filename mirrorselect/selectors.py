@@ -63,7 +63,7 @@ from mirrorselect.output import encoder, get_encoding, decode_selection
 
 # The netselect --ipv4 and --ipv6 options are supported only
 # with >=net-analyzer/netselect-0.4[ipv6(+)].
-NETSELECT_SUPPORTS_IPV4_IPV6 = False
+NETSELECT_SUPPORTS_IPV4_IPV6 = True
 
 
 class Shallow(object):
@@ -260,7 +260,7 @@ class Deep(object):
 		for host in hosts:
 
 			prog += 1
-			if self.test_file is not 'mirrorselect-test':
+			if self.test_file != 'mirrorselect-test':
 				self.output.print_info(
 					'Downloading %s files from each mirror... [%s of %s]'
 					% (self.test_file, prog, num_hosts) )
