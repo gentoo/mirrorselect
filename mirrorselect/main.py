@@ -30,9 +30,6 @@ Distributed under the terms of the GNU General Public License v2
 """
 
 
-from __future__ import print_function
-
-
 import os
 import socket
 import sys
