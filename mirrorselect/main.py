@@ -182,6 +182,9 @@ class MirrorSelect(object):
 			"-H", "--http", action="store_true", default=False,
 			help="http only mode. Will not consider hosts of other types")
 		group.add_option(
+			"-S", "--https", action="store_true", default=False,
+			help="https only mode. Will not consider hosts of other types")
+		group.add_option(
 			"-r", "--rsync", action="store_true", default=False,
 			help="rsync mode. Allows you to interactively select your"
 			" rsync mirror. Requires -i or -a to be used.")
@@ -255,8 +258,8 @@ class MirrorSelect(object):
 		# sanity checks
 
 		# hack: check if more than one of these is set
-		if options.http + options.ftp + options.rsync > 1:
-			self.output.print_err('Choose at most one of -H, -f and -r')
+		if options.http + options.https + options.ftp + options.rsync > 1:
+			self.output.print_err('Choose at most one of -H, -S, -f and -r')
 
 		if options.ipv4 and options.ipv6:
 			self.output.print_err('Choose at most one of --ipv4 and --ipv6')

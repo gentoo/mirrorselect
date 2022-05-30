@@ -50,7 +50,7 @@ class Extractor(object):
 				filters[opt] = value
 				self.output.print_info('Limiting test to "%s=%s" hosts. \n'
 					%(opt, value))
-		for opt in ["ftp", "http"]:
+		for opt in ["ftp", "http", "https"]:
 			if getattr(options, opt):
 				filters["proto"] = opt
 				self.output.print_info('Limiting test to %s hosts. \n' % opt )
