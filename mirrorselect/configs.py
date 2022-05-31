@@ -37,10 +37,7 @@ import string
 import sys
 
 
-try: # py2
-	letters = string.letters
-except AttributeError: # py3
-	letters = string.ascii_letters
+letters = string.ascii_letters
 
 
 def get_make_conf_path(EPREFIX):
