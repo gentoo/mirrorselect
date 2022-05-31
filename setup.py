@@ -4,6 +4,7 @@
 from __future__ import print_function
 
 
+import logging
 import re
 import sys
 import os
@@ -56,7 +57,7 @@ class set_version(Command):
 					for line in s:
 						newline = re.sub(pattern, '"%s"' % ver, line, 1)
 						if newline != line:
-							log.info("%s: %s" % (f, newline))
+							logging.info("%s: %s" % (f, newline))
 						updated_file.append(newline)
 				with io.open(f, 'w', 1, 'utf_8') as s:
 					s.writelines(updated_file)
