@@ -109,7 +109,7 @@ class MirrorSelect(object):
 		if var == "sync-uri" and out:
 			mirror_string = '%s = %s' % (var, ' '.join(hosts))
 		else:
-			mirror_string = '%s="%s"' % (var, ' '.join(hosts))
+			mirror_string = '%s="%s"' % (var, ' \\\n    '.join(hosts))
 
 		if out:
 			self.write_to_output(mirror_string)
