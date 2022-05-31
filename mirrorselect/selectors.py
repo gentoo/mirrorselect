@@ -571,6 +571,7 @@ class Interactive(object):
 
 		self.urls = out.splitlines()
 
+		sys.stderr.write("\x1b[2J\x1b[H")
 		if self.urls:
 			if hasattr(self.urls[0], 'decode'):
 				self.urls = decode_selection(
