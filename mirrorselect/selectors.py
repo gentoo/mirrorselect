@@ -461,10 +461,10 @@ class Deep(object):
 			self.output.write(('deeptime(): connection to host %s '
 				'timed out for ip %s\n') % (url_parts.hostname, ip), 2)
 		except Exception as e:   # Add general exception to catch any other errors
-			self.output.write(('deeptime(): connection to host %s '
+			self.output.print_warn(('deeptime(): connection to host %s '
 				'errored for ip %s\n            %s\n'
 				'          Please file a bug for this error at bugs.gentoo.org')
-				% (url_parts.hostname, ip, e), 2)
+				% (url_parts.hostname, ip, e), 0)
 		return f, test_url, early_out
 
 
