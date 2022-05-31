@@ -138,12 +138,10 @@ def write_repos_conf(output, config_path, var, value):
 			" variable: %s\nChanges NOT SAVED" %var)
 
 
-def get_filesystem_mirrors(output, config_path, sync=False):
+def get_filesystem_mirrors(output, config_path):
 	"""Read the current mirrors and retain mounted filesystems mirrors
 
 	@param config_path: string
-	@param sync: boolean, used to switch between SYNC and GENTOO_MIRRORS
-		make.conf variable target
 	@rtype list
 	"""
 
@@ -158,10 +156,7 @@ def get_filesystem_mirrors(output, config_path, sync=False):
 
 	fsmirrors = []
 
-	if sync:
-		var = 'SYNC'
-	else:
-		var = 'GENTOO_MIRRORS'
+	var = 'GENTOO_MIRRORS'
 
 	output.write('get_filesystem_mirrors(): config_path = %s\n' % config_path, 2)
 	try:

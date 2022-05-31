@@ -95,7 +95,7 @@ class MirrorSelect(object):
 		@param out: boolean, used to redirect output to stdout
 		@param config_path; string
 		@param sync: boolean, used to switch between sync-uri repos.conf target,
-			SYNC and GENTOO_MIRRORS make.conf variable target
+			and GENTOO_MIRRORS make.conf variable target
 		"""
 		if sync:
 			var = "sync-uri"
@@ -371,7 +371,7 @@ class MirrorSelect(object):
 			self.output.print_err("main(); Exiting due to missing repos.conf/gentoo.conf file\n")
 
 		fsmirrors = get_filesystem_mirrors(self.output,
-			config_path, options.rsync)
+			config_path)
 
 		hosts = self.get_available_hosts(options)
 
