@@ -165,7 +165,7 @@ def get_filesystem_mirrors(output, config_path):
 	lex = shlex.shlex(f, posix=True)
 	lex.wordchars = string.digits + letters + r"~!@#$%*_\:;?,./-+{}"
 	lex.quotes = "\"'"
-	p = re.compile('rsync://|http://|ftp://', re.IGNORECASE)
+	p = re.compile('rsync://|http://|https://|ftp://', re.IGNORECASE)
 	while 1:
 		key = get_token(lex)
 		#output.write('get_filesystem_mirrors(): processing key = %s\n' % key, 2)
