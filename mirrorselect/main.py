@@ -343,12 +343,12 @@ class MirrorSelect(object):
 		@rtype: string
 		'''
 		if rsync:
-			# startwith repos.conf
+			# repos.conf
 			config_path = EPREFIX + '/etc/portage/repos.conf/gentoo.conf'
 			if not os.access(config_path, os.F_OK):
 				self.output.write("Failed access to gentoo.conf: "
 					"%s\n" % os.access(config_path, os.F_OK), 2)
-				return get_make_conf_path(EPREFIX)
+				config_path = None
 			return config_path
 		return get_make_conf_path(EPREFIX)
 
@@ -363,12 +363,12 @@ class MirrorSelect(object):
 		self.output.verbosity = options.verbosity
 		self.output.write("main(); config_path = %s\n" % config_path, 2)
 
-		# reset config_path to find repos.conf/gentoo.conf if it exists
+		# reset config_path to find repos.conf/gentoo.conf
 		if options.rsync:
 			config_path = self.get_conf_path(options.rsync)
 			self.output.write("main(); reset config_path = %s\n" % config_path, 2)
-		else:
-			self.output.write("main(); rsync = %s\n" % str(options.rsync),2)
+		if not config_path:
+			self.output.print_err("main(); Exiting due to missing repos.conf/gentoo.conf file\n")
 
 		fsmirrors = get_filesystem_mirrors(self.output,
 			config_path, options.rsync)
