@@ -5,10 +5,13 @@
 import logging
 import re
 import sys
+from distutils import core, log
+from distutils.command.sdist import sdist
+from distutils.core import Command
+
 import os
 import io
 import unittest
-from setuptools import setup, Command
 
 
 __version__ = os.getenv('VERSION', default=os.getenv('PVR', default='9999'))
@@ -34,7 +37,7 @@ manpage = [os.path.join(cwd, path) for path in (
 )]
 
 
-class set_version(Command):
+class set_version(core.Command):
 	"""Set python version to our __version__."""
 	description = "hardcode scripts' version using VERSION from environment"
 	user_options = []  # [(long_name, short_name, desc),]
@@ -66,6 +69,18 @@ class set_version(Command):
 		sub(manpage, man_re)
 
 
+class x_sdist(sdist):
+	"""sdist defaulting to archive files owned by root."""
+
+	def finalize_options(self):
+		if self.owner is None:
+			self.owner = 'root'
+		if self.group is None:
+			self.group = 'root'
+
+		sdist.finalize_options(self)
+
+
 class TestCommand(Command):
 	user_options = []
 
@@ -89,7 +104,7 @@ test_data = {
 	]
 }
 
-setup(
+core.setup(
 	name='mirrorselect',
 	version=__version__,
 	description='Tool for selecting Gentoo source and rsync mirrors.',
@@ -109,6 +124,7 @@ setup(
 	),
 	cmdclass={
 		'test': TestCommand,
+		'sdist': x_sdist,
 		'set_version': set_version,
 	},
 )
