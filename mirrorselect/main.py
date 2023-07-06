@@ -145,6 +145,11 @@ class MirrorSelect(object):
 			self.output.white("	 interactive:"),
 			"		 # mirrorselect -i -r",
 			))
+
+		def set_servers(option, opt_str, value, parser):
+			set_servers.user_configured = True
+			setattr(parser.values, option.dest, value)
+
 		parser = OptionParser(
 			formatter=ColoredFormatter(self.output), description=desc,
 			version='Mirrorselect version: %s' % version)
@@ -236,8 +241,8 @@ class MirrorSelect(object):
 			"-q", "--quiet", action="store_const", const=0, dest="verbosity",
 			help="Quiet mode")
 		group.add_option(
-			"-s", "--servers", action="store", type="int", default=1,
-			help="Specify Number of servers for Automatic Mode "
+			"-s", "--servers", action="callback", callback=set_servers,
+			type="int", default=1, help="Specify Number of servers for Automatic Mode "
 			"to select. this is only valid for download mirrors. "
 			"If this is not specified, a default of 1 is used.")
 		group.add_option(
@@ -271,7 +276,7 @@ class MirrorSelect(object):
 		if options.rsync and not (options.interactive or options.all_mirrors):
 			self.output.print_err('rsync servers can only be selected with -i or -a')
 
-		if options.servers and options.all_mirrors:
+		if options.all_mirrors and hasattr(set_servers, 'user_configured'):
 			self.output.print_err('Choose at most one of -s or -a')
 
 		if options.interactive and (
