@@ -44,6 +44,22 @@ class MirrorParser3:
 	def _reset(self):
 		self._dict = {}
 
+	def _get_proto(self, uri=None):
+		if not uri: # Don't parse if empty
+			return None;
+		try:
+			import sys;
+			if sys.version_info[0] >= 3:
+				from urllib.parse import urlparse
+				return urlparse(uri).scheme
+			else:
+				from urllib2 import Request
+				return Request(uri).get_type()
+		except Exception as e: # Add general exception to catch errors
+			from mirrorselect.output import Output
+			Output.write(('_get_proto(): Exception while parsing the protocol '
+				'for URI %s: %s\n')% (uri, e), 2)
+
 	def parse(self, text):
 		self._reset()
 		for mirrorgroup in ET.XML(text):
@@ -60,7 +76,7 @@ class MirrorParser3:
 							"region": mirrorgroup.get("region"),
 							"ipv4": e.get("ipv4"),
 							"ipv6": e.get("ipv6"),
-							"proto": e.get("protocol"),
+							"proto": e.get("protocol") or self._get_proto(uri),
 							}
 
 	def tuples(self):
