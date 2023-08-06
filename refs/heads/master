@@ -1,15 +1,15 @@
 certificate version 0.1
-pusher Sam James <sam@gentoo.org> 1688630737 +0100
+pusher Sam James <sam@gentoo.org> 1691364604 +0100
 pushee git+ssh://git.gentoo.org/proj/mirrorselect.git
-nonce 1688630737-c6d173edb0cbdf3babcbf434d70460d3efac0c9a
+nonce 1691364604-379bbd458eaa21d4a9ea44d31fbad03841eeb3ca
 
-5444d0ddb5268325aac63dcdeb908b614916dd0f e0fbc2fb33762211aa5e64175d525e66f4c257d4 refs/heads/master
+e0fbc2fb33762211aa5e64175d525e66f4c257d4 ac250b126b8de24276cd4e9bdc4afab14a9c41e7 refs/heads/master
 -----BEGIN PGP SIGNATURE-----
 
-iOUEABYKAI0WIQQlpruI3Zt2TGtVQcJzhAn1IN+RkAUCZKZ10V8UgAAAAAAuAChp
+iOUEABYKAI0WIQQlpruI3Zt2TGtVQcJzhAn1IN+RkAUCZNAs/F8UgAAAAAAuAChp
 c3N1ZXItZnByQG5vdGF0aW9ucy5vcGVucGdwLmZpZnRoaG9yc2VtYW4ubmV0MjVB
 NkJCODhERDlCNzY0QzZCNTU0MUMyNzM4NDA5RjUyMERGOTE5MA8cc2FtQGdlbnRv
-by5vcmcACgkQc4QJ9SDfkZAIpwEA9mnsB5z6KBOYhdDdOIlHyil3FeTSqnt8Afla
-MJf/rrMA/2/4v7wD/kR3KN1kRlrCxLebaZQZDNbT0kvI0YyNpwUJ
-=+JwQ
+by5vcmcACgkQc4QJ9SDfkZC1dgEA1PP0hjbIv3UAZ74E/yoElGl0GLHHg6I7bNya
+HGvafT0BANhMesdOcri2gQm2jRSahBXGiPQlZ9KiBo3XcN5+ciIO
+=mPln
 -----END PGP SIGNATURE-----
