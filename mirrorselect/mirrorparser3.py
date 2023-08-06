@@ -48,13 +48,8 @@ class MirrorParser3:
 		if not uri: # Don't parse if empty
 			return None;
 		try:
-			import sys;
-			if sys.version_info[0] >= 3:
-				from urllib.parse import urlparse
-				return urlparse(uri).scheme
-			else:
-				from urllib2 import Request
-				return Request(uri).get_type()
+			from urllib.parse import urlparse
+			return urlparse(uri).scheme
 		except Exception as e: # Add general exception to catch errors
 			from mirrorselect.output import Output
 			Output.write(('_get_proto(): Exception while parsing the protocol '
