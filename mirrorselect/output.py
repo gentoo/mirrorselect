@@ -53,7 +53,7 @@ def decode_selection(selection):
 
 
 def get_encoding(output):
-    if hasattr(output, "encoding") and output.encoding != None:
+    if hasattr(output, "encoding") and output.encoding is not None:
         return output.encoding
     else:
         encoding = locale.getpreferredencoding()

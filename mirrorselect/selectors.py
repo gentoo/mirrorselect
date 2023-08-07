@@ -168,8 +168,7 @@ class Shallow:
             % (number, block_size, block_index, len(host_blocks))
         )
 
-        host_ranking_keys = list(ret_hosts.keys())
-        host_ranking_keys.sort()
+        host_ranking_keys = sorted(ret_hosts.keys())
 
         for rank in host_ranking_keys[:number]:
             top_hosts.append(ret_hosts[rank])
@@ -283,8 +282,7 @@ class Deep:
 
         # can't just return the dict.values,
         # because we want the fastest mirror first...
-        keys = list(top_hosts.keys())
-        keys.sort()
+        keys = sorted(top_hosts.keys())
 
         rethosts = []
         for key in keys:
@@ -521,8 +519,7 @@ class Deep:
             )
 
             host_dict.update(dict([time_host]))
-            times = list(host_dict.keys())
-            times.sort()
+            times = sorted(host_dict.keys())
 
         else:  # We need to make room in the dict before we add. Kill the slowest.
             self.output.write(
@@ -530,14 +527,12 @@ class Deep:
                 % (time_host[1], time_host[0]),
                 2,
             )
-            times = list(host_dict.keys())
-            times.sort()
+            times = sorted(host_dict.keys())
             self.output.write("_list_add(): removing %s\n" % host_dict[times[-1]], 2)
             del host_dict[times[-1]]
             host_dict.update(dict([time_host]))
             # done adding. now return the appropriate time
-            times = list(host_dict.keys())
-            times.sort()
+            times = sorted(host_dict.keys())
 
         if len(host_dict) < maxlen:  # check again to choose new timeout
             self.output.write(

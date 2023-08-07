@@ -164,7 +164,7 @@ def get_filesystem_mirrors(output, config_path):
     lex.wordchars = string.digits + letters + r"~!@#$%*_\:;?,./-+{}"
     lex.quotes = "\"'"
     p = re.compile("rsync://|http://|https://|ftp://", re.IGNORECASE)
-    while 1:
+    while True:
         key = get_token(lex)
         # output.write('get_filesystem_mirrors(): processing key = %s\n' % key, 2)
 
@@ -181,7 +181,7 @@ def get_filesystem_mirrors(output, config_path):
             mirrorlist = val.rsplit()
             output.write("get_filesystem_mirrors(): mirrorlist = %s\n" % mirrorlist, 2)
             for mirror in mirrorlist:
-                if p.match(mirror) == None:
+                if p.match(mirror) is None:
                     if os.access(mirror, os.F_OK):
                         output.write(
                             "get_filesystem_mirrors(): found file system mirror = %s\n"
