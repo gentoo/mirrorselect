@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """Mirrorselect 2.x
  Tool for selecting Gentoo source and rsync mirrors.
 
-Copyright 2005-2012 Gentoo Foundation
+Copyright 2005-2023 Gentoo Authors
 
 	Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
 	Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
