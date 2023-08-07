@@ -28,11 +28,6 @@ Distributed under the terms of the GNU General Public License v2
 
 from xml.etree import ElementTree as ET
 
-# old url's
-#MIRRORS_3_XML = 'http://www.gentoo.org/main/en/mirrors3.xml'
-#MIRRORS_RSYNC_DATA = 'http://www.gentoo.org/main/en/mirrors-rsync-data.xml'
-
-# new urls
 MIRRORS_3_XML = 'https://api.gentoo.org/mirrors/distfiles.xml'
 MIRRORS_RSYNC_DATA = 'https://api.gentoo.org/mirrors/rsync.xml'
 
