@@ -28,58 +28,69 @@ Distributed under the terms of the GNU General Public License v2
 
 from xml.etree import ElementTree as ET
 
-MIRRORS_3_XML = 'https://api.gentoo.org/mirrors/distfiles.xml'
-MIRRORS_RSYNC_DATA = 'https://api.gentoo.org/mirrors/rsync.xml'
+MIRRORS_3_XML = "https://api.gentoo.org/mirrors/distfiles.xml"
+MIRRORS_RSYNC_DATA = "https://api.gentoo.org/mirrors/rsync.xml"
+
 
 class MirrorParser3:
-	def __init__(self, options=None):
-		self._reset()
+    def __init__(self, options=None):
+        self._reset()
 
-	def _reset(self):
-		self._dict = {}
+    def _reset(self):
+        self._dict = {}
 
-	def _get_proto(self, uri=None):
-		if not uri: # Don't parse if empty
-			return None;
-		try:
-			from urllib.parse import urlparse
-			return urlparse(uri).scheme
-		except Exception as e: # Add general exception to catch errors
-			from mirrorselect.output import Output
-			Output.write(('_get_proto(): Exception while parsing the protocol '
-				'for URI %s: %s\n')% (uri, e), 2)
+    def _get_proto(self, uri=None):
+        if not uri:  # Don't parse if empty
+            return None
+        try:
+            from urllib.parse import urlparse
 
-	def parse(self, text):
-		self._reset()
-		for mirrorgroup in ET.XML(text):
-			for mirror in mirrorgroup:
-				name = ''
-				for e in mirror:
-					if e.tag == 'name':
-						name = e.text
-					if e.tag == 'uri':
-						uri = e.text
-						self._dict[uri] = {
-							"name": name,
-							"country": mirrorgroup.get("countryname"),
-							"region": mirrorgroup.get("region"),
-							"ipv4": e.get("ipv4"),
-							"ipv6": e.get("ipv6"),
-							"proto": e.get("protocol") or self._get_proto(uri),
-							}
+            return urlparse(uri).scheme
+        except Exception as e:  # Add general exception to catch errors
+            from mirrorselect.output import Output
 
-	def tuples(self):
-		return [(url, args) for url, args in list(self._dict.items())]
+            Output.write(
+                (
+                    "_get_proto(): Exception while parsing the protocol "
+                    "for URI %s: %s\n"
+                )
+                % (uri, e),
+                2,
+            )
 
-	def uris(self):
-		return [url for url, args in list(self._dict.items())]
+    def parse(self, text):
+        self._reset()
+        for mirrorgroup in ET.XML(text):
+            for mirror in mirrorgroup:
+                name = ""
+                for e in mirror:
+                    if e.tag == "name":
+                        name = e.text
+                    if e.tag == "uri":
+                        uri = e.text
+                        self._dict[uri] = {
+                            "name": name,
+                            "country": mirrorgroup.get("countryname"),
+                            "region": mirrorgroup.get("region"),
+                            "ipv4": e.get("ipv4"),
+                            "ipv6": e.get("ipv6"),
+                            "proto": e.get("protocol") or self._get_proto(uri),
+                        }
 
-if __name__ == '__main__':
-	import sys
-	import urllib.request, urllib.parse, urllib.error
-	parser = MirrorParser3()
-	parser.parse(urllib.request.urlopen(MIRRORS_3_XML).read())
-	print('===== tuples')
-	print(parser.tuples())
-	print('===== uris')
-	print(parser.uris())
+    def tuples(self):
+        return [(url, args) for url, args in list(self._dict.items())]
+
+    def uris(self):
+        return [url for url, args in list(self._dict.items())]
+
+
+if __name__ == "__main__":
+    import sys
+    import urllib.request, urllib.parse, urllib.error
+
+    parser = MirrorParser3()
+    parser.parse(urllib.request.urlopen(MIRRORS_3_XML).read())
+    print("===== tuples")
+    print(parser.tuples())
+    print("===== uris")
+    print(parser.uris())
