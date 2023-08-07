@@ -26,31 +26,29 @@ class WriteMakeConfTestCase(unittest.TestCase):
                 with open(config_path) as f:
                     result = f.read()
                     # print("!!!result!!!\n", result, "!!!!!!!!!!\n")
-                self.assertEqual(
-                    result, "{}".format(expected_result).format(mirror_string)
-                )
+                self.assertEqual(result, f"{expected_result}".format(mirror_string))
             finally:
                 shutil.rmtree(tempdir)
                 status_output.close()
 
         var = "GENTOO_MIRRORS"
         mirrors = (
-            ('{}="a"'.format(var)),
-            ('{}="a b"'.format(var)),
-            ('{}="a b c"'.format(var)),
+            (f'{var}="a"'),
+            (f'{var}="a b"'),
+            (f'{var}="a b c"'),
         )
 
         cases = (
-            ('{}="foo\nbar"\n'.format(var), "{}\n"),
-            ('\n{}="foo\nbar"\n'.format(var), "\n{}\n"),
-            ('\n{}="foo bar"\n'.format(var), "\n{}\n"),
-            ('\n{}="foo bar"\n\n'.format(var), "\n\n{}\n"),
-            ('\n{}="foo \\\nbar"\n'.format(var), "\n{}\n"),
-            ('\n\n{}="foo \\\nbar"\n'.format(var), "\n\n{}\n"),
-            ('\n\n{}="foo \\\nbar"\na="b"\n'.format(var), '\n\na="b"\n{}\n'),
-            ('\n\n{}="foo \\\n    bar"\na="b"\n'.format(var), '\n\na="b"\n{}\n'),
+            (f'{var}="foo\nbar"\n', "{}\n"),
+            (f'\n{var}="foo\nbar"\n', "\n{}\n"),
+            (f'\n{var}="foo bar"\n', "\n{}\n"),
+            (f'\n{var}="foo bar"\n\n', "\n\n{}\n"),
+            (f'\n{var}="foo \\\nbar"\n', "\n{}\n"),
+            (f'\n\n{var}="foo \\\nbar"\n', "\n\n{}\n"),
+            (f'\n\n{var}="foo \\\nbar"\na="b"\n', '\n\na="b"\n{}\n'),
+            (f'\n\n{var}="foo \\\n    bar"\na="b"\n', '\n\na="b"\n{}\n'),
             (
-                '\n\n{}="foo \\\n    bar\\\n    baz"\na="b"\n'.format(var),
+                f'\n\n{var}="foo \\\n    bar\\\n    baz"\na="b"\n',
                 '\n\na="b"\n{}\n',
             ),
             ("", "{}\n"),

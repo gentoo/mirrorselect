@@ -118,7 +118,7 @@ class Shallow:
             self.output.write("Done.\n")
 
         self.output.write(
-            "\nnetselect(): returning {} and {}\n".format(top_hosts, top_host_dict), 2
+            f"\nnetselect(): returning {top_hosts} and {top_host_dict}\n", 2
         )
 
         if quiet:
@@ -154,7 +154,7 @@ class Shallow:
             host_dict = self.netselect(block, len(block), quiet=True)[1]
 
             self.output.write(
-                "ran netselect(%s, %s), and got %s\n" % (block, len(block), host_dict),
+                f"ran netselect({block}, {len(block)}), and got {host_dict}\n",
                 2,
             )
 
@@ -292,7 +292,7 @@ class Deep:
 
         self.output.write("deeptest(): final rethost %s\n" % (rethosts), 2)
         self.output.write(
-            "deeptest(): final md5 failures %s of %s\n" % (self.dl_failures, num_hosts),
+            f"deeptest(): final md5 failures {self.dl_failures} of {num_hosts}\n",
             2,
         )
         self.urls = rethosts
@@ -336,7 +336,7 @@ class Deep:
                     signal.alarm(0)
             except OSError as e:
                 self.output.write(
-                    "deeptime(): dns error for host %s: %s\n" % (url_parts.hostname, e),
+                    f"deeptime(): dns error for host {url_parts.hostname}: {e}\n",
                     2,
                 )
             except TimeoutException:
@@ -351,7 +351,7 @@ class Deep:
             return (None, True)
 
         self.output.write(
-            "deeptime(): ip's for host %s: %s\n" % (url_parts.hostname, str(ips)), 2
+            f"deeptime(): ip's for host {url_parts.hostname}: {str(ips)}\n", 2
         )
         delta = 0
         f = None
@@ -369,8 +369,7 @@ class Deep:
 
         if f is None:
             self.output.write(
-                "deeptime(): unable to "
-                + "connect to host %s\n" % (url_parts.hostname,),
+                "deeptime(): unable to " + f"connect to host {url_parts.hostname}\n",
                 2,
             )
             return (None, True)
@@ -416,7 +415,7 @@ class Deep:
                         "\ndeeptime(): md5sum error for file: %s\n" % self.test_file
                         + "         expected: %s\n" % self.test_md5
                         + "         got.....: %s\n" % md5
-                        + "         host....: %s, %s\n" % (url_parts.hostname, ip)
+                        + f"         host....: {url_parts.hostname}, {ip}\n"
                     )
                     self.dl_failures += 1
                     return (None, True)
@@ -449,7 +448,7 @@ class Deep:
         signal.signal(signal.SIGALRM, signal.SIG_DFL)
 
         self.output.write("deeptime(): download completed.\n", 2)
-        self.output.write("deeptime(): %s seconds for host %s\n" % (delta, url), 2)
+        self.output.write(f"deeptime(): {delta} seconds for host {url}\n", 2)
         return (delta, False)
 
     def _test_connection(self, test_url, url_parts, ip, ips):
@@ -621,7 +620,7 @@ class Interactive:
             dialog.extend(
                 [
                     "%s" % url,
-                    "%s%s: %s" % (marker, args["country"], args["name"]),
+                    "{}{}: {}".format(marker, args["country"], args["name"]),
                     "OFF",
                 ]
             )

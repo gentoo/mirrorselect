@@ -54,7 +54,7 @@ class set_version(core.Command):
                     for line in s:
                         newline = re.sub(pattern, '"%s"' % ver, line, 1)
                         if newline != line:
-                            logging.info("{}: {}".format(f, newline))
+                            logging.info(f"{f}: {newline}")
                         updated_file.append(newline)
                 with open(f, "w", 1, "utf_8") as s:
                     s.writelines(updated_file)

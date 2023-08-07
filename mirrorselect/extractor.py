@@ -47,9 +47,7 @@ class Extractor:
             value = getattr(options, opt)
             if value is not None:
                 filters[opt] = value
-                self.output.print_info(
-                    'Limiting test to "%s=%s" hosts. \n' % (opt, value)
-                )
+                self.output.print_info(f'Limiting test to "{opt}={value}" hosts. \n')
         for opt in ["ftp", "http", "https"]:
             if getattr(options, opt):
                 filters["proto"] = opt
