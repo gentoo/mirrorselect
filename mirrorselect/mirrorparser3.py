@@ -86,7 +86,9 @@ class MirrorParser3:
 
 if __name__ == "__main__":
     import sys
-    import urllib.request, urllib.parse, urllib.error
+    import urllib.request
+    import urllib.parse
+    import urllib.error
 
     parser = MirrorParser3()
     parser.parse(urllib.request.urlopen(MIRRORS_3_XML).read())

@@ -27,6 +27,8 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
+from mirrorselect.output import encoder, get_encoding, decode_selection
+import http.client
 import math
 import signal
 import socket
@@ -36,16 +38,15 @@ import sys
 import time
 import hashlib
 
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 
 url_parse = urllib.parse.urlparse
 url_unparse = urllib.parse.urlunparse
 url_open = urllib.request.urlopen
 url_request = urllib.request.Request
 HTTPError = urllib.error.HTTPError
-import http.client
-
-from mirrorselect.output import encoder, get_encoding, decode_selection
 
 
 # The netselect --ipv4 and --ipv6 options are supported only
@@ -251,7 +252,6 @@ class Deep:
         self.dl_failures = 0
 
         for host in hosts:
-
             prog += 1
             if self.test_file != "mirrorselect-test":
                 self.output.print_info(
@@ -289,7 +289,7 @@ class Deep:
         rethosts = []
         for key in keys:
             # self.output.write('deeptest(): adding rethost '
-            #'%s, %s' % (key, top_hosts[key]), 2)
+            # '%s, %s' % (key, top_hosts[key]), 2)
             rethosts.append(top_hosts[key])
 
         self.output.write("deeptest(): final rethost %s\n" % (rethosts), 2)
@@ -514,7 +514,6 @@ class Deep:
         or the slowest host.
         """
         if len(host_dict) < maxlen:  # still have room, and host is fast. add it.
-
             self.output.write(
                 "_list_add(): added host %s. with a time of %s\n"
                 % (time_host[1], time_host[0]),
@@ -609,7 +608,7 @@ class Interactive:
 
             dialog.extend(["20", "110", "14"])
 
-        for (url, args) in sorted(
+        for url, args in sorted(
             hosts, key=lambda x: (x[1]["country"].lower(), x[1]["name"].lower())
         ):
             marker = ""
@@ -623,7 +622,7 @@ class Interactive:
                 continue
 
             # dialog.append('"%s" "%s%s: %s" "OFF"'
-            #% ( url, marker, args['country'], args['name']))
+            # % ( url, marker, args['country'], args['name']))
             dialog.extend(
                 [
                     "%s" % url,
