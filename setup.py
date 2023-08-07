@@ -101,12 +101,12 @@ test_data = {"mirrorselect": []}
 core.setup(
     name="mirrorselect",
     version=__version__,
-    description="Tool for selecting Gentoo source and rsync mirrors.",
+    description="Tool for selecting Gentoo source and rsync mirrors",
     author="",
     author_email="",
     maintainer="Gentoo Portage Tools Team",
     maintainer_email="tools-portage@gentoo.org",
-    url="http://www.gentoo.org/proj/en/portage/tools/index.xml",
+    url="https://wiki.gentoo.org/wiki/Project:Portage-Tools",
     download_url="http://distfiles.gentoo.org/distfiles/mirrorselect-%s.tar.gz"
     % __version__,
     packages=["mirrorselect"],
