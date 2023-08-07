@@ -1,5 +1,3 @@
-#-*- coding:utf-8 -*-
-
 """Mirrorselect 2.x
  Tool for selecting Gentoo source and rsync mirrors.
 
@@ -35,7 +33,7 @@ from mirrorselect.version import version
 
 USERAGENT = "Mirrorselect-" + version
 
-class Extractor(object):
+class Extractor:
 	"""The Extractor employs a MirrorParser3 object to get a list of valid
 	mirrors, and then filters them. Only the mirrors that should be tested,
 	based on user input are saved. They will be in the hosts attribute."""

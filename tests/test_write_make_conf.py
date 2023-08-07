@@ -19,10 +19,10 @@ class WriteMakeConfTestCase(unittest.TestCase):
 				#print("*****expect*****\n", expected_result, "***********")
 				try:
 					config_path = os.path.join(tempdir, 'make.conf')
-					with open(config_path, 'wt') as f:
+					with open(config_path, 'w') as f:
 						f.write(make_conf)
 					write_make_conf(Output(out=status_output), config_path, var, mirror_string)
-					with open(config_path, 'rt') as f:
+					with open(config_path) as f:
 						result = f.read()
 						#print("!!!result!!!\n", result, "!!!!!!!!!!\n")
 					self.assertEqual(result, "{}".format(expected_result).format(mirror_string))

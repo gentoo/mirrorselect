@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#-*- coding:utf-8 -*-
 
 
 """Mirrorselect 2.x
@@ -58,7 +57,7 @@ if "GENTOO_PORTAGE_EPREFIX" in EPREFIX:
     EPREFIX = ''
 
 
-class MirrorSelect(object):
+class MirrorSelect:
 	'''Main operational class'''
 
 	def __init__(self, output=None):
@@ -107,9 +106,9 @@ class MirrorSelect(object):
 				hosts[i] = hosts[i].decode('utf-8')
 
 		if var == "sync-uri" and out:
-			mirror_string = '%s = %s' % (var, ' '.join(hosts))
+			mirror_string = '{} = {}'.format(var, ' '.join(hosts))
 		else:
-			mirror_string = '%s="%s"' % (var, ' \\\n    '.join(hosts))
+			mirror_string = '{}="{}"'.format(var, ' \\\n    '.join(hosts))
 
 		if out:
 			self.write_to_output(mirror_string)

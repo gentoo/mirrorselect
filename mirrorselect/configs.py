@@ -1,6 +1,3 @@
-#-*- coding:utf-8 -*-
-
-
 """Mirrorselect 2.x
  Tool for selecting Gentoo source and rsync mirrors.
 
@@ -60,16 +57,16 @@ def write_make_conf(output, config_path, var, mirror_string):
 	output.write('\n')
 	output.print_info('Modifying %s with new mirrors...\n' % config_path)
 	try:
-		config = open(config_path, 'r')
+		config = open(config_path)
 		output.write('\tReading make.conf\n')
 		lines = config.readlines()
 		config.close()
 		output.write('\tMoving to %s.backup\n' % config_path)
 		shutil.move(config_path, config_path + '.backup')
-	except IOError:
+	except OSError:
 		lines = []
 
-	with open(config_path + '.backup', 'r') as f:
+	with open(config_path + '.backup') as f:
 		lex = shlex.shlex(f, posix=True)
 		lex.wordchars = string.digits + letters + r"~!@#$%*_\:;?,./-+{}"
 		lex.quotes = "\"'"
@@ -157,8 +154,8 @@ def get_filesystem_mirrors(output, config_path):
 
 	output.write('get_filesystem_mirrors(): config_path = %s\n' % config_path, 2)
 	try:
-		f = open(config_path,'r')
-	except IOError:
+		f = open(config_path)
+	except OSError:
 		return fsmirrors
 
 	""" Search for 'var' in make.conf and extract value """

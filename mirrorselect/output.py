@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#-*- coding:utf-8 -*-
 
 """Mirrorselect 2.x
  Tool for selecting Gentoo source and rsync mirrors.
@@ -70,7 +69,7 @@ def get_encoding(output):
         return encoding
 
 
-class Output(object):
+class Output:
 	"""Handles text output. Only prints messages with level <= verbosity.
 	Therefore, verbosity=2 is everything (debug), and verbosity=0 is urgent
 	messages only (quiet)."""
@@ -155,7 +154,7 @@ class ColoredFormatter(IndentedHelpFormatter):
 		# long options with args
 		option = re.sub(
 			r"--([a-zA-Z]*)=([a-zA-Z]*)",
-			lambda m: "-%s %s" % (self.output.green(m.group(1)),
+			lambda m: "-{} {}".format(self.output.green(m.group(1)),
 				self.output.blue(m.group(2))),
 			option)
 		# short options with args

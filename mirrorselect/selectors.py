@@ -66,7 +66,7 @@ from mirrorselect.output import encoder, get_encoding, decode_selection
 NETSELECT_SUPPORTS_IPV4_IPV6 = True
 
 
-class Shallow(object):
+class Shallow:
 	"""handles rapid server selection via netselect"""
 
 	def __init__(self, hosts, options, output):
@@ -131,7 +131,7 @@ class Shallow(object):
 		if not quiet:
 			self.output.write('Done.\n')
 
-		self.output.write('\nnetselect(): returning %s and %s\n' % (top_hosts,
+		self.output.write('\nnetselect(): returning {} and {}\n'.format(top_hosts,
 			top_host_dict), 2)
 
 		if quiet:
@@ -218,7 +218,7 @@ def timeout_handler(signum, frame):
 	raise TimeoutException()
 
 
-class Deep(object):
+class Deep:
 	"""handles deep mode mirror selection."""
 
 	def __init__(self, hosts, options, output):
@@ -331,7 +331,7 @@ class Deep(object):
 						ips.append(ip)
 				finally:
 					signal.alarm(0)
-			except socket.error as e:
+			except OSError as e:
 				self.output.write('deeptime(): dns error for host %s: %s\n'
 					% (url_parts.hostname, e), 2)
 			except TimeoutException:
@@ -371,7 +371,7 @@ class Deep(object):
 				f.close()
 			finally:
 				signal.alarm(0)
-		except EnvironmentError as e:
+		except OSError as e:
 			self.output.write(('deeptime(): closing connection to host %s '
 				'failed for ip %s: %s\n') % (url_parts.hostname, ip, e), 2)
 		except TimeoutException:
@@ -408,7 +408,7 @@ class Deep(object):
 			finally:
 				signal.alarm(0)
 
-		except (EnvironmentError, ssl.CertificateError) as e:
+		except (OSError, ssl.CertificateError) as e:
 			self.output.write(('\ndeeptime(): download from host %s '
 				'failed for ip %s: %s\n') % (url_parts.hostname, ip, e), 2)
 			return (None, True)
@@ -453,7 +453,7 @@ class Deep(object):
 			if len(ips) == 1:
 				test_url = url_unparse(url_parts)
 				return self._test_connection(test_url, url_parts, ip, [])
-		except (EnvironmentError, ssl.CertificateError) as e:
+		except (OSError, ssl.CertificateError) as e:
 			self.output.write('deeptime(): connection to host %s '
 				'failed for ip %s:\n            %s\n'
 				% (url_parts.hostname, ip, e), 2)
@@ -516,7 +516,7 @@ class Deep(object):
 		return retval, host_dict
 
 
-class Interactive(object):
+class Interactive:
 	"""Handles interactive host selection."""
 
 	def __init__(self, hosts, options, output):
