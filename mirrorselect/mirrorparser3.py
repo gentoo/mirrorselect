@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """Mirrorselect 2.x
  Tool for selecting Gentoo source and rsync mirrors.
 
-Copyright 2009-2012 Gentoo Foundation
+Copyright 2009-2023 Gentoo Authors
 
 	Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
 	Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
@@ -81,14 +81,9 @@ class MirrorParser3:
 
 if __name__ == '__main__':
 	import sys
-	if sys.version_info[0] >= 3:
-		import urllib.request, urllib.parse, urllib.error
-		parser = MirrorParser3()
-		parser.parse(urllib.request.urlopen(MIRRORS_3_XML).read())
-	else:
-		import urllib
-		parser = MirrorParser3()
-		parser.parse(urllib.urlopen(MIRRORS_3_XML).read())
+	import urllib.request, urllib.parse, urllib.error
+	parser = MirrorParser3()
+	parser.parse(urllib.request.urlopen(MIRRORS_3_XML).read())
 	print('===== tuples')
 	print(parser.tuples())
 	print('===== uris')

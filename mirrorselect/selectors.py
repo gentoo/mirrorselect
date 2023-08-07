@@ -37,26 +37,13 @@ import sys
 import time
 import hashlib
 
-if sys.version_info[0] >= 3:
-	import urllib.request, urllib.parse, urllib.error
-	url_parse = urllib.parse.urlparse
-	url_unparse = urllib.parse.urlunparse
-	url_open = urllib.request.urlopen
-	url_request = urllib.request.Request
-	HTTPError = urllib.error.HTTPError
-	import http.client
-	IncompleteRead = http.client.IncompleteRead
-else:
-	import urllib2
-	import urlparse
-	url_parse = urlparse.urlparse
-	url_unparse = urlparse.urlunparse
-	url_open = urllib2.urlopen
-	url_request = urllib2.Request
-	HTTPError = urllib2.HTTPError
-	import httplib
-	IncompleteRead = httplib.IncompleteRead
-
+import urllib.request, urllib.parse, urllib.error
+url_parse = urllib.parse.urlparse
+url_unparse = urllib.parse.urlunparse
+url_open = urllib.request.urlopen
+url_request = urllib.request.Request
+HTTPError = urllib.error.HTTPError
+import http.client
 
 from mirrorselect.output import encoder, get_encoding, decode_selection
 
