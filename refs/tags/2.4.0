@@ -1,0 +1,15 @@
+certificate version 0.1
+pusher Sam James <sam@gentoo.org> 1693094629 +0100
+pushee git+ssh://git.gentoo.org/proj/mirrorselect.git
+nonce 1693094629-e8effa51341310890ddc89068d9679529481c551
+
+0000000000000000000000000000000000000000 ebdec01d5dd6ebde2c0a33c31207e90f85151eaa refs/tags/2.4.0
+-----BEGIN PGP SIGNATURE-----
+
+iOUEABYKAI0WIQQlpruI3Zt2TGtVQcJzhAn1IN+RkAUCZOqS5V8UgAAAAAAuAChp
+c3N1ZXItZnByQG5vdGF0aW9ucy5vcGVucGdwLmZpZnRoaG9yc2VtYW4ubmV0MjVB
+NkJCODhERDlCNzY0QzZCNTU0MUMyNzM4NDA5RjUyMERGOTE5MA8cc2FtQGdlbnRv
+by5vcmcACgkQc4QJ9SDfkZD6YgEApqxx/oq0MXczaee8nhzvxyz/O9j0CQvUGucM
++HXkoMcA/RFWkIuwRVVvt2dE/RqhHeazu9aZa5b9VFs/VctShkQE
+=lSsn
+-----END PGP SIGNATURE-----
