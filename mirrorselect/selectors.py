@@ -3,13 +3,14 @@
 """Mirrorselect 2.x
  Tool for selecting Gentoo source and rsync mirrors.
 
-Copyright 2005-2023 Gentoo Authors
+Copyright 2005-2024 Gentoo Authors
 
 	Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
 	Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
 	Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
 	Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
 	Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
+	Copyright (C) 2024 Robin H. Johnson <robbat2@gentoo.org>
 
 Distributed under the terms of the GNU General Public License v2
  This program is free software; you can redistribute it and/or modify
@@ -37,6 +38,7 @@ import subprocess
 import sys
 import time
 import hashlib
+import re
 
 import urllib.request
 import urllib.parse
@@ -53,6 +55,15 @@ HTTPError = urllib.error.HTTPError
 # with >=net-analyzer/netselect-0.4[ipv6(+)].
 NETSELECT_SUPPORTS_IPV4_IPV6 = True
 
+# Given a string that is a URL or raw HOSTNAME or raw IP
+# Extract that hostname/IP
+def url_to_host(host_or_url):
+    URL_RE = "^(?P<protocol>[a-z0-9A-Z+-]+)(?:://)(?P<host_or_ip>[a-zA-Z0-9.-]+|\[[0-9a-fA-F:.]+\])(?:.*)?$"
+    m = re.fullmatch(URL_RE, host_or_url)
+    if m:
+        host_without_proto = m.group('host_or_ip')
+        return host_without_proto
+    return host_or_url
 
 class Shallow:
     """handles rapid server selection via netselect"""
@@ -86,9 +97,35 @@ class Shallow:
                 "Using netselect to choose the top " "%d mirrors..." % number
             )
 
-        host_string = " ".join(hosts)
+        # Netselect, for hosts with multiple IPs will return the IP directly,
+        # which might matter in cases of FTP or RSYNC, where virtual hosts are
+        # not possible.
+        # However, for HTTP/HTTPS, the Host and/or TLS SNI is really important
+        # to reach the correct service.
+        # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=136849
+        # To avoid that problem, convert to the netselect tagged format of selecting between hosts.
+        # However, it only supports:
+        # HOSTNAME_OR_IP:TAG
+        # It does NOT support:
+        # URL:TAG
+        host_by_tag = dict()
+        url_by_tag = dict()
+        for host_or_url in hosts:
+            # _ is just to make it easier to read
+            tag = "_"+(hashlib.sha256(host_or_url.encode('utf-8')).hexdigest())[0:8]
+            host_by_tag[tag] = url_to_host(host_or_url)
+            url_by_tag[tag] = host_or_url
 
-        cmd = ["netselect", "-s%d" % (number,)]
+        tagged_hosts = list(
+            map(lambda kv: (kv[1]+":"+kv[0]), host_by_tag.items())
+        )
+
+        # Netselect resolves each hostname, and treats all the IPs seperately
+        # But for HTTP/HTTPs we cannot, so increase the number to start with
+        # and filter later. 10 is an semi-arbitrary decision, that a hostname might
+        # have distinct 10 IPs [IPv+IPv6 * 5 regions] = 10.
+        raw_number = number * 10
+        cmd = ["netselect", "-s%d" % (raw_number,)]
 
         if NETSELECT_SUPPORTS_IPV4_IPV6:
             if self._options.ipv4:
@@ -96,7 +133,7 @@ class Shallow:
             elif self._options.ipv6:
                 cmd.append("-6")
 
-        cmd.extend(hosts)
+        cmd.extend(tagged_hosts)
 
         self.output.write('\nnetselect(): running "%s"\n' % " ".join(cmd), 2)
 
@@ -107,12 +144,36 @@ class Shallow:
         if err:
             self.output.write("netselect(): netselect stderr: %s\n" % err, 2)
 
-        for line in out.splitlines():
-            line = line.split()
+        if hasattr(out, 'decode'):
+            print("Raw output", out)
+            out = out.decode('utf-8')
+        if hasattr(err, 'decode'):
+            err = err.decode('utf-8')
+
+        # With tagged format, output is:
+        # NNN HOST_OR_IP:TAG
+        seen = set()
+        for rawline in out.splitlines():
+            line = list(map(lambda s: s.strip(), rawline.split()))
             if len(line) < 2:
                 continue
-            top_hosts.append(line[1])
-            top_host_dict[line[0]] = line[1]
+            # Cannot use split on ":" if the output will contain IPv6!
+            m = re.fullmatch("^(?P<host_or_ip>.+?):(?P<tag>_.+)\s*$", line[1])
+            if m:
+                tag = m.group('tag')
+                score = line[0]
+                host_or_ip = m.group('host_or_ip')
+                # host_or_ip *might* be an IP that the host resolved to, rather than the original hostname
+                assert tag, ("netselect did not return a tag in "+rawline.strip())
+                assert host_or_ip, ("netselect did not return a host or IP in "+rawline.strip())
+                assert host_by_tag.get(tag), ("netselect returned an unknown tag: "+tag+" in '"+rawline+"'")
+                if tag not in seen:
+                    seen.add(tag)
+                    url = url_by_tag[tag]
+                    top_hosts.append(url)
+                    top_host_dict[score] = url
+            else:
+                assert False, "netselect returned impossible line:"+rawline
 
         if not quiet:
             self.output.write("Done.\n")
