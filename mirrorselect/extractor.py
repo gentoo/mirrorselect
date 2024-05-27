@@ -27,8 +27,9 @@ Distributed under the terms of the GNU General Public License v2
 
 import os
 
+import requests
+
 from mirrorselect.mirrorparser3 import MirrorParser3
-from sslfetch.connections import Connector
 from mirrorselect.version import version
 
 USERAGENT = "Mirrorselect-" + version
@@ -103,21 +104,14 @@ class Extractor:
 
         self.output.print_info("Downloading a list of mirrors...\n")
 
-        # setup the ssl-fetch ouptut map
-        connector_output = {
-            "info": self.output.write,
-            "debug": self.output.write,
-            "error": self.output.print_err,
-            "kwargs-info": {"level": 2},
-            "kwargs-debug": {"level": 2},
-            "kwargs-error": {"level": 0},
-        }
+        response = requests.get(url,
+                                timeout=60,
+                                proxies=self.proxies,
+                                headers={"User-Agent": USERAGENT})
+        if response:
+            parser.parse(response.text)
 
-        fetcher = Connector(connector_output, self.proxies, USERAGENT)
-        success, mirrorlist, timestamp = fetcher.fetch_content(url, climit=60)
-        parser.parse(mirrorlist)
-
-        if (not mirrorlist) or len(parser.tuples()) == 0:
+        if len(parser.tuples()) == 0:
             self.output.print_err(
                 "Could not get mirror list. " "Check your internet connection."
             )
