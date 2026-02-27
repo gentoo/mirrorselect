@@ -266,7 +266,7 @@ class MirrorSelect:
             "-f",
             "--file",
             action="store",
-            default="mirrorselect-test",
+            default="f2/mirrorselect-test",
             help="An alternate file to download for deep testing. "
             "Please choose the file carefully as to not abuse the system "
             "by selecting an overly large size file.  You must also "
