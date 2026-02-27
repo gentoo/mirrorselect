@@ -437,7 +437,7 @@ class Deep:
                 2,
             )
             return (None, True)
-        except IncompleteRead as e:
+        except httplib.IncompleteRead as e:
             self.output.write(
                 ("\ndeeptime(): download from host %s " "failed for ip %s: %s\n")
                 % (url_parts.hostname, ip, e),
