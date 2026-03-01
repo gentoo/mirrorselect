@@ -32,15 +32,11 @@ import os
 import socket
 import sys
 from optparse import OptionParser
-from mirrorselect.mirrorparser3 import MIRRORS_3_XML, MIRRORS_RSYNC_DATA
 from mirrorselect.output import Output, ColoredFormatter
 from mirrorselect.selectors import Deep, Shallow, Interactive
-from mirrorselect.extractor import Extractor
 from mirrorselect.configs import (
-    get_make_conf_path,
-    write_make_conf,
-    write_repos_conf,
-    get_filesystem_mirrors,
+    DistfilesConfig,
+    RsyncConfig,
 )
 from mirrorselect.version import version
 
@@ -50,15 +46,13 @@ try:
 except ImportError:
     rootuid = 0
 
-
-# establish the eprefix, initially set so eprefixify can
+# establish the eprefix, initially set so exprefixify can
 # set it on install
 EPREFIX = "@GENTOO_PORTAGE_EPREFIX@"
 
 # check and set it if it wasn't
 if "GENTOO_PORTAGE_EPREFIX" in EPREFIX:
     EPREFIX = ""
-
 
 class MirrorSelect:
     """Main operational class"""
@@ -88,7 +82,7 @@ class MirrorSelect:
                 return file_path
         return None
 
-    def change_config(self, hosts, out, config_path, sync=False):
+    def change_config(self, hosts, out, config_path):
         """Writes the config changes to the given file, or to stdout.
 
         @param hosts: list of host urls to write
@@ -97,26 +91,14 @@ class MirrorSelect:
         @param sync: boolean, used to switch between sync-uri repos.conf target,
                 and GENTOO_MIRRORS make.conf variable target
         """
-        if sync:
-            var = "sync-uri"
-        else:
-            var = "GENTOO_MIRRORS"
-
         for i in range(0, len(hosts)):
             if isinstance(hosts[i], bytes):
                 hosts[i] = hosts[i].decode("utf-8")
 
-        if var == "sync-uri" and out:
-            mirror_string = "{} = {}".format(var, " ".join(hosts))
-        else:
-            mirror_string = '{}="{}"'.format(var, " \\\n    ".join(hosts))
-
         if out:
-            self.write_to_output(mirror_string)
-        elif var == "sync-uri":
-            write_repos_conf(self.output, config_path, var, " ".join(hosts))
+            self.write_to_output(self.mirror_type.format_config(hosts))
         else:
-            write_make_conf(self.output, config_path, var, mirror_string)
+            self.mirror_type.write_config(self.output, config_path, hosts)
 
     @staticmethod
     def write_to_output(mirror_string):
@@ -384,12 +366,7 @@ class MirrorSelect:
         @param options: parser.parse_args() options instance
         @rtype: list
         """
-        if options.rsync:
-            self.output.write("using url: %s\n" % MIRRORS_RSYNC_DATA, 2)
-            hosts = Extractor(MIRRORS_RSYNC_DATA, options, self.output).hosts
-        else:
-            self.output.write("using url: %s\n" % MIRRORS_3_XML, 2)
-            hosts = Extractor(MIRRORS_3_XML, options, self.output).hosts
+        hosts = self.mirror_type.get_available_hosts(self.output, options)
 
         if options.exclude:
             hosts = [x for x in hosts if x[0] not in options.exclude]
@@ -415,46 +392,43 @@ class MirrorSelect:
             selector = Shallow(hosts, options, self.output)
         return selector.urls
 
-    def get_conf_path(self, rsync=False):
+    def get_conf_path(self, mirror_type):
         """Checks for the existance of repos.conf or make.conf in /etc/portage/
         Failing that it checks for it in /etc/
         Failing in /etc/ it defaults to /etc/portage/make.conf
 
         @rtype: string
         """
-        if rsync:
-            # repos.conf
-            config_path = EPREFIX + "/etc/portage/repos.conf/gentoo.conf"
-            if not os.access(config_path, os.F_OK):
-                self.output.write(
-                    "Failed access to gentoo.conf: "
-                    "%s\n" % os.access(config_path, os.F_OK),
-                    2,
-                )
-                config_path = None
-            return config_path
-        return get_make_conf_path(EPREFIX)
+        return mirror_type.get_conf_path(self.output)
 
     def main(self, argv):
         """Lets Rock!
 
         @param argv: list of command line arguments to parse
         """
-        config_path = self.get_conf_path()
+        # XXX this is only because _parse_args (dubiously) wants to know the 
+        # path of make.conf, and because the debug logging prints that path on
+        # startup, even when using -r which doesn't interact with that file.
+        distfiles_mirror = DistfilesConfig(EPREFIX)
+        config_path = distfiles_mirror.get_conf_path(self.output)
         options = self._parse_args(argv, config_path)
         self.output.verbosity = options.verbosity
         self.output.write("main(); config_path = %s\n" % config_path, 2)
 
         # reset config_path to find repos.conf/gentoo.conf
         if options.rsync:
-            config_path = self.get_conf_path(options.rsync)
+            self.mirror_type = RsyncConfig()
+            config_path = self.mirror_type.get_conf_path(self.output)
             self.output.write("main(); reset config_path = %s\n" % config_path, 2)
+        else:
+            self.mirror_type = distfiles_mirror
+
         if not config_path:
             self.output.print_err(
                 "main(); Exiting due to missing repos.conf/gentoo.conf file\n"
             )
 
-        fsmirrors = get_filesystem_mirrors(self.output, config_path)
+        fsmirrors = self.mirror_type.get_filesystem_mirrors(self.output, config_path)
 
         hosts = self.get_available_hosts(options)
 
@@ -467,7 +441,7 @@ class MirrorSelect:
 
         if len(urls):
             self.change_config(
-                fsmirrors + urls, options.output, config_path, options.rsync
+                fsmirrors + urls, options.output, config_path
             )
         else:
             self.output.write(

@@ -5,13 +5,14 @@ import shutil
 import tempfile
 import unittest
 
-from mirrorselect.configs import write_make_conf
+from mirrorselect.configs import DistfilesMirror
 from mirrorselect.output import Output
 
 
 class WriteMakeConfTestCase(unittest.TestCase):
     def test_write_make_conf(self):
         def __do_it(var, mirror_string, make_conf, expected_result):
+            sut = DistfilesMirror()
             tempdir = tempfile.mkdtemp()
             status_output = open(os.devnull, "w")
             # print("------make_conf--------", make_conf, "----------------------")
@@ -20,8 +21,8 @@ class WriteMakeConfTestCase(unittest.TestCase):
                 config_path = os.path.join(tempdir, "make.conf")
                 with open(config_path, "w") as f:
                     f.write(make_conf)
-                write_make_conf(
-                    Output(out=status_output), config_path, var, mirror_string
+                sut.write_conf(
+                    Output(out=status_output), config_path, mirror_string
                 )
                 with open(config_path) as f:
                     result = f.read()
