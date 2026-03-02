@@ -357,7 +357,7 @@ class MirrorSelect:
         if options.all_mirrors and hasattr(set_servers, "user_configured"):
             self.output.print_err("Choose at most one of -s or -a")
 
-        if options.interactive and (
+        if options.interactive and not options.rsync and (
             options.deep or options.blocksize or options.servers > 1
         ):
             self.output.print_err("Invalid option combination with -i")
