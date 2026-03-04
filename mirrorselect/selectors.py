@@ -366,7 +366,7 @@ class Deep:
 
         if f is None:
             self.output.write(
-                "deeptime(): unable to " + f"connect to host {url_parts.hostname}\n",
+                f"deeptime(): unable to connect to host {url_parts.hostname}\n",
                 2,
             )
             return (None, True)
