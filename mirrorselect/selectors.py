@@ -37,10 +37,22 @@ import subprocess
 import sys
 import time
 import hashlib
+import itertools
 
 import urllib.request
 import urllib.parse
 import urllib.error
+
+from mirrorselect.extractor import USERAGENT
+from portage.package.ebuild.fetch import (
+        MirrorLayoutConfig,
+        FlatLayout,
+        get_mirror_url,
+        )
+from configparser import (
+        ConfigParser,
+        Error as ConfigParseError
+        )
 
 url_parse = urllib.parse.urlparse
 url_unparse = urllib.parse.urlunparse
@@ -297,6 +309,43 @@ class Deep:
         )
         self.urls = rethosts
 
+    def get_distfile_structure(self, distfiles_url):
+        """
+        Obtain the GLEP 75 Mirror Layout from layout.conf
+
+        This is a modification  of that found in portage
+        in package/ebuild/fetch.py, however that implementation
+        requires storing the layout.conf as a temporary file.
+
+        GLEP 75 explains the mechanism for mirrors to communicate
+        the path schema they use.
+        See: https://www.gentoo.org/glep/glep-0075.html
+        """
+        config_parser = ConfigParser()
+        config_url = Deep._urljoin(distfiles_url, "layout.conf")
+
+        self.output.write(f"_get_distfile_structure(): config_url = {config_url}\n", 2)
+
+        response = url_open(config_url, None, self._connect_timeout)
+
+        if response.status == 404:
+            self.output.write("_get_distfile_structure(): no layout.conf, assuming flat\n", 2)
+            # mirrors lacking a layout.conf are assume to use a flat layout
+            return FlatLayout()
+
+        config_parser.read_string(response.read().decode('utf-8'))
+        vals = []
+
+        for i in itertools.count():
+            try:
+                vals.append(tuple(config_parser.get("structure", "%d" % i).split()))
+            except ConfigParseError:
+                break
+
+        mlc = MirrorLayoutConfig()
+        mlc.deserialize(vals)
+        return mlc.get_best_supported_layout()
+
     def deeptime(self, url, maxtime):
         """
         Takes a single url and fetch command, and downloads the test file.
@@ -307,7 +356,20 @@ class Deep:
 
         dist_url = Deep._urljoin(url, "distfiles")
 
+        try: 
+            structure = self.get_distfile_structure(dist_url)
+        except OSError as e:
+            self.output.write(
+                f"deeptime(): unable to connect to host {url}\n",
+                2,
+            )
+            return (None, True)
+
+        path = structure.get_path(self.test_file)
+        url = self._urljoin(dist_url, path)
         url_parts = url_parse(url)
+
+        self.output.write(f"_deeptime(): testfile url = {url}\n", 1)
 
         signal.signal(signal.SIGALRM, timeout_handler)
 

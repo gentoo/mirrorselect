@@ -30,6 +30,13 @@ python_scripts = [os.path.join(cwd, path) for path in ("mirrorselect/version.py"
 
 manpage = [os.path.join(cwd, path) for path in ("mirrorselect.8",)]
 
+# requirements.txt
+lib_folder = os.path.dirname(os.path.realpath(__file__))
+requirements_path = f"{lib_folder}/requirements.txt"
+install_requires = []
+if os.path.isfile(requirements_path):
+    with open(requirements_path) as f:
+        install_requires = f.read().splitlines()
 
 class set_version(core.Command):
     """Set python version to our __version__."""
@@ -110,6 +117,7 @@ core.setup(
     download_url="http://distfiles.gentoo.org/distfiles/mirrorselect-%s.tar.gz"
     % __version__,
     packages=["mirrorselect"],
+    install_requires=install_requires,
     # package_data = test_data,
     scripts=(["bin/mirrorselect"]),
     data_files=(
