@@ -305,10 +305,7 @@ class Deep:
         """
         self.output.write("\n_deeptime(): maxtime is %s\n" % maxtime, 2)
 
-        if url.endswith("/"):  # append the path to the testfile to the URL
-            url = url + "distfiles/" + self.test_file
-        else:
-            url = url + "/distfiles/" + self.test_file
+        dist_url = Deep._urljoin(url, "distfiles")
 
         url_parts = url_parse(url)
 
@@ -556,6 +553,23 @@ class Deep:
         )
 
         return retval, host_dict
+
+    @staticmethod
+    def _urljoin(url, path):
+        """Appends a path component to a URL string.
+
+        urllib's urljoin can't be relied on for this. If the given URL
+        doesn't end with a slash, the last component is *replaced* instead
+        of concatenated to.
+
+        In addition, urllib.parse requires a workaround for other protocols
+        such as rsync, otherwise the given path component simply replaces
+        the URL.
+        """
+        if not url.endswith("/"):
+            url = url + "/"
+
+        return url + path
 
 
 class Interactive:
