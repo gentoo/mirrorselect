@@ -104,7 +104,7 @@ class MirrorSelect:
 
         for i in range(0, len(hosts)):
             if isinstance(hosts[i], bytes):
-                hosts[i] = hosts[i].decode("utf-8")
+                hosts[i] = hosts[i].decode("utf-8", errors="replace")
 
         if var == "sync-uri" and out:
             mirror_string = "{} = {}".format(var, " ".join(hosts))
