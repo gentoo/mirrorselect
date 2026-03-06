@@ -223,10 +223,7 @@ class RsyncConfig(Configuration):
         @param var: string; the variable to save the value to.
         @param value: string, the value to set var to
         """
-        try:
-            from configparser import ConfigParser
-        except ImportError:
-            from ConfigParser import ConfigParser
+        from configparser import ConfigParser
         config = ConfigParser()
         config.read(config_path)
         if config.has_option("gentoo", self.var):
