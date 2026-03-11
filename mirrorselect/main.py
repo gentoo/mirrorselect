@@ -310,10 +310,10 @@ class MirrorSelect:
             action="callback",
             callback=set_servers,
             type="int",
-            default=3,
+            default=1,
             help="Specify Number of servers for Automatic Mode "
             "to select. this is only valid for download mirrors. "
-            "If this is not specified, a default of 3 is used.",
+            "If this is not specified, a default of 1 is used.",
         )
         group.add_option(
             "-t",
