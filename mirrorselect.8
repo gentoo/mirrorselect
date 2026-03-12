@@ -21,16 +21,15 @@ Show program's version number and exit.
 This will present a list of all filtered search results
 to make it possible to select mirrors you wish to use.
 For the -r, --rsync option, it will select the rotation server
-only. As multiple rsync URL's are not supported.
+only, as multiple rsync URLs are not supported.
 .TP
 .B \-D, \-\-deep
 Deep mode. This is used to give a more accurate speed test. It will download
-a 100k file from each server. Because of this you should only use this option
+a 100kB file from each server. Because of this you should only use this option
 if you have a good connection.
 .TP
 .B \-i, \-\-interactive
-Interactive Mode, this will present a list to make it possible to select mirrors
-you wish to use.
+Interactive Mode. Presents a list for selecting mirrors you wish to use.
 .SS "Server type selection (choose at most one)"
 .TP
 .BI \-c " COUNTRY " "\fR,\fP \-\-country " COUNTRY "
@@ -74,7 +73,7 @@ Debug mode.
 .TP
 .BI \-f " FILE " "\fR,\fP \-\-file "FILE "
 An alternate file to download for deep testing. Please
-choose the file carefully as to not abuse the system
+choose the file carefully so as to not abuse the system
 by selecting an overly large size file.  You must also
 use the -m, --md5 option.
 .TP
@@ -107,8 +106,8 @@ Exclude host from mirrors list.
 automatic:
 .LP
 .RS 8
-Autoselect the 5 best mirrors and save results in /etc/portage/make.conf,
-a backup will be created.
+Autoselect the 5 best mirrors and save results in /etc/portage/make.conf.
+A backup will be created.
 .LP
 # mirrorselect -s5
 .LP
@@ -118,8 +117,8 @@ of 10 and append the output to /etc/portage/make.conf.
 .LP
 # mirrorselect -s3 -b10 -o >> /etc/portage/make.conf
 .LP
-Autoselect the 4 best mirrors, it also loads a 100k file from each mirror.
-The result will be written to /etc/portage/make.conf, a backup will be created.
+Autoselect the 4 best mirrors, loading a 100kB file from each mirror.
+The result will be written to /etc/portage/make.conf, and a backup will be created.
 .LP
 # mirrorselect -D -s4
 .LP
