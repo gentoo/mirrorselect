@@ -258,11 +258,10 @@ class Deep:
         top_hosts = {}
         prog = 0
         maxtime = self._download_timeout
-        hosts = [host[0] for host in self._hosts]
-        num_hosts = len(hosts)
+        num_hosts = len(self._hosts)
         self.dl_failures = 0
 
-        for host in hosts:
+        for host in self._hosts:
             prog += 1
             if self.test_file != "mirrorselect-test":
                 self.output.print_info(

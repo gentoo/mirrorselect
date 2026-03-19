@@ -3,7 +3,7 @@
 """Mirrorselect 2.x
  Tool for selecting Gentoo source and rsync mirrors.
 
-Copyright 2009-2023 Gentoo Authors
+Copyright 2009-2026 Gentoo Authors
 
 	Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
 	Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
@@ -25,74 +25,57 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
-
 from xml.etree import ElementTree as ET
+from mirrorselect.mirrorset import MirrorSet, MirrorGroup, MirrorEndpoint, Mirror
 
 MIRRORS_3_XML = "https://api.gentoo.org/mirrors/distfiles.xml"
 MIRRORS_RSYNC_DATA = "https://api.gentoo.org/mirrors/rsync.xml"
 
-
 class MirrorParser3:
-    def __init__(self, options=None):
-        self._reset()
+    @staticmethod
+    def parse(text: str):
+        groups: list[MirrorGroup] = []
+        for group_element in ET.XML(text):
+            mirrors: list[Mirror] = []
+            region = group_element.get("region")
+            country = group_element.get("country")
+            countryname = group_element.get("countryname")
+            if region is None:
+                raise Exception("mirror has no region")
+            if country is None:
+                raise Exception("mirror has no country")
+            if countryname is None:
+                raise Exception("mirror has no countryname")
 
-    def _reset(self):
-        self._dict = {}
-
-    def _get_proto(self, uri=None):
-        if not uri:  # Don't parse if empty
-            return None
-        try:
-            from urllib.parse import urlparse
-
-            return urlparse(uri).scheme
-        except Exception as e:  # Add general exception to catch errors
-            from mirrorselect.output import Output
-
-            Output.write(
-                (
-                    "_get_proto(): Exception while parsing the protocol "
-                    "for URI %s: %s\n"
-                )
-                % (uri, e),
-                2,
-            )
-
-    def parse(self, text):
-        self._reset()
-        for mirrorgroup in ET.XML(text):
-            for mirror in mirrorgroup:
-                name = ""
-                for e in mirror:
-                    if e.tag == "name":
-                        name = e.text
-                    if e.tag == "uri":
-                        uri = e.text
-                        self._dict[uri] = {
-                            "name": name,
-                            "country": mirrorgroup.get("countryname"),
-                            "region": mirrorgroup.get("region"),
-                            "ipv4": e.get("ipv4"),
-                            "ipv6": e.get("ipv6"),
-                            "proto": e.get("protocol") or self._get_proto(uri),
-                        }
-
-    def tuples(self):
-        return [(url, args) for url, args in list(self._dict.items())]
-
-    def uris(self):
-        return [url for url, args in list(self._dict.items())]
-
+            for mirror_element in group_element:
+                endpoints: list[MirrorEndpoint] = []
+                mirror_name: str | None = None
+                for element in mirror_element:
+                    if element.tag == "name":
+                        mirror_name = element.text
+                    if element.tag == "uri":
+                        ipv4 = element.get("ipv4") == "y"
+                        ipv6 = element.get("ipv6") == "y"
+                        uri = element.text
+                        protocol = element.get("protocol")
+                        if uri is None:
+                            raise Exception("uri is missing")
+                        if protocol is None:
+                            raise Exception("protocol is missing")
+                        endpoints.append(MirrorEndpoint(uri, ipv4, ipv6, protocol))
+                if mirror_name is None:
+                    raise Exception("name missing from mirror")
+                mirrors.append(Mirror(mirror_name, endpoints))
+            group = MirrorGroup(mirrors, country, countryname, region)
+            groups.append(group)
+        return MirrorSet(groups)
 
 if __name__ == "__main__":
-    import sys
-    import urllib.request
-    import urllib.parse
-    import urllib.error
+  import urllib.request
+  mirrorset = MirrorParser3.parse(urllib.request.urlopen(MIRRORS_3_XML).read())
+  print (len(mirrorset.uris()))
+  mirrorset = mirrorset.preferring_protocols(["https", "http"])
+  print (len(mirrorset.uris()))
+  print (len(mirrorset.uris()))
+  print(mirrorset.uris())
 
-    parser = MirrorParser3()
-    parser.parse(urllib.request.urlopen(MIRRORS_3_XML).read())
-    print("===== tuples")
-    print(parser.tuples())
-    print("===== uris")
-    print(parser.uris())
