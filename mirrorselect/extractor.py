@@ -29,7 +29,7 @@ import os
 import requests
 
 from mirrorselect.mirrorparser3 import MirrorParser3
-from mirrorselect.mirrorset import MirrorSet
+from mirrorselect.mirrorset import MirrorSet, Endpoint
 from mirrorselect.version import version
 
 USERAGENT = "Mirrorselect-" + version
@@ -74,7 +74,7 @@ class Extractor:
         if "region" in filters:
             hosts = hosts.with_region(filters["region"])
 
-        self.hosts = hosts.uris()
+        self.hosts: list[Endpoint] = hosts.mirrors()
 
         self.output.write(
             "Extractor(): fetched mirrors,"
@@ -98,12 +98,12 @@ class Extractor:
                                 headers={"User-Agent": USERAGENT})
         if response:
             mirrorset = MirrorParser3.parse(response.text)
-            if len(mirrorset.uris()) == 0:
+            if len(mirrorset.mirrors()) == 0:
                 self.output.print_err(
                     "Could not get mirror list. " "Check your internet connection."
                 )
 
-            self.output.write(" Got %d mirrors.\n" % len(mirrorset.uris()))
+            self.output.write(" Got %d mirrors.\n" % len(mirrorset.mirrors()))
             return mirrorset
 
         self.output.print_err(

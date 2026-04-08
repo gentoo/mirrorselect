@@ -25,6 +25,9 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
+from collections import namedtuple
+
+Endpoint = namedtuple('Endpoint', 'uri name country ipv4 ipv6')
 
 class MirrorEndpoint:
     """An endpoint of a mirror."""
@@ -110,13 +113,12 @@ class MirrorSet:
         """Select mirrors in the specified region."""
         return MirrorSet([g for g in self._groups if g.region == region])
 
-    def uris(self):
-        """The URIs for each mirror endpoint in the set."""
-        flat_list = [
-            e.uri
+    def mirrors(self) -> list[Endpoint]:
+        """Each mirror endpoint in the set."""
+        return [
+            Endpoint(uri=e.uri, name=m.name, country=g.countryname, ipv4=e.ipv4, ipv6=e.ipv6)
             for g in self._groups
             for m in g.mirrors
             for e in m.endpoints
         ]
-        return set(flat_list)
 

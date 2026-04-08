@@ -44,6 +44,7 @@ import urllib.parse
 import urllib.error
 
 from mirrorselect.extractor import USERAGENT
+from mirrorselect.mirrorset import Endpoint
 from portage.package.ebuild.fetch import (
         MirrorLayoutConfig,
         FlatLayout,
@@ -53,6 +54,7 @@ from configparser import (
         ConfigParser,
         Error as ConfigParseError
         )
+
 
 url_parse = urllib.parse.urlparse
 url_unparse = urllib.parse.urlunparse
@@ -69,7 +71,7 @@ NETSELECT_SUPPORTS_IPV4_IPV6 = True
 class Shallow:
     """handles rapid server selection via netselect"""
 
-    def __init__(self, hosts, options, output):
+    def __init__(self, hosts: list[Endpoint], options, output):
         self._options = options
         self.output = output
         self.urls = []
@@ -84,12 +86,12 @@ class Shallow:
                 "Netselect failed to return any mirrors." " Try again using block mode."
             )
 
-    def netselect(self, hosts, number, quiet=False):
+    def netselect(self, hosts: list[Endpoint], number, quiet=False):
         """
         Uses Netselect to choose the closest hosts, _very_ quickly
         """
         if not quiet:
-            hosts = [host[0] for host in hosts]
+            hosts = [host.uri for host in hosts]
         top_host_dict = {}
         top_hosts = []
 
@@ -274,11 +276,11 @@ class Deep:
                     % (prog, num_hosts)
                 )
 
-            mytime, ignore = self.deeptime(host, maxtime)
+            mytime, ignore = self.deeptime(host.uri, maxtime)
 
             if not ignore and mytime < maxtime:
                 maxtime, top_hosts = self._list_add(
-                    (mytime, host), maxtime, top_hosts, self._number
+                    (mytime, host.uri), maxtime, top_hosts, self._number
                 )
             else:
                 continue
@@ -677,25 +679,26 @@ class Interactive:
 
             dialog.extend(["20", "110", "14"])
 
-        for url, args in sorted(
-            hosts, key=lambda x: (x[1]["country"].lower(), x[1]["name"].lower())
+        for mirror in sorted(
+            hosts, key=lambda x: (x.country.lower(), x.name.lower())
         ):
             marker = ""
-            if options.rsync and not url.endswith("/gentoo-portage"):
-                url += "/gentoo-portage"
-            if (not options.ipv6 and not options.ipv4) and args["ipv6"] == "y":
+            uri = mirror.uri
+            if options.rsync and not uri.endswith("/gentoo-portage"):
+                uri += "/gentoo-portage"
+            if (not options.ipv6 and not options.ipv4) and mirror.ipv6 == "y":
                 marker = "* "
-            if options.ipv6 and (args["ipv6"] == "n"):
+            if options.ipv6 and (mirror.ipv6 == "n"):
                 continue
-            if options.ipv4 and (args["ipv4"] == "n"):
+            if options.ipv4 and (mirror.ipv4 == "n"):
                 continue
 
             # dialog.append('"%s" "%s%s: %s" "OFF"'
             # % ( url, marker, args['country'], args['name']))
             dialog.extend(
                 [
-                    "%s" % url,
-                    "{}{}: {}".format(marker, args["country"], args["name"]),
+                    "%s" % uri,
+                    f"{marker}{mirror.country}: {mirror.name}",
                     "OFF",
                 ]
             )
