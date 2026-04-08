@@ -39,9 +39,9 @@ import time
 import hashlib
 import itertools
 
-import urllib.request
-import urllib.parse
-import urllib.error
+from urllib.parse import urlparse, urlunparse
+from urllib.request import urlopen, Request
+from urllib.error import HTTPError
 
 from mirrorselect.extractor import USERAGENT
 from mirrorselect.mirrorset import Endpoint
@@ -54,14 +54,6 @@ from configparser import (
         ConfigParser,
         Error as ConfigParseError
         )
-
-
-url_parse = urllib.parse.urlparse
-url_unparse = urllib.parse.urlunparse
-url_open = urllib.request.urlopen
-url_request = urllib.request.Request
-HTTPError = urllib.error.HTTPError
-
 
 # The netselect --ipv4 and --ipv6 options are supported only
 # with >=net-analyzer/netselect-0.4[ipv6(+)].
@@ -327,7 +319,7 @@ class Deep:
 
         self.output.write(f"_get_distfile_structure(): config_url = {config_url}\n", 2)
 
-        response = url_open(config_url, None, self._connect_timeout)
+        response = urlopen(config_url, None, self._connect_timeout)
 
         if response.status == 404:
             self.output.write("_get_distfile_structure(): no layout.conf, assuming flat\n", 2)
@@ -368,7 +360,7 @@ class Deep:
 
         path = structure.get_path(self.test_file)
         url = self._urljoin(dist_url, path)
-        url_parts = url_parse(url)
+        url_parts = urlparse(url)
 
         self.output.write(f"_deeptime(): testfile url = {url}\n", 1)
 
@@ -418,7 +410,7 @@ class Deep:
 
         for ip in ips:
             test_parts = url_parts._replace(netloc=ip)
-            test_url = url_unparse(test_parts)
+            test_url = urlunparse(test_parts)
             self.output.write("deeptime(): testing url: %s\n" % test_url, 2)
 
             f, test_url, early_out = self._test_connection(
@@ -462,9 +454,9 @@ class Deep:
             try:
                 signal.alarm(int(math.ceil(maxtime)))
                 stime = time.time()
-                r = url_request(test_url)
+                r = Request(test_url)
                 r.host = url_parts.netloc
-                f = url_open(r)
+                f = urlopen(r)
 
                 md5 = hashlib.md5(f.read()).hexdigest()
 
@@ -521,9 +513,9 @@ class Deep:
         try:
             try:
                 signal.alarm(self._connect_timeout)
-                r = url_request(test_url)
+                r = Request(test_url)
                 r.host = url_parts.netloc
-                f = url_open(r)
+                f = urlopen(r)
                 early_out = True
             finally:
                 signal.alarm(0)
