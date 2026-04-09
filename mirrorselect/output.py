@@ -3,7 +3,7 @@
 """Mirrorselect 2.x
  Tool for selecting Gentoo source and rsync mirrors.
 
-Copyright 2005-2023 Gentoo Authors
+Copyright 2005-2026 Gentoo Authors
 
 	Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
 	Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
@@ -33,14 +33,13 @@ import re
 import codecs
 import locale
 
-from optparse import IndentedHelpFormatter
+from optparse import IndentedHelpFormatter, Option
+from typing import Any, TextIO
 
-
-def encoder(text, _encoding_):
+def encoder(text: str, _encoding_: str):
     return codecs.encode(text, _encoding_, "replace")
 
-
-def decode_selection(selection):
+def decode_selection(selection: list[str]):
     """utility function to decode a list of strings
     accoring to the filesystem encoding
     """
@@ -49,8 +48,7 @@ def decode_selection(selection):
     enc = sys.getfilesystemencoding()
     return [encoder(i, enc) for i in selection]
 
-
-def get_encoding(output):
+def get_encoding(output: TextIO | Any):
     if hasattr(output, "encoding") and output.encoding is not None:
         return output.encoding
     else:
@@ -71,7 +69,7 @@ class Output:
     Therefore, verbosity=2 is everything (debug), and verbosity=0 is urgent
     messages only (quiet)."""
 
-    def __init__(self, verbosity=1, out=sys.stderr):
+    def __init__(self, verbosity: int = 1, out: TextIO | Any = sys.stderr):
         esc_seq = "\x1b["
         codes = {}
 
@@ -82,47 +80,47 @@ class Output:
         codes["yellow"] = esc_seq + "33;01m"
         codes["red"] = esc_seq + "31;01m"
 
-        self.codes = codes
+        self.codes: dict[str, str] = codes
         del codes
 
         self.verbosity = verbosity
         self.file = out
 
-    def red(self, text):
+    def red(self, text: str):
         return self.codes["red"] + text + self.codes["reset"]
 
-    def green(self, text):
+    def green(self, text: str):
         return self.codes["green"] + text + self.codes["reset"]
 
-    def white(self, text):
+    def white(self, text: str):
         return self.codes["bold"] + text + self.codes["reset"]
 
-    def blue(self, text):
+    def blue(self, text: str):
         return self.codes["blue"] + text + self.codes["reset"]
 
-    def yellow(self, text):
+    def yellow(self, text: str):
         return self.codes["yellow"] + text + self.codes["reset"]
 
-    def print_info(self, message, level=1):
+    def print_info(self, message: str, level: int = 1):
         """Prints an info message with a green star, like einfo."""
         if level <= self.verbosity:
             self.file.write("\r" + self.green("* ") + message)
             self.file.flush()
 
-    def print_warn(self, message, level=1):
+    def print_warn(self, message: str, level: int = 1):
         """Prints a warning."""
         if level <= self.verbosity:
             self.file.write(self.yellow("Warning: ") + message)
             self.file.flush()
 
-    def print_err(self, message, level=0):
+    def print_err(self, message: str, level: int = 0):
         """Prints an error message with a big red ERROR."""
         if level <= self.verbosity:
             self.file.write(self.red("\nERROR: ") + message + "\n")
             self.file.flush()
             sys.exit(1)
 
-    def write(self, message, level=1):
+    def write(self, message: str, level: int = 1):
         """A wrapper around stderr.write, to enforce verbosity settings."""
         if level <= self.verbosity:
             self.file.write(message)
@@ -137,40 +135,42 @@ class ColoredFormatter(IndentedHelpFormatter):
     Overrides format_heading.
     """
 
-    def __init__(self, output):
+    def __init__(self, output: Output):
         IndentedHelpFormatter.__init__(self)
         self.output = output
 
-    def format_heading(self, heading):
+    def format_heading(self, heading: str):
         """Return a colorful heading."""
         return "%*s%s:\n" % (self.current_indent, "", self.output.white(heading))
 
-    def format_option(self, option):
+    def format_option(self, option: Option):
         """Return colorful formatted help for an option."""
-        option = IndentedHelpFormatter.format_option(self, option)
+        colored = IndentedHelpFormatter.format_option(self, option)
         # long options with args
-        option = re.sub(
+        colored = re.sub(
             r"--([a-zA-Z]*)=([a-zA-Z]*)",
             lambda m: "-{} {}".format(
                 self.output.green(m.group(1)), self.output.blue(m.group(2))
             ),
-            option,
+            colored,
         )
         # short options with args
-        option = re.sub(
+        colored = re.sub(
             r"-([a-zA-Z]) ?([0-9A-Z]+)",
             lambda m: " -"
             + self.output.green(m.group(1))
             + " "
             + self.output.blue(m.group(2)),
-            option,
+            colored,
         )
         # options without args
-        option = re.sub(
-            r"-([a-zA-Z\d]+)", lambda m: "-" + self.output.green(m.group(1)), option
+        colored = re.sub(
+            r"-([a-zA-Z\d]+)", lambda m: "-" + self.output.green(m.group(1)), colored
         )
-        return option
+        return colored
 
-    def format_description(self, description):
+    def format_description(self, description: str | None):
         """Do not wrap."""
+        if not description:
+            return "\n"
         return description + "\n"

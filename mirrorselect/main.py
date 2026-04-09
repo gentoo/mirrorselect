@@ -31,7 +31,9 @@ Distributed under the terms of the GNU General Public License v2
 import os
 import socket
 import sys
-from optparse import OptionParser
+from optparse import Option, OptionParser, Values
+from mirrorselect.configs.configuration import Configuration
+from mirrorselect.mirrorset import Endpoint
 from mirrorselect.output import Output, ColoredFormatter
 from mirrorselect.selectors import Deep, Shallow, Interactive
 from mirrorselect.configs import (
@@ -57,7 +59,7 @@ if "GENTOO_PORTAGE_EPREFIX" in EPREFIX:
 class MirrorSelect:
     """Main operational class"""
 
-    def __init__(self, output=None):
+    def __init__(self, output: Output | None = None):
         """MirrorSelect class init
 
         @param output: mirrorselect.output.Ouptut() class instance
@@ -66,7 +68,7 @@ class MirrorSelect:
         self.output = output or Output()
 
     @staticmethod
-    def _have_bin(name):
+    def _have_bin(name: str):
         """Determines whether a particular binary is available
         on the host system.  It searches in the PATH environment
         variable paths.
@@ -82,7 +84,7 @@ class MirrorSelect:
                 return file_path
         return None
 
-    def change_config(self, hosts, out, config_path):
+    def change_config(self, hosts: list[str], out: bool, config_path: str):
         """Writes the config changes to the given file, or to stdout.
 
         @param hosts: list of host urls to write
@@ -101,12 +103,12 @@ class MirrorSelect:
             self.mirror_type.write_config(self.output, config_path, hosts)
 
     @staticmethod
-    def write_to_output(mirror_string):
+    def write_to_output(mirror_string: str):
         print()
         print(mirror_string)
         sys.exit(0)
 
-    def _parse_args(self, argv, config_path):
+    def _parse_args(self, argv: list[str], config_path: str):
         """
         Does argument parsing and some sanity checks.
         Returns an optparse Options object.
@@ -128,7 +130,7 @@ class MirrorSelect:
             )
         )
 
-        def set_servers(option, opt_str, value, parser):
+        def set_servers(option: Option, _, value: str, parser: OptionParser):
             set_servers.user_configured = True
             setattr(parser.values, option.dest, value)
 
@@ -359,7 +361,7 @@ class MirrorSelect:
         # return results
         return options
 
-    def get_available_hosts(self, options):
+    def get_available_hosts(self, options: Values):
         """Returns a list of hosts suitable for consideration by a user
         based on user input
 
@@ -373,7 +375,7 @@ class MirrorSelect:
 
         return hosts
 
-    def select_urls(self, hosts, options):
+    def select_urls(self, hosts: list[Endpoint], options: Values):
         """Returns the list of selected host urls using
         the options passed in to run one of the three selector types.
         1) Interactive ncurses dialog
@@ -392,7 +394,7 @@ class MirrorSelect:
             selector = Shallow(hosts, options, self.output)
         return selector.urls
 
-    def get_conf_path(self, mirror_type):
+    def get_conf_path(self, mirror_type: Configuration):
         """Checks for the existance of repos.conf or make.conf in /etc/portage/
         Failing that it checks for it in /etc/
         Failing in /etc/ it defaults to /etc/portage/make.conf
@@ -401,12 +403,12 @@ class MirrorSelect:
         """
         return mirror_type.get_conf_path(self.output)
 
-    def main(self, argv):
+    def main(self, argv: list[str]):
         """Lets Rock!
 
         @param argv: list of command line arguments to parse
         """
-        # XXX this is only because _parse_args (dubiously) wants to know the 
+        # XXX this is only because _parse_args (dubiously) wants to know the
         # path of make.conf, and because the debug logging prints that path on
         # startup, even when using -r which doesn't interact with that file.
         distfiles_mirror = DistfilesConfig(EPREFIX)
@@ -427,6 +429,7 @@ class MirrorSelect:
             self.output.print_err(
                 "main(); Exiting due to missing repos.conf/gentoo.conf file\n"
             )
+            exit(1)
 
         fsmirrors = self.mirror_type.get_filesystem_mirrors(self.output, config_path)
 
