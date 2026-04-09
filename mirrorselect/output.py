@@ -47,9 +47,7 @@ def decode_selection(selection):
     # fix None passed in, return an empty list
     selection = selection or []
     enc = sys.getfilesystemencoding()
-    if enc is not None:
-        return [encoder(i, enc) for i in selection]
-    return selection
+    return [encoder(i, enc) for i in selection]
 
 
 def get_encoding(output):
