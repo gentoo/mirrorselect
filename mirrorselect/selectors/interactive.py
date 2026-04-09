@@ -56,9 +56,9 @@ class Interactive:
                 "dialog",
                 "--stdout",
                 "--title",
-                '"Gentoo RSYNC Mirrors"',
+                "Gentoo RSYNC Mirrors",
                 "--radiolist",
-                '"Please select your desired mirror:"',
+                "Please select your desired mirror:",
             ]
         else:
             dialog = [
@@ -66,9 +66,9 @@ class Interactive:
                 "--separate-output",
                 "--stdout",
                 "--title",
-                '"Gentoo Download Mirrors"',
+                "Gentoo Download Mirrors",
                 "--checklist",
-                '"Please select your desired mirrors:',
+                "Please select your desired mirrors:",
             ]
             if not options.ipv4 and not options.ipv6:
                 dialog[-1] += "\n* = supports ipv6"
