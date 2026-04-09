@@ -59,9 +59,6 @@ class Interactive:
                 '"Gentoo RSYNC Mirrors"',
                 "--radiolist",
                 '"Please select your desired mirror:"',
-                "20",
-                "110",
-                "14",
             ]
         else:
             dialog = [
@@ -76,7 +73,7 @@ class Interactive:
             if not options.ipv4 and not options.ipv6:
                 dialog[-1] += "\n* = supports ipv6"
 
-            dialog.extend(["20", "110", "14"])
+        dialog.extend(["20", "110", "14"])
 
         for mirror in sorted(
             hosts, key=lambda x: (x.country.lower(), x.name.lower())
