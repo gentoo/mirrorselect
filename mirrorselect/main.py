@@ -374,7 +374,7 @@ class MirrorSelect:
 
         return hosts
 
-    def select_urls(self, hosts: list[Endpoint], options: Values):
+    def select_urls(self, hosts: list[Endpoint], options: Values) -> list[str]:
         """Returns the list of selected host urls using
         the options passed in to run one of the three selector types.
         1) Interactive ncurses dialog
@@ -386,12 +386,11 @@ class MirrorSelect:
         @rtype: list
         """
         if options.interactive:
-            selector = Interactive(hosts, options, self.output)
+            return Interactive(hosts, options, self.output).urls
         elif options.deep:
-            selector = Deep(hosts, options, self.output)
+            return Deep(hosts, options, self.output).urls
         else:
-            selector = Shallow(hosts, options, self.output)
-        return selector.urls
+            return Shallow(hosts, options, self.output).urls
 
     def main(self, argv: list[str]):
         """Lets Rock!
