@@ -108,7 +108,7 @@ class MirrorSelect:
         print(mirror_string)
         sys.exit(0)
 
-    def _parse_args(self, argv: list[str], config_path: str):
+    def _parse_args(self, argv: list[str]):
         """
         Does argument parsing and some sanity checks.
         Returns an optparse Options object.
@@ -185,7 +185,7 @@ class MirrorSelect:
             "--ftp",
             action="store_true",
             default=False,
-            help="ftp only mode. Will not consider hosts of other " "types.",
+            help="ftp only mode. Will not consider hosts of other types.",
         )
         group.add_option(
             "-H",
@@ -269,9 +269,8 @@ class MirrorSelect:
             "--output",
             action="store_true",
             default=False,
-            help="Output Only Mode, this is especially useful "
-            "when being used during installation, to redirect "
-            "output to a file other than %s" % config_path,
+            help="Do not modify the portage config, but print the results "
+            " to STDOUT instead. "
         )
         group.add_option(
             "-P",
@@ -394,36 +393,21 @@ class MirrorSelect:
             selector = Shallow(hosts, options, self.output)
         return selector.urls
 
-    def get_conf_path(self, mirror_type: Configuration):
-        """Checks for the existance of repos.conf or make.conf in /etc/portage/
-        Failing that it checks for it in /etc/
-        Failing in /etc/ it defaults to /etc/portage/make.conf
-
-        @rtype: string
-        """
-        return mirror_type.get_conf_path(self.output)
-
     def main(self, argv: list[str]):
         """Lets Rock!
 
         @param argv: list of command line arguments to parse
         """
-        # XXX this is only because _parse_args (dubiously) wants to know the
-        # path of make.conf, and because the debug logging prints that path on
-        # startup, even when using -r which doesn't interact with that file.
-        distfiles_mirror = DistfilesConfig(EPREFIX)
-        config_path = distfiles_mirror.get_conf_path(self.output)
-        options = self._parse_args(argv, config_path)
+        options = self._parse_args(argv)
         self.output.verbosity = options.verbosity
-        self.output.write("main(); config_path = %s\n" % config_path, 2)
 
-        # reset config_path to find repos.conf/gentoo.conf
         if options.rsync:
             self.mirror_type = RsyncConfig()
-            config_path = self.mirror_type.get_conf_path(self.output)
-            self.output.write("main(); reset config_path = %s\n" % config_path, 2)
         else:
-            self.mirror_type = distfiles_mirror
+            self.mirror_type = DistfilesConfig(EPREFIX)
+
+        config_path = self.mirror_type.get_conf_path(self.output)
+        self.output.write("main(); config_path = %s\n" % config_path, 2)
 
         if not config_path:
             self.output.print_err(
