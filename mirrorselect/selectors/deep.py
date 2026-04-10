@@ -27,7 +27,6 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
-from mirrorselect.output import encoder, get_encoding, decode_selection
 import http.client
 import math
 import signal
@@ -41,6 +40,8 @@ from urllib.parse import urlparse, urlunparse
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError
 
+from optparse import Values
+from mirrorselect.output import Output
 from mirrorselect.mirrorset import Endpoint
 from portage.package.ebuild.fetch import (
         MirrorLayoutConfig,
@@ -55,24 +56,24 @@ class TimeoutException(Exception):
     pass
 
 
-def timeout_handler(signum, frame):
+def timeout_handler(*_):
     raise TimeoutException()
 
 class Deep:
     """handles deep mode mirror selection."""
 
-    def __init__(self, hosts: list[Endpoint], options, output):
+    def __init__(self, hosts: list[Endpoint], options: Values, output: Output):
         self.output = output
-        self.urls = []
+        self.urls: list[str] = []
         self._hosts = hosts
         self._number = options.servers
         self._dns_timeout = options.timeout
         self._connect_timeout = options.timeout
-        self._download_timeout = options.timeout
+        self._download_timeout: float = options.timeout
         self.test_file = options.file
         self.test_md5 = options.md5
 
-        addr_families = []
+        addr_families: list[int] = []
         if options.ipv4:
             addr_families.append(socket.AF_INET)
         elif options.ipv6:
@@ -137,7 +138,7 @@ class Deep:
         )
         self.urls = fastest_hosts
 
-    def get_distfile_structure(self, distfiles_url):
+    def get_distfile_structure(self, distfiles_url: str):
         """
         Obtain the GLEP 75 Mirror Layout from layout.conf
 
@@ -174,7 +175,7 @@ class Deep:
         mlc.deserialize(vals)
         return mlc.get_best_supported_layout()
 
-    def deeptime(self, url, maxtime):
+    def deeptime(self, url: str, maxtime: float):
         """
         Takes a single url and fetch command, and downloads the test file.
         Can be given an optional timeout, for use with a clever algorithm.
@@ -193,7 +194,7 @@ class Deep:
             )
             return (None, True)
 
-        path = structure.get_path(self.test_file)
+        path: str = structure.get_path(self.test_file)
         url = self._urljoin(dist_url, path)
         url_parts = urlparse(url)
 
@@ -391,7 +392,7 @@ class Deep:
 
 
     @staticmethod
-    def _urljoin(url, path):
+    def _urljoin(url: str, path: str):
         """Appends a path component to a URL string.
 
         urllib's urljoin can't be relied on for this. If the given URL
