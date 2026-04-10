@@ -25,9 +25,15 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
-from collections import namedtuple
+from typing import NamedTuple
 
-Endpoint = namedtuple('Endpoint', 'uri name country ipv4 ipv6')
+class Endpoint(NamedTuple):
+    uri: str
+    name: str
+    country: str
+    ipv4: bool
+    ipv6: bool
+
 
 class MirrorEndpoint:
     """An endpoint of a mirror."""

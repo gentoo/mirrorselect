@@ -459,7 +459,7 @@ class MirrorSelect:
         hosts = self.get_available_hosts(options)
 
         if options.all_mirrors:
-            urls = sorted([url for url in list(hosts)])
+            urls = sorted([url.uri for url in list(hosts)])
             if options.rsync:
                 urls = [urls[0]]
         else:
