@@ -90,11 +90,11 @@ class Deep:
         Doesn't waste time finnishing a test that has already taken longer than
         the slowest mirror weve already got.
         """
-        top_hosts = {}
         prog = 0
         maxtime = self._download_timeout
         num_hosts = len(self._hosts)
         self.dl_failures = 0
+        results: list[tuple[float, Endpoint]] = []
 
         for host in self._hosts:
             prog += 1
@@ -109,39 +109,33 @@ class Deep:
                     % (prog, num_hosts)
                 )
 
-            mytime, ignore = self.deeptime(host.uri, maxtime)
+            mytime, _ = self.deeptime(host.uri, maxtime)
 
-            if not ignore and mytime < maxtime:
-                maxtime, top_hosts = self._list_add(
-                    (mytime, host.uri), maxtime, top_hosts, self._number
-                )
-            else:
+            if mytime is None:
                 continue
+
+            results.append((mytime, host))
+            if len(results) >= self._number:
+                """we can now start bailing out of tests that are slower
+                than the nth fastest host in the list"""
+
+                maxtime = max(sorted(results)[:self._number])[0]
+
+        fastest_hosts = [test[1].uri for test in sorted(results)[:self._number]]
 
         self.output.write(
             "deeptest(): got %s hosts, and returned %s\n"
-            % (num_hosts, str(list(top_hosts.values()))),
+            % (num_hosts, str(fastest_hosts)),
             2,
         )
 
         self.output.write("\n")  # this just makes output nicer
 
-        # can't just return the dict.values,
-        # because we want the fastest mirror first...
-        keys = sorted(top_hosts.keys())
-
-        rethosts = []
-        for key in keys:
-            # self.output.write('deeptest(): adding rethost '
-            # '%s, %s' % (key, top_hosts[key]), 2)
-            rethosts.append(top_hosts[key])
-
-        self.output.write("deeptest(): final rethost %s\n" % (rethosts), 2)
         self.output.write(
             f"deeptest(): final md5 failures {self.dl_failures} of {num_hosts}\n",
             2,
         )
-        self.urls = rethosts
+        self.urls = fastest_hosts
 
     def get_distfile_structure(self, distfiles_url):
         """
@@ -395,60 +389,6 @@ class Deep:
             )
         return f, test_url, early_out
 
-    def _list_add(self, time_host, maxtime, host_dict, maxlen):
-        """
-        Takes argumets ((time, host), maxtime, host_dict, maxlen)
-        Adds a new time:host pair to the dictionary of top hosts.
-        If the dictionary is full, the slowest host is removed to make space.
-        Returns the new maxtime, be it the specified timeout,
-        or the slowest host.
-        """
-        if len(host_dict) < maxlen:  # still have room, and host is fast. add it.
-            self.output.write(
-                "_list_add(): added host %s. with a time of %s\n"
-                % (time_host[1], time_host[0]),
-                2,
-            )
-
-            host_dict.update(dict([time_host]))
-            times = sorted(host_dict.keys())
-
-        else:  # We need to make room in the dict before we add. Kill the slowest.
-            self.output.write(
-                "_list_add(): Adding host %s with a time of %s\n"
-                % (time_host[1], time_host[0]),
-                2,
-            )
-            times = sorted(host_dict.keys())
-            self.output.write("_list_add(): removing %s\n" % host_dict[times[-1]], 2)
-            del host_dict[times[-1]]
-            host_dict.update(dict([time_host]))
-            # done adding. now return the appropriate time
-            times = sorted(host_dict.keys())
-
-        if len(host_dict) < maxlen:  # check again to choose new timeout
-            self.output.write(
-                "_list_add(): host_dict is not full yet."
-                " reusing timeout of %s sec.\n" % maxtime,
-                2,
-            )
-            retval = maxtime
-        else:
-            self.output.write(
-                "_list_add(): host_dict is full. " "Selecting the best timeout\n", 2
-            )
-            if times[-1] < maxtime:
-                retval = times[-1]
-            else:
-                retval = maxtime
-
-        self.output.write(
-            "_list_add(): new max time is %s seconds,"
-            " and now len(host_dict)= %s\n" % (retval, len(host_dict)),
-            2,
-        )
-
-        return retval, host_dict
 
     @staticmethod
     def _urljoin(url, path):
