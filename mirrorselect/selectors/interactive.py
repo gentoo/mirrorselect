@@ -27,18 +27,19 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
+from optparse import Values
 import subprocess
 import sys
 
 from mirrorselect.mirrorset import Endpoint
-
+from mirrorselect.output import Output
 
 class Interactive:
     """Handles interactive host selection."""
 
-    def __init__(self, hosts: list[Endpoint], options, output):
+    def __init__(self, hosts: list[Endpoint], options: Values, output: Output):
         self.output = output
-        self.urls = []
+        self.urls: list[str] = []
 
         self.interactive(hosts, options)
         self.output.write("Interactive.interactive(): self.urls = %s\n" % self.urls, 2)
@@ -46,7 +47,7 @@ class Interactive:
         if not self.urls or len(self.urls[0]) == 0:
             sys.exit(1)
 
-    def interactive(self, hosts, options):
+    def interactive(self, hosts: list[Endpoint], options: Values):
         """
         Some sort of interactive menu thingy.
         """
@@ -88,8 +89,6 @@ class Interactive:
             if options.ipv4 and (mirror.ipv4 == "n"):
                 continue
 
-            # dialog.append('"%s" "%s%s: %s" "OFF"'
-            # % ( url, marker, args['country'], args['name']))
             dialog.extend(
                 [
                     "%s" % uri,
