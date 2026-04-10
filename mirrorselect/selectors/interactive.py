@@ -30,7 +30,6 @@ Distributed under the terms of the GNU General Public License v2
 import subprocess
 import sys
 
-from mirrorselect.output import encoder, get_encoding, decode_selection
 from mirrorselect.mirrorset import Endpoint
 
 
@@ -98,18 +97,12 @@ class Interactive:
                     "OFF",
                 ]
             )
-        dialog = [encoder(x, get_encoding(sys.stdout)) for x in dialog]
         proc = subprocess.Popen(dialog, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         out, _ = proc.communicate()
 
-        self.urls = out.splitlines()
+        lines = out.splitlines()
 
         sys.stderr.write("\x1b[2J\x1b[H")
-        if self.urls:
-            if hasattr(self.urls[0], "decode"):
-                self.urls = decode_selection(
-                    [x.decode("utf-8").rstrip() for x in self.urls]
-                )
-            else:
-                self.urls = decode_selection([x.rstrip() for x in self.urls])
+        if lines:
+            self.urls = [x.decode("utf-8").rstrip() for x in lines]
