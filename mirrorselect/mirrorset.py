@@ -96,7 +96,7 @@ class MirrorSet:
         for group in self._groups:
             new_mirrors: list[Mirror] = []
             for mirror in group.mirrors:
-                preferred = next((e for e in mirror.endpoints if protocol == protocol), None)
+                preferred = next((e for e in mirror.endpoints if e.protocol == protocol), None)
                 if preferred is None:
                     break
                 new_mirrors.append(Mirror(mirror.name, [preferred]))
