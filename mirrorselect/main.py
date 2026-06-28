@@ -94,7 +94,7 @@ class MirrorSelect:
         """
         for i in range(0, len(hosts)):
             if isinstance(hosts[i], bytes):
-                hosts[i] = hosts[i].decode("utf-8")
+                hosts[i] = hosts[i].decode("utf-8", errors="replace")
 
         if out:
             self.write_to_output(self.mirror_type.format_config(hosts))
