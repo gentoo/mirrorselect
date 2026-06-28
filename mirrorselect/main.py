@@ -32,7 +32,6 @@ import os
 import socket
 import sys
 from optparse import Option, OptionParser, Values
-from mirrorselect.configs.configuration import Configuration
 from mirrorselect.mirrorset import Endpoint
 from mirrorselect.output import Output, ColoredFormatter
 from mirrorselect.selectors import Deep, Shallow, Interactive

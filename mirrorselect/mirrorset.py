@@ -64,7 +64,7 @@ class MirrorGroup:
     """Represents the set of mirrors available in one country."""
     def __init__(self, mirrors: list[Mirror], country: str,
                  countryname: str, region: str):
-        self.mirrors: list[Mirror] = mirrors;
+        self.mirrors: list[Mirror] = mirrors
         self.region: str = region
         self.country: str = country
         self.countryname: str = countryname

@@ -2,13 +2,11 @@
 
 import logging
 import re
-import sys
-from distutils import core, log
+from distutils import core
 from distutils.command.sdist import sdist
 from distutils.core import Command
 
 import os
-import io
 import unittest
 
 

@@ -187,7 +187,7 @@ class Deep:
 
         try: 
             structure = self.get_distfile_structure(dist_url)
-        except OSError as e:
+        except OSError:
             self.output.write(
                 f"deeptime(): unable to connect to host {url}\n",
                 2,
