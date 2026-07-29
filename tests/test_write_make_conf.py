@@ -21,9 +21,7 @@ class WriteMakeConfTestCase(unittest.TestCase):
                 config_path = os.path.join(tempdir, "make.conf")
                 with open(config_path, "w") as f:
                     f.write(make_conf)
-                sut.write_conf(
-                    Output(out=status_output), config_path, mirror_string
-                )
+                sut.write_conf(Output(out=status_output), config_path, mirror_string)
                 with open(config_path) as f:
                     result = f.read()
                     # print("!!!result!!!\n", result, "!!!!!!!!!!\n")

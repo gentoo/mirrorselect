@@ -5,11 +5,11 @@
 
 Copyright 2005-2023 Gentoo Authors
 
-	Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
-	Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
-	Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
-	Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
-	Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
+        Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
+        Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
+        Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
+        Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
+        Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
 
 Distributed under the terms of the GNU General Public License v2
  This program is free software; you can redistribute it and/or modify
@@ -27,18 +27,18 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
-
 import os
 import socket
 import sys
 from optparse import Option, OptionParser, Values
-from mirrorselect.mirrorset import Endpoint
-from mirrorselect.output import Output, ColoredFormatter
-from mirrorselect.selectors import Deep, Shallow, Interactive
+
 from mirrorselect.configs import (
     DistfilesConfig,
     RsyncConfig,
 )
+from mirrorselect.mirrorset import Endpoint
+from mirrorselect.output import ColoredFormatter, Output
+from mirrorselect.selectors import Deep, Interactive, Shallow
 from mirrorselect.version import version
 
 # eprefix compatibility
@@ -54,6 +54,7 @@ EPREFIX = "@GENTOO_PORTAGE_EPREFIX@"
 # check and set it if it wasn't
 if "GENTOO_PORTAGE_EPREFIX" in EPREFIX:
     EPREFIX = ""
+
 
 class MirrorSelect:
     """Main operational class"""
@@ -92,7 +93,7 @@ class MirrorSelect:
         @param sync: boolean, used to switch between sync-uri repos.conf target,
                 and GENTOO_MIRRORS make.conf variable target
         """
-        for i in range(0, len(hosts)):
+        for i in range(len(hosts)):
             if isinstance(hosts[i], bytes):
                 hosts[i] = hosts[i].decode("utf-8")
 
@@ -269,7 +270,7 @@ class MirrorSelect:
             action="store_true",
             default=False,
             help="Do not modify the portage config, but print the results "
-            " to STDOUT instead. "
+            " to STDOUT instead. ",
         )
         group.add_option(
             "-P",
@@ -339,8 +340,10 @@ class MirrorSelect:
         if options.all_mirrors and hasattr(set_servers, "user_configured"):
             self.output.print_err("Choose at most one of -s or -a")
 
-        if options.interactive and not options.rsync and (
-            options.deep or options.blocksize or options.servers > 1
+        if (
+            options.interactive
+            and not options.rsync
+            and (options.deep or options.blocksize or options.servers > 1)
         ):
             self.output.print_err("Invalid option combination with -i")
 
@@ -425,9 +428,7 @@ class MirrorSelect:
             urls = self.select_urls(hosts, options)
 
         if len(urls):
-            self.change_config(
-                fsmirrors + urls, options.output, config_path
-            )
+            self.change_config(fsmirrors + urls, options.output, config_path)
         else:
             self.output.write(
                 "No search results found. "

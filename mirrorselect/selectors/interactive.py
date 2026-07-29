@@ -5,11 +5,11 @@
 
 Copyright 2005-2026 Gentoo Authors
 
-	Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
-	Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
-	Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
-	Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
-	Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
+        Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
+        Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
+        Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
+        Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
+        Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
 
 Distributed under the terms of the GNU General Public License v2
  This program is free software; you can redistribute it and/or modify
@@ -27,12 +27,13 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
-from optparse import Values
 import subprocess
 import sys
+from optparse import Values
 
 from mirrorselect.mirrorset import Endpoint
 from mirrorselect.output import Output
+
 
 class Interactive:
     """Handles interactive host selection."""
@@ -75,9 +76,7 @@ class Interactive:
 
         dialog.extend(["20", "110", "14"])
 
-        for mirror in sorted(
-            hosts, key=lambda x: (x.country.lower(), x.name.lower())
-        ):
+        for mirror in sorted(hosts, key=lambda x: (x.country.lower(), x.name.lower())):
             marker = ""
             uri = mirror.uri
             if options.rsync and not uri.endswith("/gentoo-portage"):

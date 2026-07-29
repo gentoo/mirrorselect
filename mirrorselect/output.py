@@ -5,11 +5,11 @@
 
 Copyright 2005-2026 Gentoo Authors
 
-	Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
-	Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
-	Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
-	Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
-	Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
+        Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
+        Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
+        Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
+        Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
+        Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
 
 Distributed under the terms of the GNU General Public License v2
  This program is free software; you can redistribute it and/or modify
@@ -27,17 +27,17 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
-
-import sys
-import re
 import codecs
 import locale
-
+import re
+import sys
 from optparse import IndentedHelpFormatter, Option
 from typing import Any, TextIO
 
+
 def encoder(text: str, _encoding_: str):
     return codecs.encode(text, _encoding_, "replace")
+
 
 def decode_selection(selection: list[str]):
     """utility function to decode a list of strings
@@ -47,6 +47,7 @@ def decode_selection(selection: list[str]):
     selection = selection or []
     enc = sys.getfilesystemencoding()
     return [encoder(i, enc) for i in selection]
+
 
 def get_encoding(output: TextIO | Any):
     if hasattr(output, "encoding") and output.encoding is not None:
@@ -128,7 +129,6 @@ class Output:
 
 
 class ColoredFormatter(IndentedHelpFormatter):
-
     """HelpFormatter with colorful output.
 
     Extends format_option.
@@ -149,9 +149,7 @@ class ColoredFormatter(IndentedHelpFormatter):
         # long options with args
         colored = re.sub(
             r"--([a-zA-Z]*)=([a-zA-Z]*)",
-            lambda m: "-{} {}".format(
-                self.output.green(m.group(1)), self.output.blue(m.group(2))
-            ),
+            lambda m: f"-{self.output.green(m.group(1))} {self.output.blue(m.group(2))}",
             colored,
         )
         # short options with args

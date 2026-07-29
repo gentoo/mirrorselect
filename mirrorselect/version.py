@@ -5,7 +5,7 @@
 
 Copyright 2012-2023 Gentoo Authors
 
-	Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
+        Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
 
 Distributed under the terms of the GNU General Public License v2
  This program is free software; you can redistribute it and/or modify

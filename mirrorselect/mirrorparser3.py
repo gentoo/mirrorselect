@@ -5,9 +5,9 @@
 
 Copyright 2009-2026 Gentoo Authors
 
-	Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
-	Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
-	Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
+        Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
+        Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
+        Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
 
 Distributed under the terms of the GNU General Public License v2
  This program is free software; you can redistribute it and/or modify
@@ -26,10 +26,12 @@ Distributed under the terms of the GNU General Public License v2
 """
 
 from xml.etree import ElementTree as ET
-from mirrorselect.mirrorset import MirrorSet, MirrorGroup, MirrorEndpoint, Mirror
+
+from mirrorselect.mirrorset import Mirror, MirrorEndpoint, MirrorGroup, MirrorSet
 
 MIRRORS_3_XML = "https://api.gentoo.org/mirrors/distfiles.xml"
 MIRRORS_RSYNC_DATA = "https://api.gentoo.org/mirrors/rsync.xml"
+
 
 class MirrorParser3:
     @staticmethod
@@ -70,12 +72,13 @@ class MirrorParser3:
             groups.append(group)
         return MirrorSet(groups)
 
-if __name__ == "__main__":
-  import urllib.request
-  mirrorset = MirrorParser3.parse(urllib.request.urlopen(MIRRORS_3_XML).read())
-  print (len(mirrorset.uris()))
-  mirrorset = mirrorset.preferring_protocols(["https", "http"])
-  print (len(mirrorset.uris()))
-  print (len(mirrorset.uris()))
-  print(mirrorset.uris())
 
+if __name__ == "__main__":
+    import urllib.request
+
+    mirrorset = MirrorParser3.parse(urllib.request.urlopen(MIRRORS_3_XML).read())
+    print(len(mirrorset.uris()))
+    mirrorset = mirrorset.preferring_protocols(["https", "http"])
+    print(len(mirrorset.uris()))
+    print(len(mirrorset.uris()))
+    print(mirrorset.uris())

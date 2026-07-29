@@ -5,11 +5,11 @@
 
 Copyright 2005-2026 Gentoo Authors
 
-	Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
-	Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
-	Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
-	Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
-	Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
+        Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
+        Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
+        Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
+        Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
+        Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
 
 Distributed under the terms of the GNU General Public License v2
  This program is free software; you can redistribute it and/or modify
@@ -26,8 +26,9 @@ Distributed under the terms of the GNU General Public License v2
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
 """
-import sys
+
 import subprocess
+import sys
 
 from mirrorselect.mirrorset import Endpoint
 
@@ -183,5 +184,3 @@ class Shallow:
         )
 
         return host_array
-
-

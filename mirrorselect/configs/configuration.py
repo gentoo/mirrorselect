@@ -3,11 +3,11 @@
 
 Copyright 2005-2026 Gentoo Authors
 
-	Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
-	Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
-	Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
-	Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
-	Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
+        Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
+        Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
+        Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
+        Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
+        Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
 
 Distributed under the terms of the GNU General Public License v2
  This program is free software; you can redistribute it and/or modify
@@ -27,10 +27,12 @@ Distributed under the terms of the GNU General Public License v2
 
 import os
 import re
-import string
 import shlex
+import string
 from abc import ABC, abstractmethod
+
 from mirrorselect.output import Output
+
 
 class Configuration(ABC):
     def __init__(self, var: str, eprefix: str):
@@ -83,7 +85,9 @@ class Configuration(ABC):
 
                 """ Look for mounted filesystem in value """
                 mirrorlist = val.rsplit()
-                output.write("get_filesystem_mirrors(): mirrorlist = %s\n" % mirrorlist, 2)
+                output.write(
+                    "get_filesystem_mirrors(): mirrorlist = %s\n" % mirrorlist, 2
+                )
                 for mirror in mirrorlist:
                     if p.match(mirror) is None:
                         if os.access(mirror, os.F_OK):

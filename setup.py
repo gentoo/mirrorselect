@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 
 import logging
+import os
 import re
+import unittest
 from distutils import core
 from distutils.command.sdist import sdist
 from distutils.core import Command
-
-import os
-import unittest
-
 
 __version__ = os.getenv("VERSION", default=os.getenv("PVR", default="9999"))
 
@@ -35,6 +33,7 @@ install_requires = []
 if os.path.isfile(requirements_path):
     with open(requirements_path) as f:
         install_requires = f.read().splitlines()
+
 
 class set_version(core.Command):
     """Set python version to our __version__."""

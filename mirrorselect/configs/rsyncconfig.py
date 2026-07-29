@@ -3,11 +3,11 @@
 
 Copyright 2005-2019 Gentoo Authors
 
-	Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
-	Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
-	Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
-	Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
-	Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
+        Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
+        Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
+        Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
+        Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
+        Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
 
 Distributed under the terms of the GNU General Public License v2
  This program is free software; you can redistribute it and/or modify
@@ -25,12 +25,14 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
-from optparse import Values
 import os
-from mirrorselect.mirrorparser3 import MIRRORS_RSYNC_DATA
+from optparse import Values
+
 from mirrorselect.extractor import Extractor
-from .configuration import Configuration
+from mirrorselect.mirrorparser3 import MIRRORS_RSYNC_DATA
 from mirrorselect.output import Output
+
+from .configuration import Configuration
 
 
 class RsyncConfig(Configuration):
@@ -64,6 +66,7 @@ class RsyncConfig(Configuration):
         @param value: string, the value to set var to
         """
         from configparser import ConfigParser
+
         config = ConfigParser()
         config.read(config_path)
         if config.has_option("gentoo", self.var):
@@ -75,5 +78,3 @@ class RsyncConfig(Configuration):
                 "write_repos_conf(): Failed to find section 'gentoo',"
                 " variable: %s\nChanges NOT SAVED" % self.var
             )
-
-

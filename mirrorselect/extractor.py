@@ -3,11 +3,11 @@
 
 Copyright 2005-2012 Gentoo Foundation
 
-	Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
-	Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
-	Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
-	Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
-	Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
+        Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
+        Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
+        Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
+        Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
+        Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
 
 Distributed under the terms of the GNU General Public License v2
  This program is free software; you can redistribute it and/or modify
@@ -26,13 +26,15 @@ Distributed under the terms of the GNU General Public License v2
 """
 
 import os
+
 import requests
 
 from mirrorselect.mirrorparser3 import MirrorParser3
-from mirrorselect.mirrorset import MirrorSet, Endpoint
+from mirrorselect.mirrorset import Endpoint, MirrorSet
 from mirrorselect.version import version
 
 USERAGENT = "Mirrorselect-" + version
+
 
 class Extractor:
     """The Extractor employs a MirrorParser3 object to get a list of valid
@@ -92,10 +94,9 @@ class Extractor:
 
         self.output.print_info("Downloading a list of mirrors...\n")
 
-        response = requests.get(url,
-                                timeout=60,
-                                proxies=self.proxies,
-                                headers={"User-Agent": USERAGENT})
+        response = requests.get(
+            url, timeout=60, proxies=self.proxies, headers={"User-Agent": USERAGENT}
+        )
         if response:
             mirrorset = MirrorParser3.parse(response.text)
             if len(mirrorset.mirrors()) == 0:

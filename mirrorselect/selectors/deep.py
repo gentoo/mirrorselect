@@ -5,11 +5,11 @@
 
 Copyright 2005-2026 Gentoo Authors
 
-	Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
-	Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
-	Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
-	Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
-	Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
+        Copyright (C) 2005 Colin Kingsley <tercel@gentoo.org>
+        Copyright (C) 2008 Zac Medico <zmedico@gentoo.org>
+        Copyright (C) 2009 Sebastian Pipping <sebastian@pipping.org>
+        Copyright (C) 2009 Christian Ruppert <idl0r@gentoo.org>
+        Copyright (C) 2012 Brian Dolbec <dolsen@gentoo.org>
 
 Distributed under the terms of the GNU General Public License v2
  This program is free software; you can redistribute it and/or modify
@@ -27,30 +27,29 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
+import hashlib
 import http.client
+import itertools
 import math
 import signal
 import socket
 import ssl
 import time
-import hashlib
-import itertools
-
-from urllib.parse import urlparse, urlunparse
-from urllib.request import urlopen, Request
-from urllib.error import HTTPError
-
+from configparser import ConfigParser
+from configparser import Error as ConfigParseError
 from optparse import Values
-from mirrorselect.output import Output
-from mirrorselect.mirrorset import Endpoint
+from urllib.error import HTTPError
+from urllib.parse import urlparse, urlunparse
+from urllib.request import Request, urlopen
+
 from portage.package.ebuild.fetch import (
-        MirrorLayoutConfig,
-        FlatLayout,
-        )
-from configparser import (
-        ConfigParser,
-        Error as ConfigParseError
-        )
+    FlatLayout,
+    MirrorLayoutConfig,
+)
+
+from mirrorselect.mirrorset import Endpoint
+from mirrorselect.output import Output
+
 
 class TimeoutException(Exception):
     pass
@@ -58,6 +57,7 @@ class TimeoutException(Exception):
 
 def timeout_handler(*_):
     raise TimeoutException()
+
 
 class Deep:
     """handles deep mode mirror selection."""
@@ -120,9 +120,9 @@ class Deep:
                 """we can now start bailing out of tests that are slower
                 than the nth fastest host in the list"""
 
-                maxtime = max(sorted(results)[:self._number])[0]
+                maxtime = max(sorted(results)[: self._number])[0]
 
-        fastest_hosts = [test[1].uri for test in sorted(results)[:self._number]]
+        fastest_hosts = [test[1].uri for test in sorted(results)[: self._number]]
 
         self.output.write(
             "deeptest(): got %s hosts, and returned %s\n"
@@ -158,11 +158,13 @@ class Deep:
         response = urlopen(config_url, None, self._connect_timeout)
 
         if response.status == 404:
-            self.output.write("_get_distfile_structure(): no layout.conf, assuming flat\n", 2)
+            self.output.write(
+                "_get_distfile_structure(): no layout.conf, assuming flat\n", 2
+            )
             # mirrors lacking a layout.conf are assume to use a flat layout
             return FlatLayout()
 
-        config_parser.read_string(response.read().decode('utf-8'))
+        config_parser.read_string(response.read().decode("utf-8"))
         vals = []
 
         for i in itertools.count():
@@ -185,7 +187,7 @@ class Deep:
 
         dist_url = Deep._urljoin(url, "distfiles")
 
-        try: 
+        try:
             structure = self.get_distfile_structure(dist_url)
         except OSError:
             self.output.write(
@@ -239,7 +241,7 @@ class Deep:
             return (None, True)
 
         self.output.write(
-            f"deeptime(): ip's for host {url_parts.hostname}: {str(ips)}\n", 2
+            f"deeptime(): ip's for host {url_parts.hostname}: {ips!s}\n", 2
         )
         delta = 0
         f = None
@@ -390,7 +392,6 @@ class Deep:
             )
         return f, test_url, early_out
 
-
     @staticmethod
     def _urljoin(url: str, path: str):
         """Appends a path component to a URL string.
@@ -407,4 +408,3 @@ class Deep:
             url = url + "/"
 
         return url + path
-
