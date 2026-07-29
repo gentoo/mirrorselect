@@ -81,14 +81,14 @@ class Shallow:
 
         cmd.extend(hosts)
 
-        self.output.write('\nnetselect(): running "%s"\n' % " ".join(cmd), 2)
+        self.output.write(f"\nnetselect(): running \"{' '.join(cmd)}\"\n", 2)
 
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         out, err = proc.communicate()
 
         if err:
-            self.output.write("netselect(): netselect stderr: %s\n" % err, 2)
+            self.output.write(f"netselect(): netselect stderr: {err}\n", 2)
 
         for line in out.splitlines():
             line = line.split()
@@ -117,11 +117,11 @@ class Shallow:
         """
         hosts = [host[0] for host in hosts]
 
-        self.output.write("netselect_split() got %s hosts.\n" % len(hosts), 2)
+        self.output.write(f"netselect_split() got {len(hosts)} hosts.\n", 2)
 
         host_blocks = self.host_blocks(hosts, block_size)
 
-        self.output.write(" split into %s blocks\n" % len(host_blocks), 2)
+        self.output.write(f" split into {len(host_blocks)} blocks\n", 2)
 
         top_hosts = []
         ret_hosts = {}
@@ -156,7 +156,7 @@ class Shallow:
         for rank in host_ranking_keys[:number]:
             top_hosts.append(ret_hosts[rank])
 
-        self.output.write("netselect_split(): returns %s\n" % top_hosts, 2)
+        self.output.write(f"netselect_split(): returns {top_hosts}\n", 2)
 
         self.urls = top_hosts
 

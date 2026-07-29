@@ -49,14 +49,14 @@ class set_version(core.Command):
 
     def run(self):
         ver = "git" if __version__ == "9999" else __version__
-        print("Setting version to %s" % ver)
+        print(f"Setting version to {ver}")
 
         def sub(files, pattern):
             for f in files:
                 updated_file = []
                 with open(f, "r", 1, "utf_8") as s:
                     for line in s:
-                        newline = re.sub(pattern, '"%s"' % ver, line, 1)
+                        newline = re.sub(pattern, f'"{ver}"', line, 1)
                         if newline != line:
                             logging.info(f"{f}: {newline}")
                         updated_file.append(newline)

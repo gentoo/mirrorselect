@@ -60,7 +60,7 @@ class Configuration(ABC):
 
         fsmirrors: list[str] = []
 
-        output.write("get_filesystem_mirrors(): config_path = %s\n" % config_path, 2)
+        output.write(f"get_filesystem_mirrors(): config_path = {config_path}\n", 2)
         try:
             f = open(config_path)
         except OSError:
@@ -86,7 +86,7 @@ class Configuration(ABC):
                 """ Look for mounted filesystem in value """
                 mirrorlist = val.rsplit()
                 output.write(
-                    "get_filesystem_mirrors(): mirrorlist = %s\n" % mirrorlist, 2
+                    f"get_filesystem_mirrors(): mirrorlist = {mirrorlist}\n", 2
                 )
                 for mirror in mirrorlist:
                     if p.match(mirror) is None:
@@ -107,5 +107,5 @@ class Configuration(ABC):
             elif key is None:
                 break
 
-        output.write("get_filesystem_mirrors(): fsmirrors = %s\n" % fsmirrors, 2)
+        output.write(f"get_filesystem_mirrors(): fsmirrors = {fsmirrors}\n", 2)
         return fsmirrors

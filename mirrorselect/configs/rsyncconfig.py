@@ -43,19 +43,18 @@ class RsyncConfig(Configuration):
         config_path = self.eprefix + "/etc/portage/repos.conf/gentoo.conf"
         if not os.access(config_path, os.F_OK):
             output.write(
-                "Failed access to gentoo.conf: "
-                "%s\n" % os.access(config_path, os.F_OK),
+                f"Failed access to gentoo.conf: {os.access(config_path, os.F_OK)}\n",
                 2,
             )
             config_path = None
         return config_path
 
     def get_available_hosts(self, output: Output, options: Values):
-        output.write("using url: %s\n" % MIRRORS_RSYNC_DATA, 2)
+        output.write(f"using url: {MIRRORS_RSYNC_DATA}\n", 2)
         return Extractor(MIRRORS_RSYNC_DATA, options, output).hosts
 
     def format_config(self, hosts: list[str]):
-        return "{} = {}".format(self.var, " ".join(hosts))
+        return f"{self.var} = {' '.join(hosts)}"
 
     def write_config(self, output: Output, config_path: str, hosts: list[str]):
         """Saves the new var value to a ConfigParser style file

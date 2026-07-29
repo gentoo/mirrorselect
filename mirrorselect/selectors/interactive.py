@@ -43,7 +43,7 @@ class Interactive:
         self.urls: list[str] = []
 
         self.interactive(hosts, options)
-        self.output.write("Interactive.interactive(): self.urls = %s\n" % self.urls, 2)
+        self.output.write(f"Interactive.interactive(): self.urls = {self.urls}\n", 2)
 
         if not self.urls or len(self.urls[0]) == 0:
             sys.exit(1)
@@ -90,7 +90,7 @@ class Interactive:
 
             dialog.extend(
                 [
-                    "%s" % uri,
+                    f"{uri}",
                     f"{marker}{mirror.country}: {mirror.name}",
                     "OFF",
                 ]

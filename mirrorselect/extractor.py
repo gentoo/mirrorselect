@@ -53,7 +53,7 @@ class Extractor:
         for opt in ["ftp", "http", "https"]:
             if getattr(options, opt):
                 filters["proto"] = opt
-                self.output.print_info("Limiting test to %s hosts. \n" % opt)
+                self.output.print_info(f"Limiting test to {opt} hosts. \n")
 
         self.proxies: dict[str, str | None] = {}
 
@@ -79,8 +79,7 @@ class Extractor:
         self.hosts: list[Endpoint] = hosts.mirrors()
 
         self.output.write(
-            "Extractor(): fetched mirrors,"
-            " %s hosts after filtering\n" % len(self.hosts),
+            f"Extractor(): fetched mirrors, {len(self.hosts)} hosts after filtering\n",
             2,
         )
 
@@ -104,7 +103,7 @@ class Extractor:
                     "Could not get mirror list. " "Check your internet connection."
                 )
 
-            self.output.write(" Got %d mirrors.\n" % len(mirrorset.mirrors()))
+            self.output.write(f" Got {len(mirrorset.mirrors())} mirrors.\n")
             return mirrorset
 
         self.output.print_err(

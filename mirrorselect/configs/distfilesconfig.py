@@ -60,13 +60,13 @@ class DistfilesConfig(Configuration):
         @param config_path; string
         """
         output.write("\n")
-        output.print_info("Modifying %s with new mirrors...\n" % config_path)
+        output.print_info(f"Modifying {config_path} with new mirrors...\n")
         try:
             config = open(config_path)
             output.write("\tReading make.conf\n")
             lines = config.readlines()
             config.close()
-            output.write("\tMoving to %s.backup\n" % config_path)
+            output.write(f"\tMoving to {config_path}.backup\n")
             shutil.move(config_path, config_path + ".backup")
         except OSError:
             lines = []
@@ -102,7 +102,7 @@ class DistfilesConfig(Configuration):
 
         lines.append(self.format_config(hosts))
 
-        output.write("\tWriting new %s\n" % config_path)
+        output.write(f"\tWriting new {config_path}\n")
 
         config = open(config_path, "w")
 
@@ -114,7 +114,7 @@ class DistfilesConfig(Configuration):
         output.print_info("Done.\n")
 
     def get_available_hosts(self, output: Output, options: Values):
-        output.write("using url: %s\n" % MIRRORS_3_XML, 2)
+        output.write(f"using url: {MIRRORS_3_XML}\n", 2)
         return Extractor(MIRRORS_3_XML, options, output).hosts
 
     def format_config(self, hosts: list[str]):

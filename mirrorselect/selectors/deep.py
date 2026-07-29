@@ -125,8 +125,7 @@ class Deep:
         fastest_hosts = [test[1].uri for test in sorted(results)[: self._number]]
 
         self.output.write(
-            "deeptest(): got %s hosts, and returned %s\n"
-            % (num_hosts, str(fastest_hosts)),
+            f"deeptest(): got {num_hosts} hosts, and returned {fastest_hosts!s}\n",
             2,
         )
 
@@ -183,7 +182,7 @@ class Deep:
         Can be given an optional timeout, for use with a clever algorithm.
         Like mine.
         """
-        self.output.write("\n_deeptime(): maxtime is %s\n" % maxtime, 2)
+        self.output.write(f"\n_deeptime(): maxtime is {maxtime}\n", 2)
 
         dist_url = Deep._urljoin(url, "distfiles")
 
@@ -220,7 +219,7 @@ class Deep:
                         family, _, __, ___, sockaddr = result
                         ip = sockaddr[0]
                         if family == socket.AF_INET6:
-                            ip = "[%s]" % ip
+                            ip = f"[{ip}]"
                         ips.append(ip)
                 finally:
                     signal.alarm(0)
@@ -231,12 +230,12 @@ class Deep:
                 )
             except TimeoutException:
                 self.output.write(
-                    "deeptime(): dns timeout for host %s\n" % url_parts.hostname, 2
+                    f"deeptime(): dns timeout for host {url_parts.hostname}\n", 2
                 )
 
         if not ips:
             self.output.write(
-                "deeptime(): unable to resolve ip for host %s\n" % url_parts.hostname, 2
+                f"deeptime(): unable to resolve ip for host {url_parts.hostname}\n", 2
             )
             return (None, True)
 
@@ -249,7 +248,7 @@ class Deep:
         for ip in ips:
             test_parts = url_parts._replace(netloc=ip)
             test_url = urlunparse(test_parts)
-            self.output.write("deeptime(): testing url: %s\n" % test_url, 2)
+            self.output.write(f"deeptime(): testing url: {test_url}\n", 2)
 
             f, test_url, early_out = self._test_connection(
                 test_url, url_parts, ip, ips[ips.index(ip) :]
@@ -284,7 +283,7 @@ class Deep:
                 2,
             )
 
-        self.output.write("deeptime(): timing url: %s\n" % test_url, 2)
+        self.output.write(f"deeptime(): timing url: {test_url}\n", 2)
         try:
             # The first connection serves to "wake up" the route between
             # the local and remote machines. A second connection is used
@@ -302,9 +301,9 @@ class Deep:
                 f.close()
                 if md5 != self.test_md5:
                     self.output.write(
-                        "\ndeeptime(): md5sum error for file: %s\n" % self.test_file
-                        + "         expected: %s\n" % self.test_md5
-                        + "         got.....: %s\n" % md5
+                        f"\ndeeptime(): md5sum error for file: {self.test_file}\n"
+                        + f"         expected: {self.test_md5}\n"
+                        + f"         got.....: {md5}\n"
                         + f"         host....: {url_parts.hostname}, {ip}\n"
                     )
                     self.dl_failures += 1

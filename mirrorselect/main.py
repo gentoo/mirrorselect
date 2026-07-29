@@ -137,7 +137,7 @@ class MirrorSelect:
         parser = OptionParser(
             formatter=ColoredFormatter(self.output),
             description=desc,
-            version="Mirrorselect version: %s" % version,
+            version=f"Mirrorselect version: {version}",
         )
 
         group = parser.add_option_group("Main modes")
@@ -354,7 +354,7 @@ class MirrorSelect:
             )
 
         if (os.getuid() != rootuid) and not options.output:
-            self.output.print_err("Must be root to write to %s!\n" % config_path)
+            self.output.print_err(f"Must be root to write to {config_path}!\n")
 
         if args:
             self.output.print_err("Unexpected arguments passed.")
@@ -408,7 +408,7 @@ class MirrorSelect:
             self.mirror_type = DistfilesConfig(EPREFIX)
 
         config_path = self.mirror_type.get_conf_path(self.output)
-        self.output.write("main(); config_path = %s\n" % config_path, 2)
+        self.output.write(f"main(); config_path = {config_path}\n", 2)
 
         if not config_path:
             self.output.print_err(
