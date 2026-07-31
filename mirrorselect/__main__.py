@@ -1,3 +1,2 @@
-#!/usr/bin/env python3
 from mirrorselect.entry import main
 raise SystemExit(main())
