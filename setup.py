@@ -113,7 +113,11 @@ core.setup(
     url="https://wiki.gentoo.org/wiki/Project:Portage-Tools",
     download_url="http://distfiles.gentoo.org/distfiles/mirrorselect-%s.tar.gz"
     % __version__,
-    packages=["mirrorselect"],
+    packages=[
+        "mirrorselect",
+        "mirrorselect.configs",
+        "mirrorselect.selectors",
+    ],
     install_requires=install_requires,
     # package_data = test_data,
     scripts=(["bin/mirrorselect"]),
