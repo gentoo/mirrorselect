@@ -23,4 +23,4 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
-version = "2.3.0-git"
+version = "@VERSION@"

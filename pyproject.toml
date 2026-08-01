@@ -1,0 +1,15 @@
+[build-system]
+build-backend = "mesonpy"
+requires = ["meson-python"]
+
+[project]
+name = "mirrorselect"
+dynamic = ["version"]
+description = "Tool for selecting Gentoo source and rsync mirrors"
+maintainers = [
+  {name = "Gentoo Portage Tools Team", email = "tools-portage@gentoo.org"},
+]
+dependencies = ["portage", "requests"]
+
+[tool.meson-python.args]
+setup = ["-Dman=false"]
