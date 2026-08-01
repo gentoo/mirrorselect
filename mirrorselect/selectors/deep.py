@@ -365,7 +365,7 @@ class Deep:
                 2,
             )
             if len(ips) == 1:
-                test_url = url_unparse(url_parts)
+                test_url = urlunparse(url_parts)
                 return self._test_connection(test_url, url_parts, ip, [])
         except (OSError, ssl.CertificateError) as e:
             self.output.write(

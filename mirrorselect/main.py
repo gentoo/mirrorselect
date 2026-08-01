@@ -354,7 +354,7 @@ class MirrorSelect:
             )
 
         if (os.getuid() != rootuid) and not options.output:
-            self.output.print_err(f"Must be root to write to {config_path}!\n")
+            self.output.print_err(f"Must be root.")
 
         if args:
             self.output.print_err("Unexpected arguments passed.")
