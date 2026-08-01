@@ -5,14 +5,14 @@ import shutil
 import tempfile
 import unittest
 
-from mirrorselect.configs import DistfilesMirror
+from mirrorselect.configs import DistfilesConfig
 from mirrorselect.output import Output
 
 
 class WriteMakeConfTestCase(unittest.TestCase):
     def test_write_make_conf(self):
-        def __do_it(var, mirror_string, make_conf, expected_result):
-            sut = DistfilesMirror()
+        def __do_it(var, mirror_list, make_conf, expected_result):
+            sut = DistfilesConfig()
             tempdir = tempfile.mkdtemp()
             status_output = open(os.devnull, "w")
             # print("------make_conf--------", make_conf, "----------------------")
@@ -21,10 +21,11 @@ class WriteMakeConfTestCase(unittest.TestCase):
                 config_path = os.path.join(tempdir, "make.conf")
                 with open(config_path, "w") as f:
                     f.write(make_conf)
-                sut.write_conf(Output(out=status_output), config_path, mirror_string)
+                sut.write_config(Output(out=status_output), config_path, mirror_list)
                 with open(config_path) as f:
                     result = f.read()
                     # print("!!!result!!!\n", result, "!!!!!!!!!!\n")
+                mirror_string = sut.format_config(mirror_list)
                 self.assertEqual(result, f"{expected_result}".format(mirror_string))
             finally:
                 shutil.rmtree(tempdir)
@@ -32,9 +33,9 @@ class WriteMakeConfTestCase(unittest.TestCase):
 
         var = "GENTOO_MIRRORS"
         mirrors = (
-            (f'{var}="a"'),
-            (f'{var}="a b"'),
-            (f'{var}="a b c"'),
+            ["a"],
+            ["a", "b"],
+            ["a", "b", "c"],
         )
 
         cases = (
