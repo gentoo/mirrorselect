@@ -20,7 +20,11 @@ subdir('mirrorselect')
 subdir('bin')
 
 if get_option('man')
-  install_man('mirrorselect.8')
+  install_man(configure_file(
+    input : 'mirrorselect.1',
+    output : 'mirrorselect.1',
+    configuration : cdata,
+  ))
 endif
 
 test('unittests', py,
