@@ -26,6 +26,7 @@ Distributed under the terms of the GNU General Public License v2
 """
 
 import os
+import os.path
 import shlex
 import shutil
 import string
@@ -46,11 +47,44 @@ class DistfilesConfig(Configuration):
     def get_conf_path(self, output: Output):
         # try the newer make.conf location
         config_path = self.eprefix + "/etc/portage/make.conf"
-        if not os.access(config_path, os.F_OK):
+        if not os.path.exists(config_path):
             # check if the old location is what is used
-            if os.access(self.eprefix + "/etc/make.conf", os.F_OK):
-                config_path = self.eprefix + "/etc/make.conf"
+            old_path = self.eprefix + "/etc/make.conf"
+            if os.path.exists(old_path):
+                config_path = old_path
         return config_path
+
+    def filter_config(self, config):
+        lines = config.readlines()
+        config.seek(0)
+        lex = shlex.shlex(config, posix=True)
+        lex.wordchars = string.digits + letters + r"~!@#$%*_\:;?,./-+{}"
+        lex.quotes = "\"'"
+        while True:
+            key = lex.get_token()
+            if key is None:
+                break
+
+            if key == self.var:
+                begin_line = lex.lineno
+                equ = lex.get_token()
+                if equ is None:
+                    break
+                if equ != "=":
+                    continue
+
+                val = lex.get_token()
+                if val is None:
+                    break
+                end_line = lex.lineno
+
+                new_lines = []
+                for index, line in enumerate(lines):
+                    if index < begin_line - 1 or index >= end_line - 1:
+                        new_lines.append(line)
+                lines = new_lines
+                break
+        return lines
 
     def write_config(self, output: Output, config_path: str, hosts: list[str]):
         """Write the make.conf target changes
@@ -59,57 +93,29 @@ class DistfilesConfig(Configuration):
         @param mirror_string: "var='hosts'" string to write
         @param config_path; string
         """
+
         output.write("\n")
         output.print_info(f"Modifying {config_path} with new mirrors...\n")
+
         try:
-            config = open(config_path)
-            output.write("\tReading make.conf\n")
-            lines = config.readlines()
-            config.close()
-            output.write(f"\tMoving to {config_path}.backup\n")
-            shutil.move(config_path, config_path + ".backup")
-        except OSError:
+            config = open(config_path, "r", encoding="utf-8")
+        except FileNotFoundError:
             lines = []
+        else:
+            with config:
+                lines = self.filter_config(config)
 
-        with open(config_path + ".backup") as f:
-            lex = shlex.shlex(f, posix=True)
-            lex.wordchars = string.digits + letters + r"~!@#$%*_\:;?,./-+{}"
-            lex.quotes = "\"'"
-            while True:
-                key = lex.get_token()
-                if key is None:
-                    break
-
-                if key == self.var:
-                    begin_line = lex.lineno
-                    equ = lex.get_token()
-                    if equ is None:
-                        break
-                    if equ != "=":
-                        continue
-
-                    val = lex.get_token()
-                    if val is None:
-                        break
-                    end_line = lex.lineno
-
-                    new_lines = []
-                    for index, line in enumerate(lines):
-                        if index < begin_line - 1 or index >= end_line - 1:
-                            new_lines.append(line)
-                    lines = new_lines
-                    break
-
-        lines.append(self.format_config(hosts))
+        lines.append(self.format_config(hosts) + "\n")
 
         output.write(f"\tWriting new {config_path}\n")
 
-        config = open(config_path, "w")
+        try:
+            os.rename(config_path, config_path + ".backup")
+        except FileNotFoundError:
+            pass
 
-        for line in lines:
-            config.write(line)
-        config.write("\n")
-        config.close()
+        with open(config_path, "w", encoding="utf-8") as config:
+            config.writelines(lines)
 
         output.print_info("Done.\n")
 
