@@ -41,12 +41,6 @@ from mirrorselect.output import ColoredFormatter, Output
 from mirrorselect.selectors import Deep, Interactive, Shallow
 from mirrorselect.version import version
 
-# eprefix compatibility
-try:
-    from portage.const import rootuid
-except ImportError:
-    rootuid = 0
-
 # establish the eprefix, initially set so exprefixify can
 # set it on install
 EPREFIX = "@GENTOO_PORTAGE_EPREFIX@"
@@ -352,9 +346,6 @@ class MirrorSelect:
                 "You do not appear to have netselect on your system. "
                 "You must use the -D flag"
             )
-
-        if (os.getuid() != rootuid) and not options.output:
-            self.output.print_err(f"Must be root.")
 
         if args:
             self.output.print_err("Unexpected arguments passed.")
