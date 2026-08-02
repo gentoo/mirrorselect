@@ -1,7 +1,7 @@
 project('mirrorselect',
   default_options : { 'prefix' : '/usr' },
   meson_version : '>=1.2.0',
-  version : '2.6.5',
+  version : '2.7.0',
 )
 
 fs = import('fs')
