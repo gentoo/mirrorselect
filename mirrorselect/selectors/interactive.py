@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """Mirrorselect 2.x
  Tool for selecting Gentoo source and rsync mirrors.
 
