@@ -35,8 +35,8 @@ from mirrorselect.output import Output
 
 
 class Configuration(ABC):
-    def __init__(self, var: str, eprefix: str):
-        self.eprefix = eprefix
+    def __init__(self, var: str, confdir: str):
+        self.confdir = confdir
         self.var = var
 
     @abstractmethod

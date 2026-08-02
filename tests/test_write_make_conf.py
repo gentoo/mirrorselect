@@ -12,8 +12,8 @@ from mirrorselect.output import Output
 class WriteMakeConfTestCase(unittest.TestCase):
     def test_write_make_conf(self):
         def __do_it(var, mirror_list, make_conf, expected_result):
-            sut = DistfilesConfig()
             tempdir = tempfile.mkdtemp()
+            sut = DistfilesConfig(tempdir)
             status_output = open(os.devnull, "w")
             # print("------make_conf--------", make_conf, "----------------------")
             # print("*****expect*****\n", expected_result, "***********")

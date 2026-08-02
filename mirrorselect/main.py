@@ -39,13 +39,10 @@ from mirrorselect.output import ColoredFormatter, Output
 from mirrorselect.selectors import Deep, Interactive, Shallow
 from mirrorselect.version import version
 
-# establish the eprefix, initially set so exprefixify can
-# set it on install
-EPREFIX = "@GENTOO_PORTAGE_EPREFIX@"
 
-# check and set it if it wasn't
-if "GENTOO_PORTAGE_EPREFIX" in EPREFIX:
-    EPREFIX = ""
+confdir = "@CONFDIR@"
+if confdir == "@" "CONFDIR@":
+    confdir = "/etc"
 
 
 class MirrorSelect:
@@ -388,9 +385,9 @@ class MirrorSelect:
         self.output.verbosity = options.verbosity
 
         if options.rsync:
-            self.mirror_type = RsyncConfig()
+            self.mirror_type = RsyncConfig(confdir)
         else:
-            self.mirror_type = DistfilesConfig(EPREFIX)
+            self.mirror_type = DistfilesConfig(confdir)
 
         config_path = self.mirror_type.get_conf_path(self.output)
         self.output.write(f"main(); config_path = {config_path}\n", 2)

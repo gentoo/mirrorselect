@@ -4,16 +4,12 @@ project('mirrorselect',
   version : '2.7.0',
 )
 
-fs = import('fs')
 py = import('python').find_installation(pure : true)
 
-eprefix = fs.parent(get_option('prefix') / get_option('sysconfdir'))
-if eprefix == '/'
-  eprefix = ''
-endif
+confdir = get_option('prefix') / get_option('sysconfdir')
 
 cdata = configuration_data()
-cdata.set('GENTOO_PORTAGE_EPREFIX', eprefix)
+cdata.set('CONFDIR', confdir)
 cdata.set('VERSION', meson.project_version())
 
 subdir('mirrorselect')

@@ -26,6 +26,7 @@ Distributed under the terms of the GNU General Public License v2
 """
 
 import os
+import os.path
 from optparse import Values
 
 from mirrorselect.extractor import Extractor
@@ -36,16 +37,12 @@ from .configuration import Configuration
 
 
 class RsyncConfig(Configuration):
-    def __init__(self, eprefix: str = ""):
-        super().__init__("sync-uri", eprefix)
+    def __init__(self, confdir: str):
+        super().__init__("sync-uri", confdir)
 
     def get_conf_path(self, output: Output):
-        config_path = self.eprefix + "/etc/portage/repos.conf/gentoo.conf"
-        if not os.access(config_path, os.F_OK):
-            output.write(
-                f"Failed access to gentoo.conf: {os.access(config_path, os.F_OK)}\n",
-                2,
-            )
+        config_path = os.path.join(self.confdir, "portage", "repos.conf", "gentoo.conf")
+        if not os.path.exists(config_path):
             config_path = None
         return config_path
 
@@ -67,10 +64,10 @@ class RsyncConfig(Configuration):
         from configparser import ConfigParser
 
         config = ConfigParser()
-        config.read(config_path)
+        config.read(config_path, encoding="utf-8")
         if config.has_option("gentoo", self.var):
             config.set("gentoo", self.var, " ".join(hosts))
-            with open(config_path, "w") as configfile:
+            with open(config_path, "w", encoding="utf-8") as configfile:
                 config.write(configfile)
         else:
             output.print_err(

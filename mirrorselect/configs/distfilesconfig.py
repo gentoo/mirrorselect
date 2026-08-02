@@ -41,15 +41,15 @@ from .configuration import Configuration
 
 
 class DistfilesConfig(Configuration):
-    def __init__(self, eprefix: str = ""):
-        super().__init__("GENTOO_MIRRORS", eprefix)
+    def __init__(self, confdir: str):
+        super().__init__("GENTOO_MIRRORS", confdir)
 
     def get_conf_path(self, output: Output):
         # try the newer make.conf location
-        config_path = self.eprefix + "/etc/portage/make.conf"
+        config_path = os.path.join(self.confdir, "portage", "make.conf")
         if not os.path.exists(config_path):
             # check if the old location is what is used
-            old_path = self.eprefix + "/etc/make.conf"
+            old_path = os.path.join(self.confdir, "make.conf")
             if os.path.exists(old_path):
                 config_path = old_path
         return config_path
