@@ -66,12 +66,12 @@ class Shallow:
 
         if not quiet:
             self.output.print_info(
-                "Using netselect to choose the top " "%d mirrors..." % number
+                f"Using netselect to choose the top {number} mirrors..."
             )
 
         host_string = " ".join(hosts)
 
-        cmd = ["netselect", "-s%d" % (number,)]
+        cmd = ["netselect", f"-s{number}"]
 
         if NETSELECT_SUPPORTS_IPV4_IPV6:
             if self._options.ipv4:
@@ -83,22 +83,22 @@ class Shallow:
 
         self.output.write(f"\nnetselect(): running \"{' '.join(cmd)}\"\n", 2)
 
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(
+            cmd, check=False, capture_output=True, encoding="utf-8", errors="replace"
+        )
 
-        out, err = proc.communicate()
+        if not quiet:
+            self.output.write("Done.\n")
 
-        if err:
-            self.output.write(f"netselect(): netselect stderr: {err}\n", 2)
+        if result.returncode != 0 and result.stderr:
+            self.output.write(result.stderr)
 
-        for line in out.splitlines():
+        for line in result.stdout.splitlines():
             line = line.split()
             if len(line) < 2:
                 continue
             top_hosts.append(line[1])
             top_host_dict[line[0]] = line[1]
-
-        if not quiet:
-            self.output.write("Done.\n")
 
         self.output.write(
             f"\nnetselect(): returning {top_hosts} and {top_host_dict}\n", 2

@@ -87,10 +87,6 @@ class MirrorSelect:
         @param sync: boolean, used to switch between sync-uri repos.conf target,
                 and GENTOO_MIRRORS make.conf variable target
         """
-        for i in range(len(hosts)):
-            if isinstance(hosts[i], bytes):
-                hosts[i] = hosts[i].decode("utf-8")
-
         if out:
             self.write_to_output(self.mirror_type.format_config(hosts))
         else:
