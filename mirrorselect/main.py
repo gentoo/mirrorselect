@@ -39,7 +39,6 @@ from mirrorselect.output import ColoredFormatter, Output
 from mirrorselect.selectors import Deep, Interactive, Shallow
 from mirrorselect.version import version
 
-
 confdir = "@CONFDIR@"
 if confdir == "@" "CONFDIR@":
     confdir = "/etc"

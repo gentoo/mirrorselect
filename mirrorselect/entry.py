@@ -1,6 +1,7 @@
 def main():
     try:
         import sys
+
         from mirrorselect.main import MirrorSelect
 
         MirrorSelect().main(sys.argv)
