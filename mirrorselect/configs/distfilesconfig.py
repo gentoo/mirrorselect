@@ -28,7 +28,6 @@ Distributed under the terms of the GNU General Public License v2
 import os
 import os.path
 import shlex
-import shutil
 import string
 from optparse import Values
 
