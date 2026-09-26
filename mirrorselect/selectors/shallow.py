@@ -25,160 +25,117 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
-import subprocess
-import sys
+import concurrent.futures
+import requests
+import socket
 
+from datetime import datetime, timezone
 from mirrorselect.mirrorset import Endpoint
+from urllib.parse import urlparse
+from .helpers import urljoin
 
-# The netselect --ipv4 and --ipv6 options are supported only
-# with >=net-analyzer/netselect-0.4[ipv6(+)].
-NETSELECT_SUPPORTS_IPV4_IPV6 = True
+MAX_MIRROR_AGE_DAYS = 14
 
+# The timestamp.mirmon file contains a UNIX timestamp as text
+TIMESTAMP_FILENAME = "distfiles/timestamp.mirmon"
 
 class Shallow:
-    """handles rapid server selection via netselect"""
+    """
+    Approximates an HTTP GET request/response as a quasi
+    'round trip time', analogous the previous behaviour by
+    netselect. Additionally, discards mirrors with a
+    timestamp older than MAX_MIRROR_AGE_DAYS
+    """
 
     def __init__(self, hosts: list[Endpoint], options, output):
         self._options = options
         self.output = output
+        self._connect_timeout = options.timeout
         self.urls = []
 
-        if options.blocksize is not None:
-            self.netselect_split(hosts, options.servers, options.blocksize)
-        else:
-            self.netselect(hosts, options.servers)
+        self.fetch_select(hosts, options.servers, options.blocksize)
 
         if len(self.urls) == 0:
             self.output.print_err(
-                "Netselect failed to return any mirrors." " Try again using block mode."
+                "Could not find any mirrors."
             )
 
-    def netselect(self, hosts: list[Endpoint], number, quiet=False):
-        """
-        Uses Netselect to choose the closest hosts, _very_ quickly
-        """
-        if not quiet:
-            hosts = [host.uri for host in hosts]
-        top_host_dict = {}
-        top_hosts = []
+    def _probe_mirror(self, host: Endpoint, today: datetime):
+        timestamp_uri = urljoin(host.uri, TIMESTAMP_FILENAME)
+        url_parts = urlparse(host.uri)
 
-        if not quiet:
-            self.output.print_info(
-                f"Using netselect to choose the top {number} mirrors..."
-            )
+        try:
+            # First, ensure any DNS records are cached, prior to timing the
+            # HTTP GET exchange, to ensure any mirrors already cached locally
+            # aren't unduly advantaged.
 
-        host_string = " ".join(hosts)
+            for addr_family in (socket.AF_INET, socket.AF_INET6):
+                socket.getaddrinfo(
+                    url_parts.hostname,
+                    None,
+                    addr_family,
+                    socket.SOCK_STREAM,
+                    0,
+                    socket.AI_ADDRCONFIG,
+                )
 
-        cmd = ["netselect", f"-s{number}"]
+            response = requests.get(timestamp_uri, timeout=self._connect_timeout)
 
-        if NETSELECT_SUPPORTS_IPV4_IPV6:
-            if self._options.ipv4:
-                cmd.append("-4")
-            elif self._options.ipv6:
-                cmd.append("-6")
+            # Log a 404 differently; a mirror that is functional but lacks a
+            # timestamp entry is interesting from a diagnostics perspective.
+            if response.status_code == 404:
+                self.output.write(
+                    f"_probe_mirror(): no timestamp.mirmon at {timestamp_uri}\n", 2
+                )
+                return
+            if response.status_code != 200:
+                self.output.write(
+                    f"_probe_mirror(): got HTTP {response.status_code}"
+                    f" fetching {timestamp_uri}\n", 2
+                )
+                return
 
-        cmd.extend(hosts)
+            age = today - datetime.fromtimestamp(int(response.text), timezone.utc)
+            if age.days > MAX_MIRROR_AGE_DAYS:
+                self.output.write(
+                    f"{host.uri} has not updated in {age.days} days, dicarding\n",
+                    1,
+                )
+                return
 
-        self.output.write(f"\nnetselect(): running \"{' '.join(cmd)}\"\n", 2)
-
-        result = subprocess.run(
-            cmd, check=False, capture_output=True, encoding="utf-8", errors="replace"
-        )
-
-        if not quiet:
-            self.output.write("Done.\n")
-
-        if result.returncode != 0 and result.stderr:
-            self.output.write(result.stderr)
-
-        for line in result.stdout.splitlines():
-            line = line.split()
-            if len(line) < 2:
-                continue
-            top_hosts.append(line[1])
-            top_host_dict[line[0]] = line[1]
-
-        self.output.write(
-            f"\nnetselect(): returning {top_hosts} and {top_host_dict}\n", 2
-        )
-
-        if quiet:
-            return top_hosts, top_host_dict
-        else:
-            self.urls = top_hosts
-
-    def netselect_split(self, hosts, number, block_size):
-        """
-        This uses netselect to test mirrors in chunks,
-        each at most block_size in length.
-        This is done in a tournament style.
-        """
-        hosts = [host[0] for host in hosts]
-
-        self.output.write(f"netselect_split() got {len(hosts)} hosts.\n", 2)
-
-        host_blocks = self.host_blocks(hosts, block_size)
-
-        self.output.write(f" split into {len(host_blocks)} blocks\n", 2)
-
-        top_hosts = []
-        ret_hosts = {}
-
-        block_index = 0
-        for block in host_blocks:
-            self.output.print_info(
-                "Using netselect to choose the top "
-                "%d hosts, in blocks of %s. %s of %s blocks complete."
-                % (number, block_size, block_index, len(host_blocks))
-            )
-
-            host_dict = self.netselect(block, len(block), quiet=True)[1]
-
+            return (host, age, response.elapsed.total_seconds())
+        except ValueError:
             self.output.write(
-                f"ran netselect({block}, {len(block)}), and got {host_dict}\n",
+                f"_probe_mirror(): couldn't parse timestamp {host.uri}\n",
+                2,
+            )
+        except requests.exceptions.Timeout:
+            self.output.write(
+                f"_probe_mirror(): timeout connecting to host {host.uri}\n",
+                2,
+            )
+        except OSError:
+            self.output.write(
+                f"_probe_mirror(): unable to connect to host {host.uri}\n",
                 2,
             )
 
-            for key in list(host_dict.keys()):
-                ret_hosts[key] = host_dict[key]
-            block_index += 1
+    def fetch_select(self, hosts: list[Endpoint], number, blocksize):
+        today = datetime.now(timezone.utc)
+        results = []
 
-        sys.stderr.write(
-            "\rUsing netselect to choose the top"
-            "%d hosts, in blocks of %s. %s of %s blocks complete.\n"
-            % (number, block_size, block_index, len(host_blocks))
-        )
+        with concurrent.futures.ThreadPoolExecutor(max_workers=blocksize) as executor:
+            futures = [executor.submit(self._probe_mirror, host, today) for host in hosts]
+            for future in concurrent.futures.as_completed(futures):
+                try:
+                    if future.result() is not None:
+                        results.append(future.result())
+                        host, age, elapsed = future.result()
+                        self.output.write(f"{host.uri:40} age: {age} RTT: {elapsed}\n", 3)
+                except Exception as e:
+                    self.output.write(f"error {e}\n", 2)
 
-        host_ranking_keys = sorted(ret_hosts.keys())
+            # sort the results by the fetch time
+            fastest = sorted(results, key=lambda item: item[2])
+            self.urls = [result[0].uri for result in fastest[:number]]
 
-        for rank in host_ranking_keys[:number]:
-            top_hosts.append(ret_hosts[rank])
-
-        self.output.write(f"netselect_split(): returns {top_hosts}\n", 2)
-
-        self.urls = top_hosts
-
-    def host_blocks(self, hosts, block_size):
-        """
-        Takes a list of hosts and a block size,
-        and returns an list of lists of URLs.
-        Each of the sublists is at most block_size in length.
-        """
-        host_array = []
-        mylist = []
-
-        while len(hosts) > block_size:
-            while len(mylist) < block_size:
-                mylist.append(hosts.pop())
-            host_array.append(mylist)
-            mylist = []
-        host_array.append(hosts)
-
-        self.output.write(
-            "\n_host_blocks(): returns "
-            "%s blocks, each about %s in size\n"
-            % (len(host_array), len(host_array[0])),
-            2,
-        )
-
-        return host_array

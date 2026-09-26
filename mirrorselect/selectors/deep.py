@@ -47,7 +47,7 @@ from portage.package.ebuild.fetch import (
 
 from mirrorselect.mirrorset import Endpoint
 from mirrorselect.output import Output
-
+from .helpers import urljoin
 
 class TimeoutException(Exception):
     pass
@@ -148,7 +148,7 @@ class Deep:
         See: https://www.gentoo.org/glep/glep-0075.html
         """
         config_parser = ConfigParser()
-        config_url = Deep._urljoin(distfiles_url, "layout.conf")
+        config_url = urljoin(distfiles_url, "layout.conf")
 
         self.output.write(f"_get_distfile_structure(): config_url = {config_url}\n", 2)
 
@@ -182,7 +182,7 @@ class Deep:
         """
         self.output.write(f"\n_deeptime(): maxtime is {maxtime}\n", 2)
 
-        dist_url = Deep._urljoin(url, "distfiles")
+        dist_url = urljoin(url, "distfiles")
 
         try:
             structure = self.get_distfile_structure(dist_url)
@@ -194,7 +194,7 @@ class Deep:
             return (None, True)
 
         path: str = structure.get_path(self.test_file)
-        url = self._urljoin(dist_url, path)
+        url = urljoin(dist_url, path)
         url_parts = urlparse(url)
 
         self.output.write(f"_deeptime(): testfile url = {url}\n", 1)
@@ -389,19 +389,3 @@ class Deep:
             )
         return f, test_url, early_out
 
-    @staticmethod
-    def _urljoin(url: str, path: str):
-        """Appends a path component to a URL string.
-
-        urllib's urljoin can't be relied on for this. If the given URL
-        doesn't end with a slash, the last component is *replaced* instead
-        of concatenated to.
-
-        In addition, urllib.parse requires a workaround for other protocols
-        such as rsync, otherwise the given path component simply replaces
-        the URL.
-        """
-        if not url.endswith("/"):
-            url = url + "/"
-
-        return url + path

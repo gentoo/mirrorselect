@@ -215,9 +215,8 @@ class MirrorSelect:
             "--blocksize",
             action="store",
             type="int",
-            help="This is to be used in automatic mode "
-            "and will split the hosts into blocks of BLOCKSIZE for "
-            "use with netselect. This is required for certain "
+            help="The number of concurrent requests to make in "
+            "automatic mode. This is required for certain "
             "routers which block 40+ requests at any given time. "
             "Recommended parameters to pass are: -s3 -b10",
         )
