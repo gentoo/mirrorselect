@@ -197,7 +197,7 @@ class Deep:
         url = urljoin(dist_url, path)
         url_parts = urlparse(url)
 
-        self.output.write(f"_deeptime(): testfile url = {url}\n", 1)
+        self.output.write(f"_deeptime(): testfile url = {url}\n", 2)
 
         signal.signal(signal.SIGALRM, timeout_handler)
 
