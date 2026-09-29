@@ -1,0 +1,28 @@
+name: Unit tests
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: codeberg-tiny
+    strategy:
+      matrix:
+        python-version:
+        - '3.12'
+        - '3.13'
+        - '3.14'
+        - '3.15-dev'
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - uses: actions/setup-python@v7
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: python -m pip install portage requests
+
+    - name: Run tests
+      run: python -m unittest discover -v
