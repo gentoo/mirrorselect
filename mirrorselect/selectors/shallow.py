@@ -39,6 +39,7 @@ MAX_MIRROR_AGE_DAYS = 14
 # The timestamp.mirmon file contains a UNIX timestamp as text
 TIMESTAMP_FILENAME = "distfiles/timestamp.mirmon"
 
+
 class Shallow:
     """
     Approximates an HTTP GET request/response as a quasi
@@ -56,9 +57,7 @@ class Shallow:
         self.fetch_select(hosts, options.servers, options.blocksize)
 
         if len(self.urls) == 0:
-            self.output.print_err(
-                "Could not find any mirrors."
-            )
+            self.output.print_err("Could not find any mirrors.")
 
     def _probe_mirror(self, host: Endpoint, today: datetime):
         timestamp_uri = urljoin(host.uri, TIMESTAMP_FILENAME)
@@ -91,7 +90,8 @@ class Shallow:
             if response.status_code != 200:
                 self.output.write(
                     f"_probe_mirror(): got HTTP {response.status_code}"
-                    f" fetching {timestamp_uri}\n", 2
+                    f" fetching {timestamp_uri}\n",
+                    2,
                 )
                 return
 
@@ -125,17 +125,20 @@ class Shallow:
         results = []
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=blocksize) as executor:
-            futures = [executor.submit(self._probe_mirror, host, today) for host in hosts]
+            futures = [
+                executor.submit(self._probe_mirror, host, today) for host in hosts
+            ]
             for future in concurrent.futures.as_completed(futures):
                 try:
                     if future.result() is not None:
                         results.append(future.result())
                         host, age, elapsed = future.result()
-                        self.output.write(f"{host.uri:40} age: {age} RTT: {elapsed}\n", 3)
+                        self.output.write(
+                            f"{host.uri:40} age: {age} RTT: {elapsed}\n", 3
+                        )
                 except Exception as e:
                     self.output.write(f"error {e}\n", 2)
 
             # sort the results by the fetch time
             fastest = sorted(results, key=lambda item: item[2])
             self.urls = [result[0].uri for result in fastest[:number]]
-

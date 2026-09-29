@@ -49,6 +49,7 @@ from mirrorselect.mirrorset import Endpoint
 from mirrorselect.output import Output
 from .helpers import urljoin
 
+
 class TimeoutException(Exception):
     pass
 
@@ -388,4 +389,3 @@ class Deep:
                 0,
             )
         return f, test_url, early_out
-

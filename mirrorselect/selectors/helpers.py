@@ -25,6 +25,7 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
+
 def urljoin(url: str, path: str):
     """Appends a path component to a URL string.
 
@@ -40,4 +41,3 @@ def urljoin(url: str, path: str):
         url = url + "/"
 
     return url + path
-
