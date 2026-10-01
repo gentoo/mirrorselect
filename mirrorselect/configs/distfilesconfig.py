@@ -25,6 +25,7 @@ Distributed under the terms of the GNU General Public License v2
 
 """
 
+import glob
 import os
 import os.path
 import shlex
@@ -38,14 +39,63 @@ from mirrorselect.output import Output
 letters = string.ascii_letters
 from .configuration import Configuration
 
+"""
+If make.conf is a directory, and no child contains an for GENTOO_MIRRORS,
+a new file is created with this name:
+"""
+DEFAULT_CONF_NAME = "mirrorselect.conf"
+
 
 class DistfilesConfig(Configuration):
     def __init__(self, confdir: str):
         super().__init__("GENTOO_MIRRORS", confdir)
 
     def get_conf_path(self, output: Output):
+        """
+        1. make.conf is a file, which may or may not set mirrors
+           - so use that file
+        2. make.conf is a directory, and some file in it sets mirrors
+           - use the first one we find
+        3. make.conf is a directory, but no file sets mirrors
+           - create mirrorselect.conf for that purpose
+        """
         config_path = os.path.join(self.confdir, "portage", "make.conf")
-        return config_path
+        if os.path.isfile(config_path):
+            return config_path
+        if os.path.isdir(config_path):
+            for subdir_path in glob.glob(f"{config_path}/**/*", recursive=True):
+                if subdir_path.endswith("~"):
+                    continue
+
+                if not os.path.isfile(subdir_path):
+                    continue
+                try:
+                    with open(subdir_path, "r", encoding="utf-8") as config:
+                        if self._test_config(config):
+                            return subdir_path
+                except:
+                    continue
+
+            # No file in make.conf (as a dir) contains a mirrorselect entry
+            return os.path.join(config_path, "mirrorselect.conf")
+        # no make.conf; you have bigger problems than finding a fast mirror
+        output.print_err(f"Couldn't find portage config at {config_path}\n")
+        return None
+
+    def _test_config(self, config):
+        """
+        Checks if the given config file contains an entry for GENTOO_MIRRORS
+        """
+        lex = shlex.shlex(config, posix=True)
+        lex.wordchars = string.digits + letters + r"~!@#$%*_\:;?,./-+{}"
+        lex.quotes = "\"'"
+        while True:
+            key = lex.get_token()
+            if key is None:
+                break
+
+            if key == self.var:
+                return True
 
     def _weave_config(self, config, new_value):
         """
