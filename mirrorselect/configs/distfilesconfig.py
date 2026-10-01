@@ -112,7 +112,7 @@ class DistfilesConfig(Configuration):
         output.write(f"\tWriting new {config_path}\n")
 
         try:
-            os.rename(config_path, config_path + ".backup")
+            os.rename(config_path, config_path + ".backup~")
         except FileNotFoundError:
             pass
 
