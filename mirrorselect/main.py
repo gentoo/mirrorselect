@@ -392,13 +392,14 @@ class MirrorSelect:
             self.mirror_type = DistfilesConfig(confdir)
 
         config_path = self.mirror_type.get_conf_path(self.output)
-        self.output.write(f"main(); config_path = {config_path}\n", 2)
 
         if not config_path:
             self.output.print_err(
                 "main(); Exiting due to missing repos.conf/gentoo.conf file\n"
             )
             exit(1)
+
+        self.output.write(f"main(); config_path = {config_path}\n", 2)
 
         fsmirrors = self.mirror_type.get_filesystem_mirrors(self.output, config_path)
 
