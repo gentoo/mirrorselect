@@ -69,14 +69,18 @@ class Shallow:
             # aren't unduly advantaged.
 
             for addr_family in (socket.AF_INET, socket.AF_INET6):
-                socket.getaddrinfo(
-                    url_parts.hostname,
-                    None,
-                    addr_family,
-                    socket.SOCK_STREAM,
-                    0,
-                    socket.AI_ADDRCONFIG,
-                )
+                try:
+                    socket.getaddrinfo(
+                        url_parts.hostname,
+                        None,
+                        addr_family,
+                        socket.SOCK_STREAM,
+                        0,
+                        socket.AI_ADDRCONFIG,
+                    )
+                except:
+                    # Ignore errors if a specific address family is missing
+                    pass
 
             response = requests.get(timestamp_uri, timeout=self._connect_timeout)
 
