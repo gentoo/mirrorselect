@@ -47,12 +47,16 @@ class DistfilesConfig(Configuration):
         config_path = os.path.join(self.confdir, "portage", "make.conf")
         return config_path
 
-    def filter_config(self, config):
+    def _weave_config(self, config, new_value):
+        """
+        Replace the instance of the configuration variable with the new value.
+        """
         lines = config.readlines()
         config.seek(0)
         lex = shlex.shlex(config, posix=True)
         lex.wordchars = string.digits + letters + r"~!@#$%*_\:;?,./-+{}"
         lex.quotes = "\"'"
+        begin_line = -1
         while True:
             key = lex.get_token()
             if key is None:
@@ -72,11 +76,16 @@ class DistfilesConfig(Configuration):
                 end_line = lex.lineno
 
                 new_lines = []
-                for index, line in enumerate(lines):
-                    if index < begin_line - 1 or index >= end_line - 1:
-                        new_lines.append(line)
+                new_lines.extend(lines[: begin_line - 1])
+                new_lines.append(new_value)
+                new_lines.extend(lines[end_line - 1 :])
+
                 lines = new_lines
                 break
+
+        if begin_line == -1:
+            lines.append(new_value)
+
         return lines
 
     def write_config(self, output: Output, config_path: str, hosts: list[str]):
@@ -90,15 +99,15 @@ class DistfilesConfig(Configuration):
         output.write("\n")
         output.print_info(f"Modifying {config_path} with new mirrors...\n")
 
+        formatted = self.format_config(hosts) + "\n"
+
         try:
             config = open(config_path, "r", encoding="utf-8")
         except FileNotFoundError:
-            lines = []
+            lines = [formatted]
         else:
             with config:
-                lines = self.filter_config(config)
-
-        lines.append(self.format_config(hosts) + "\n")
+                lines = self._weave_config(config, formatted)
 
         output.write(f"\tWriting new {config_path}\n")
 

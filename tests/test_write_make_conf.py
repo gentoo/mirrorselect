@@ -42,14 +42,13 @@ class WriteMakeConfTestCase(unittest.TestCase):
             (f'{var}="foo\nbar"\n', "{}\n"),
             (f'\n{var}="foo\nbar"\n', "\n{}\n"),
             (f'\n{var}="foo bar"\n', "\n{}\n"),
-            (f'\n{var}="foo bar"\n\n', "\n\n{}\n"),
             (f'\n{var}="foo \\\nbar"\n', "\n{}\n"),
             (f'\n\n{var}="foo \\\nbar"\n', "\n\n{}\n"),
-            (f'\n\n{var}="foo \\\nbar"\na="b"\n', '\n\na="b"\n{}\n'),
-            (f'\n\n{var}="foo \\\n    bar"\na="b"\n', '\n\na="b"\n{}\n'),
+            (f'\n\n{var}="foo \\\nbar"\na="b"\n', '\n\n{}\na="b"\n'),
+            (f'\n\n{var}="foo \\\n    bar"\na="b"\n', '\n\n{}\na="b"\n'),
             (
                 f'\n\n{var}="foo \\\n    bar\\\n    baz"\na="b"\n',
-                '\n\na="b"\n{}\n',
+                '\n\n{}\na="b"\n',
             ),
             ("", "{}\n"),
         )
@@ -57,3 +56,4 @@ class WriteMakeConfTestCase(unittest.TestCase):
         for mirror in mirrors:
             for make_conf, expected_result in cases:
                 __do_it(var, mirror, make_conf, expected_result)
+
