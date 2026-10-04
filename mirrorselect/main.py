@@ -276,10 +276,10 @@ class MirrorSelect:
             action="callback",
             callback=set_servers,
             type="int",
-            default=1,
+            default=3,
             help="Specify Number of servers for Automatic Mode "
             "to select. this is only valid for download mirrors. "
-            "If this is not specified, a default of 1 is used.",
+            "If this is not specified, a default of 3 is used.",
         )
         group.add_option(
             "-t",
@@ -326,7 +326,11 @@ class MirrorSelect:
         if (
             options.interactive
             and not options.rsync
-            and (options.deep or options.blocksize or options.servers > 1)
+            and (
+                options.deep
+                or options.blocksize
+                or hasattr(set_servers, "user_configured")
+            )
         ):
             self.output.print_err("Invalid option combination with -i")
 
