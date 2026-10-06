@@ -55,23 +55,6 @@ class MirrorSelect:
         """
         self.output = output or Output()
 
-    @staticmethod
-    def _have_bin(name: str):
-        """Determines whether a particular binary is available
-        on the host system.  It searches in the PATH environment
-        variable paths.
-
-        @param name: string, binary name to search for
-        @rtype: string or None
-        """
-        for path_dir in os.environ.get("PATH", "").split(":"):
-            if not path_dir:
-                continue
-            file_path = os.path.join(path_dir, name)
-            if os.path.isfile(file_path) and os.access(file_path, os.X_OK):
-                return file_path
-        return None
-
     def change_config(self, hosts: list[str], out: bool, config_path: str):
         """Writes the config changes to the given file, or to stdout.
 
@@ -334,12 +317,6 @@ class MirrorSelect:
         ):
             self.output.print_err("Invalid option combination with -i")
 
-        if (not options.deep) and (not self._have_bin("netselect")):
-            self.output.print_err(
-                "You do not appear to have netselect on your system. "
-                "You must use the -D flag"
-            )
-
         if args:
             self.output.print_err("Unexpected arguments passed.")
 
@@ -364,8 +341,8 @@ class MirrorSelect:
         """Returns the list of selected host urls using
         the options passed in to run one of the three selector types.
         1) Interactive ncurses dialog
-        2) Deep mode mirror selection.
-        3) (Shallow) Rapid server selection via netselect
+        2) Deep mode mirror selection
+        3) (Shallow) Rapid server selection by testing HTTP response times
 
         @param hosts: list of hosts to choose from
         @param options: parser.parse_args() options instance
