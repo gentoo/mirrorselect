@@ -1,7 +1,7 @@
 project('mirrorselect',
   default_options : { 'prefix' : '/usr' },
   meson_version : '>=1.2.0',
-  version : '2.8.0',
+  version : '2.8.1',
 )
 
 py = import('python').find_installation(pure : true)
