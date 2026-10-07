@@ -76,6 +76,11 @@ class Extractor:
         if "region" in filters:
             hosts = hosts.with_region(filters["region"])
 
+        # finally, remove duplicates of any hosts with presence in
+        # multiple countries
+
+        hosts = hosts.distinct()
+
         self.hosts: list[Endpoint] = hosts.mirrors()
 
         self.output.write(

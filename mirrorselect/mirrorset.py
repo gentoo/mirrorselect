@@ -135,6 +135,26 @@ class MirrorSet:
         """Select mirrors in the specified region."""
         return MirrorSet([g for g in self._groups if g.region == region])
 
+    def distinct(self):
+        """Remove any duplicated endpoints."""
+        seen = set();
+        groups: list[MirrorGroup] = []
+        for group in self._groups:
+            new_mirrors: list[Mirror] = []
+            for mirror in group.mirrors:
+                for endpoint in mirror.endpoints:
+                    ep_key = (endpoint.protocol, endpoint.uri)
+                    if ep_key not in seen:
+                        seen.add(ep_key)
+                        new_mirrors.append(Mirror(mirror.name, [endpoint]))
+            if len(new_mirrors):
+                groups.append(
+                    MirrorGroup(
+                        new_mirrors, group.country, group.countryname, group.region
+                    )
+                )
+        return MirrorSet(groups)
+
     def mirrors(self) -> list[Endpoint]:
         """Each mirror endpoint in the set."""
         return [
