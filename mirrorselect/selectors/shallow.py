@@ -43,7 +43,7 @@ TIMESTAMP_FILENAME = "distfiles/timestamp.mirmon"
 class Shallow:
     """
     Approximates an HTTP GET request/response as a quasi
-    'round trip time', analagous the previous behaviour by
+    'round trip time', analogous the previous behaviour by
     netselect. Additionally, discards mirrors with a
     timestamp older than MAX_MIRROR_AGE_DAYS
     """

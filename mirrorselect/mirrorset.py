@@ -89,7 +89,7 @@ class MirrorSet:
 
         A mirror usually has multiple endpoints with different protcols
         available. Select one from the specified list, in decreasing
-        order of preference. Returns the first enpoint if none exists.
+        order of preference. Returns the first endpoint if none exists.
         """
         groups: list[MirrorGroup] = []
         for group in self._groups:
@@ -108,7 +108,7 @@ class MirrorSet:
         return MirrorSet(groups)
 
     def only_protocol(self, protocol: str):
-        """Select enpoints matching the specified protocol."""
+        """Select endpoints matching the specified protocol."""
         groups: list[MirrorGroup] = []
         for group in self._groups:
             new_mirrors: list[Mirror] = []
